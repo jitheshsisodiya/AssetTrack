@@ -1,0 +1,3969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Asset Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g800:#0d3d28;--g700:#14532d;--g600:#1a6e49;--g500:#22875b;
+  --g400:#2e9e6a;--g200:#86efbc;--g100:#c6ecd8;--g50:#f0faf5;
+  --s800:#1e293b;--s700:#334155;--s600:#475569;--s500:#64748b;
+  --s400:#94a3b8;--s300:#cbd5e1;--s200:#e2e8f0;--s100:#f1f5f9;--s50:#f8fafc;
+  --red:#dc2626;--red-bg:#fef2f2;--red-b:#fecaca;
+  --amber:#d97706;--amber-bg:#fffbeb;--amber-b:#fde68a;
+  --white:#fff;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--s100);color:var(--s800);min-height:100vh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ── LOGIN ── */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--g800);position:relative;overflow:hidden}
+#loginScreen::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.04);top:-200px;right:-150px;pointer-events:none}
+#loginScreen::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.03);bottom:-100px;left:-80px;pointer-events:none}
+.login-card{background:var(--white);border-radius:var(--r24);padding:36px 32px 40px;width:100%;max-width:400px;position:relative;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--g400),var(--g600));border-radius:var(--r16);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 4px 14px rgba(46,158,106,.4)}
+.login-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.login-title{font-size:24px;font-weight:700;color:var(--g800);margin-bottom:4px;letter-spacing:-.3px}
+.login-sub{font-size:13.5px;color:var(--s500);margin-bottom:28px}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:0}
+label{font-size:11.5px;font-weight:700;color:var(--s600);text-transform:uppercase;letter-spacing:.07em}
+input,select{border:1.5px solid var(--s300);border-radius:var(--r8);padding:12px 14px;font-family:inherit;font-size:15px;color:var(--s800);background:var(--s50);outline:none;transition:border-color .15s,background .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;width:100%}
+input:focus,select:focus{border-color:var(--g400);background:var(--white);box-shadow:0 0 0 3px rgba(46,158,106,.14)}
+input[readonly]{background:var(--s100);color:var(--s500);cursor:default}
+select:disabled,input:disabled{background:var(--s100);color:var(--s500);cursor:not-allowed;opacity:.75}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1.5l6 6 6-6' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:40px;cursor:pointer}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--r8);font-family:inherit;font-size:14.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;user-select:none}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--g600);color:#fff}
+.btn-p:hover{background:var(--g700)}
+.btn-p:disabled{background:var(--s300);color:var(--s400);cursor:not-allowed;transform:none}
+.btn-s{background:var(--s200);color:var(--s700);border:1.5px solid var(--s300)}
+.btn-s:hover{background:var(--s300)}
+.btn-warn{background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber-b)}
+.btn-warn:hover{background:var(--amber-b)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-b)}
+.btn-danger:hover{background:var(--red-b)}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--g500),var(--g700));color:#fff;border:none;border-radius:var(--r12);padding:14px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 4px 14px rgba(26,110,73,.35)}
+.btn-login:hover{background:linear-gradient(135deg,var(--g400),var(--g600))}
+.btn-login:active{transform:scale(.98)}
+.btn-login:disabled{background:var(--s300);color:var(--s400);cursor:not-allowed;box-shadow:none;transform:none}
+.btn-icon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--r8);background:var(--s200);border:1.5px solid var(--s300);cursor:pointer;color:var(--s600);font-size:16px;transition:all .15s;flex-shrink:0}
+.btn-icon:hover{background:var(--s300)}
+
+/* ── MESSAGES ── */
+.msg{padding:12px 15px;border-radius:var(--r8);font-size:13.5px;font-weight:500;margin-top:12px;display:none;line-height:1.5}
+.msg.ok{background:var(--g50);color:var(--g700);border:1.5px solid var(--g100);display:block}
+.msg.err{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-b);display:block}
+.msg.info{background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber-b);display:block}
+
+/* ── APP SHELL ── */
+#appScreen{display:none}
+.topbar{background:var(--g800);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:56px;position:sticky;top:0;z-index:200}
+@media(min-width:640px){.topbar{padding:0 24px}}
+.topbar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;flex:1;min-width:0}
+.topbar-brand svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.brand-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r20);padding:5px 14px 5px 5px;font-size:13px;font-weight:500;flex-shrink:0}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.btn-out{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:var(--r8);padding:6px 12px;cursor:pointer;font-family:inherit;font-size:13px;transition:background .15s;margin-left:10px;flex-shrink:0}
+.btn-out:hover{background:rgba(255,255,255,.12)}
+
+/* ── TABS ── */
+.tab-bar{background:var(--white);border-bottom:2px solid var(--s200);display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;border-bottom:2.5px solid transparent;color:var(--s500);cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;padding:13px 18px 10px;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0}
+.tab-btn.active{color:var(--g600);border-bottom-color:var(--g400)}
+.tab-btn:hover:not(.active){color:var(--s700)}
+.tab-icon{display:none}
+
+/* ── MAIN ── */
+.main{padding:16px;max-width:1400px;margin:0 auto}
+@media(min-width:640px){.main{padding:24px}}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1.5px solid var(--s200);border-radius:var(--r16);padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+@media(min-width:640px){.card{padding:24px;margin-bottom:20px}}
+.card-title{font-size:11px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.09em;margin-bottom:16px}
+
+/* ── FORM GRID ── */
+.form-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px}
+@media(min-width:480px){.form-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.form-grid{grid-template-columns:repeat(4,1fr)}}
+
+/* Add-Entry layout */
+.class-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap}
+.class-row .fg{flex:1;min-width:160px}
+.entry-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px}
+@media(min-width:480px){.entry-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.entry-grid{grid-template-columns:2fr 1fr 1fr}}
+
+/* ── CLASS REFERENCE PANEL ── */
+.class-ref{background:var(--g50);border:1.5px solid var(--g100);border-radius:var(--r8);padding:12px 14px;margin-bottom:14px;display:none}
+.class-ref-title{font-size:11px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.class-ref table{width:100%;font-size:12.5px;border-collapse:collapse}
+.class-ref thead{background:transparent;color:inherit}
+.class-ref thead th{text-align:left;padding:4px 8px 6px;color:var(--g700);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--g200)}
+.class-ref tbody td{padding:5px 8px;color:var(--s700)}
+.class-ref tbody tr:hover td{background:rgba(46,158,106,.07)}
+.class-ref .no-items{color:var(--s400);font-size:13px;font-style:italic}
+
+/* ── PREVIEW ── */
+.preview{background:var(--g50);border:1.5px solid var(--g100);border-radius:var(--r8);padding:13px 16px;font-size:13.5px;color:var(--g700);display:none;margin-top:4px;line-height:1.7}
+.preview.show{display:block}
+.preview strong{color:var(--g800);font-weight:700}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+#panel-view .stats-row{grid-template-columns:repeat(3,1fr)}
+@media(min-width:640px){#panel-view .stats-row{grid-template-columns:repeat(6,1fr)}}
+@media(min-width:640px){.stats-row{gap:14px}}
+.stat{background:var(--white);border:1.5px solid var(--s200);border-radius:var(--r12);padding:14px 10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-lbl{font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.stat-val{font-size:24px;font-weight:700;color:var(--g600);font-family:'DM Mono',monospace;line-height:1}
+@media(min-width:640px){.stat-val{font-size:30px}}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:flex-end}
+.filter-bar .fg{flex:1;min-width:140px}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r12);border:1.5px solid var(--s200);-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+thead{background:var(--g800);color:#fff}
+thead th{padding:11px 14px;text-align:left;font-weight:600;font-size:11.5px;letter-spacing:.05em;white-space:nowrap}
+thead th.num{text-align:center}
+tbody tr{border-bottom:1px solid var(--s100)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--g50)}
+tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
+.qb{background:var(--g100);color:var(--g800);border-radius:4px;padding:3px 9px;font-weight:700;font-size:12px;font-family:'DM Mono',monospace;display:inline-block}
+.dash{color:var(--s300);text-align:center;font-size:12px}
+.mono{font-family:'DM Mono',monospace;font-size:12px;color:var(--s500)}
+.tbl-empty{padding:48px 20px;text-align:center;color:var(--s400);font-size:14px}
+.tbl-loading{padding:40px 20px;text-align:center;color:var(--s400);display:flex;flex-direction:column;align-items:center;gap:12px}
+
+/* ── REGISTER TAB: Freeze panes + totals row ── */
+#dataTbl{overflow:auto;max-height:62vh;border-radius:var(--r12);border:1.5px solid var(--s200)}
+#dataTbl table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%}
+#dataTbl tbody td{border-bottom:1px solid var(--s100)}
+#dataTbl tbody tr:last-child td{border-bottom:none}
+/* Freeze ENTIRE thead as one block — most reliable cross-browser approach */
+#dataTbl thead{position:sticky;top:0;z-index:10}
+/* Totals row */
+#dataTbl .reg-tot-row th{background:var(--s700);color:#fff;padding:8px 13px;font-size:12px;font-weight:700;white-space:nowrap;text-align:center;border-bottom:2px solid var(--g500)}
+#dataTbl .reg-tot-row th:first-child{text-align:left}
+/* Header row */
+#dataTbl .reg-hdr-row th{background:var(--g800);color:#fff;padding:11px 14px;font-size:11.5px;font-weight:600;letter-spacing:.05em;white-space:nowrap;text-align:left}
+#dataTbl .reg-hdr-row th.num{text-align:center}
+/* Sticky first 3 columns — left only; vertical freeze handled by thead above */
+#dataTbl .rs1{position:sticky;left:0;z-index:3;min-width:44px;width:44px}
+#dataTbl .rs2{position:sticky;left:44px;z-index:3;min-width:176px;width:176px}
+#dataTbl .rs3{position:sticky;left:220px;z-index:3;min-width:90px;width:90px;border-right:2px solid var(--s200)!important}
+/* thead sticky-col cells sit above body sticky-col cells */
+#dataTbl thead .rs1,#dataTbl thead .rs2,#dataTbl thead .rs3{z-index:4}
+/* Body sticky cell backgrounds (opaque to mask scrolled content) */
+#dataTbl tbody td.rs1,#dataTbl tbody td.rs2,#dataTbl tbody td.rs3{background:#fff}
+#dataTbl tbody tr:hover td{background:var(--g50)}
+#dataTbl tbody tr:hover td.rs1,#dataTbl tbody tr:hover td.rs2,#dataTbl tbody tr:hover td.rs3{background:var(--g50)}
+/* Nil column: amber tint in totals + subtle in header */
+#dataTbl .reg-tot-row .rt-nil-col{background:rgba(217,119,6,.35)!important;color:#fff!important}
+#dataTbl .reg-hdr-row .rt-nil-col{background:rgba(255,255,255,.06)!important}
+/* Nil cell in body */
+.rt-nil-cell{color:var(--s300)!important;text-align:center;font-style:italic;font-size:12px}
+
+/* ── OFFLINE BAR ── */
+.offline-bar{display:none;align-items:center;gap:10px;background:#7c2d12;color:#fed7aa;font-size:13px;font-weight:600;padding:8px 18px;position:sticky;top:56px;z-index:199;border-bottom:1px solid #9a3412}
+.offline-bar svg{width:16px;height:16px;stroke:#fed7aa;fill:none;stroke-width:2;flex-shrink:0}
+.q-badge{display:none;align-items:center;gap:5px;background:var(--amber);color:#fff;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;flex-shrink:0;cursor:pointer}
+
+/* ── CUSTOM SEARCHABLE DROPDOWN ── */
+.cs-wrap{position:relative;width:100%}
+.cs-box{display:flex;border:1.5px solid var(--s300);border-radius:var(--r8);background:var(--s50);transition:border-color .15s,box-shadow .15s,background .15s;overflow:hidden}
+.cs-box:focus-within{border-color:var(--g400);background:var(--white);box-shadow:0 0 0 3px rgba(46,158,106,.14)}
+.cs-box input{border:none;background:transparent;box-shadow:none;outline:none;flex:1;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--s800);width:100%;appearance:none;-webkit-appearance:none}
+.cs-arrow{background:none;border:none;border-left:1.5px solid var(--s300);padding:0 13px;cursor:pointer;color:var(--s500);font-size:11px;flex-shrink:0;transition:background .15s}
+.cs-arrow:hover{background:var(--s100)}
+.cs-list{position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--white);border:1.5px solid var(--s300);border-radius:var(--r8);box-shadow:0 6px 20px rgba(0,0,0,.13);z-index:600;max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+.cs-opt{padding:11px 14px;cursor:pointer;font-size:14.5px;color:var(--s800);border-bottom:1px solid var(--s100)}
+.cs-opt:last-child{border-bottom:none}
+.cs-opt:hover,.cs-opt:active{background:var(--g50);color:var(--g700)}
+.cs-empty{padding:11px 14px;font-size:13.5px;color:var(--s400);font-style:italic}
+
+/* ── LIVE INDICATOR ── */
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+.spin.dk{border-color:rgba(0,0,0,.1);border-top-color:var(--s500);width:22px;height:22px;border-width:3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── MOBILE SIGN OUT — must come before the media query ── */
+.mob-out{display:none}
+
+/* ── BARCODE TAB ── */
+.bc-class-section{margin-bottom:28px}
+.bc-class-title{font-size:15px;font-weight:700;color:var(--g700);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--g200);display:flex;align-items:center;gap:10px}
+.bc-count{font-size:11.5px;font-weight:500;color:var(--s500);background:var(--s200);padding:2px 9px;border-radius:12px}
+.bc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.bc-card{background:var(--white);border:1.5px solid var(--s200);border-radius:var(--r8);padding:12px 8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;min-height:52px}
+.bc-card-cls{background:var(--g50);border-color:var(--g200)}
+.bc-code-text{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:700;color:var(--s800);letter-spacing:.03em;word-break:break-all;line-height:1.4}
+.bc-empty{padding:48px 20px;text-align:center;color:var(--s400);font-size:14px}
+.bc-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+.bc-toolbar .fg{flex:1;min-width:130px}
+
+/* ── MOBILE ── */
+@media(max-width:479px){
+  .tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1.5px solid var(--s200);border-bottom:none;padding:0;box-shadow:0 -2px 12px rgba(0,0,0,.08);justify-content:stretch}
+  .tab-btn{flex:1;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px 10px;gap:3px;font-size:10px;border-bottom:none;border-top:2.5px solid transparent;display:flex}
+  .tab-btn.active{border-bottom:none;border-top-color:var(--g400);color:var(--g600)}
+  .tab-icon{display:block;font-size:18px;line-height:1}
+  .main{padding-bottom:74px}
+  .btn-out{display:inline-flex;padding:5px 10px;font-size:12px;margin-left:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
+    </div>
+    <div class="login-title">Asset Manager</div>
+    <div class="login-sub">School Asset Management System</div>
+
+    <!-- Tab toggle -->
+    <div style="display:flex;gap:0;margin-bottom:20px;border:1.5px solid var(--s200);border-radius:10px;overflow:hidden">
+      <button id="tabSignIn" onclick="switchLoginTab('signin')"
+        style="flex:1;padding:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--g600);color:#fff;transition:.2s">Sign In</button>
+      <button id="tabRegister" onclick="switchLoginTab('register')"
+        style="flex:1;padding:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#fff;color:var(--s500);transition:.2s">New Institution</button>
+    </div>
+
+    <!-- Sign In panel -->
+    <div id="panelSignIn">
+      <div class="fg" style="margin-bottom:14px"><label>Username</label>
+        <input type="text" id="lu" placeholder="Enter username" autocomplete="username" autocapitalize="none"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Password</label>
+        <input type="password" id="lp" placeholder="Enter password" autocomplete="current-password"></div>
+      <div id="lm" class="msg"></div>
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <!-- Register Institution panel -->
+    <div id="panelRegister" style="display:none">
+      <div class="fg" style="margin-bottom:14px"><label>Institution Name</label>
+        <input type="text" id="ri" placeholder="e.g. Springfield School" autocapitalize="words"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Admin Username</label>
+        <input type="text" id="ru" placeholder="Choose a username" autocomplete="username" autocapitalize="none"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Admin Password</label>
+        <input type="password" id="rp" placeholder="Choose a password" autocomplete="new-password"></div>
+      <div id="rm" class="msg"></div>
+      <button class="btn-login" id="registerBtn" onclick="doRegister()">Create Institution</button>
+      <p style="text-align:center;font-size:12px;color:var(--s400);margin-top:12px">
+        A new isolated workspace will be created for your institution.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SUPER ADMIN OVERVIEW ══════════════ -->
+<div id="superAdminScreen" style="display:none;min-height:100vh;background:var(--s50)">
+  <!-- topbar -->
+  <div style="background:var(--g800);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:10">
+    <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
+      Asset Manager &nbsp;<span style="font-size:11px;font-weight:500;opacity:.7;background:rgba(255,255,255,.15);border-radius:20px;padding:2px 10px">Super Admin</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+      <span style="opacity:.8">Jithesh</span>
+      <button class="btn-out" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+  <!-- tabs -->
+  <div style="background:#fff;border-bottom:1px solid var(--s200);display:flex;gap:0;padding:0 24px">
+    <button id="saTab-dashboard" onclick="saSwitchTab('dashboard')" style="padding:14px 20px;border:none;background:none;font-size:13px;font-weight:600;color:var(--g600);border-bottom:2px solid var(--g600);cursor:pointer">Dashboard</button>
+    <button id="saTab-activity"  onclick="saSwitchTab('activity')"  style="padding:14px 20px;border:none;background:none;font-size:13px;font-weight:500;color:var(--s400);border-bottom:2px solid transparent;cursor:pointer">Activity</button>
+    <button id="saTab-access"    onclick="saSwitchTab('access')"    style="padding:14px 20px;border:none;background:none;font-size:13px;font-weight:500;color:var(--s400);border-bottom:2px solid transparent;cursor:pointer">Access</button>
+  </div>
+
+  <!-- ── TAB: DASHBOARD ── -->
+  <div id="saPane-dashboard" style="max-width:1000px;margin:28px auto;padding:0 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:20px;font-weight:700;color:var(--s800)">System Overview</div>
+        <div style="font-size:13px;color:var(--s400);margin-top:2px">All registered institutions</div>
+      </div>
+      <button class="btn btn-p" onclick="loadOverview()">↻ Refresh</button>
+    </div>
+    <!-- stat cards -->
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Institutions</div>
+        <div id="ovTotalInst" style="font-size:30px;font-weight:700;color:var(--g600);margin-top:4px">—</div>
+      </div>
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Active Today</div>
+        <div id="ovActiveToday" style="font-size:30px;font-weight:700;color:#16a34a;margin-top:4px">—</div>
+      </div>
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Active Users Today</div>
+        <div id="ovActiveUsers" style="font-size:30px;font-weight:700;color:#16a34a;margin-top:4px">—</div>
+      </div>
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Total Classes</div>
+        <div id="ovTotalClasses" style="font-size:30px;font-weight:700;color:var(--g600);margin-top:4px">—</div>
+      </div>
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Total Line Items</div>
+        <div id="ovTotalItems" style="font-size:30px;font-weight:700;color:var(--g600);margin-top:4px">—</div>
+      </div>
+      <div style="flex:1;min-width:130px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <div style="font-size:11px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Total Qty</div>
+        <div id="ovTotalQty" style="font-size:30px;font-weight:700;color:var(--g600);margin-top:4px">—</div>
+      </div>
+    </div>
+    <!-- institution table -->
+    <div style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">
+      <div id="overviewTable" style="padding:16px;color:var(--s400);font-size:13px">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ── TAB: ACTIVITY ── -->
+  <div id="saPane-activity" style="display:none;max-width:1000px;margin:28px auto;padding:0 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:20px;font-weight:700;color:var(--s800)">Activity Feed</div>
+      <button class="btn btn-p" onclick="loadActivity()">↻ Refresh</button>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1;min-width:280px;background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">
+        <div style="padding:14px 16px;font-size:13px;font-weight:700;color:var(--s800);border-bottom:1px solid var(--s100)">Recent Logins</div>
+        <div id="actLoginsList" style="padding:12px 16px;font-size:13px;color:var(--s400)">Loading…</div>
+      </div>
+      <div style="flex:1;min-width:280px;background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">
+        <div style="padding:14px 16px;font-size:13px;font-weight:700;color:var(--s800);border-bottom:1px solid var(--s100)">Recent Edits</div>
+        <div id="actEditsList" style="padding:12px 16px;font-size:13px;color:var(--s400)">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: ACCESS ── -->
+  <div id="saPane-access" style="display:none;max-width:1000px;margin:28px auto;padding:0 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:20px;font-weight:700;color:var(--s800)">Access Management</div>
+      <button class="btn btn-p" onclick="loadAccess()">↻ Refresh</button>
+    </div>
+    <div style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">
+      <div id="accessTable" style="padding:16px;color:var(--s400);font-size:13px">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div id="saResetModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:28px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+      <div style="font-size:16px;font-weight:700;color:var(--s800);margin-bottom:4px">Reset Admin Password</div>
+      <div id="saResetInstName" style="font-size:13px;color:var(--s400);margin-bottom:16px"></div>
+      <input id="saResetPwd" type="password" placeholder="New password" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--s200);border-radius:8px;font-size:14px;margin-bottom:12px">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="document.getElementById('saResetModal').style.display='none'">Cancel</button>
+        <button class="btn btn-p" onclick="saDoResetPassword()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Admin Modal -->
+  <div id="saAddAdminModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:28px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+      <div style="font-size:16px;font-weight:700;color:var(--s800);margin-bottom:4px">Add Admin User</div>
+      <div id="saAddAdminInstName" style="font-size:13px;color:var(--s400);margin-bottom:16px"></div>
+      <input id="saAddAdminUser" type="text" placeholder="Username" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--s200);border-radius:8px;font-size:14px;margin-bottom:8px">
+      <input id="saAddAdminPwd"  type="password" placeholder="Password" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--s200);border-radius:8px;font-size:14px;margin-bottom:12px">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="document.getElementById('saAddAdminModal').style.display='none'">Cancel</button>
+        <button class="btn btn-p" onclick="saDoAddAdmin()">Add Admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
+      <span class="brand-text">Asset Manager</span>
+      <span id="institutionName" style="font-size:11px;font-weight:500;color:rgba(255,255,255,.6);background:rgba(255,255,255,.1);border-radius:20px;padding:2px 10px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px"></span>
+      <span id="liveIndicator" title="Live sync" style="display:none;align-items:center;gap:5px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border-radius:20px;padding:2px 9px 2px 6px;flex-shrink:0">
+        <span id="liveDot" style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:livePulse 1.8s ease-in-out infinite"></span>LIVE
+      </span>
+      <span id="qBadge" class="q-badge" title="Entries saved offline — tap to sync now" onclick="oqDrain()">&#8635; <span id="qBadgeCount">0</span> pending</span>
+    </div>
+    <div style="display:flex;align-items:center;flex-shrink:0">
+      <div class="user-chip">
+        <div class="avatar" id="uav">U</div>
+        <span id="uname" style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+        <span id="branchChip" style="display:none;font-size:11px;background:rgba(255,255,255,.15);border-radius:10px;padding:2px 8px;margin-left:2px"></span>
+      </div>
+      <button class="btn-out" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="offline-bar" id="offlineBar">
+    <svg viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+    You're offline — entries are saved on this device and will sync automatically when connected.
+    <span id="offlineQCount" style="background:rgba(255,255,255,.15);border-radius:12px;padding:1px 8px;font-size:11px"></span>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-add" onclick="switchTab('add')">
+      <span class="tab-icon">📋</span>Add Entry
+    </button>
+    <button class="tab-btn" id="tab-view" onclick="switchTab('view')">
+      <span class="tab-icon">📊</span>Register
+    </button>
+    <button class="tab-btn" id="tab-log" onclick="switchTab('log')">
+      <span class="tab-icon">📝</span>Edit Log
+    </button>
+    <button class="tab-btn" id="tab-barcode" onclick="switchTab('barcode')">
+      <span class="tab-icon">🏷️</span>Barcodes
+    </button>
+    <button class="tab-btn" id="tab-stickering" onclick="switchTab('stickering')">
+      <span class="tab-icon">📌</span>Stickering
+    </button>
+    <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display:none">
+      <span class="tab-icon">⚙️</span>Admin
+    </button>
+  </div>
+
+  <div class="main">
+
+    <!-- ADD ENTRY -->
+    <div class="tab-panel active" id="panel-add">
+      <div class="card">
+        <div class="card-title">Record Asset Entry</div>
+
+        <!-- 1. CLASS NAME — top, sticky with lock -->
+        <div class="class-row">
+          <div class="fg">
+            <label>Class Name</label>
+            <select id="eClass" onchange="onClassChange()"><option value="">— Select Class —</option></select>
+          </div>
+          <button class="btn btn-warn" id="lockClassBtn" onclick="doLockClass()" title="Lock class so it cannot be changed accidentally">&#128274; Submit Class</button>
+          <button class="btn btn-danger" id="unlockClassBtn" onclick="doUnlockClass()" style="display:none" title="Unlock class (Kush / Darsh only)">&#128275; Unlock Class</button>
+          <button class="btn btn-warn" id="eStickerLockBtn" onclick="doLockStickerFromEntry()" style="display:none" title="Submit stickering for this class — only Admin can undo">&#128274; Submit Sticker</button>
+          <button class="btn btn-danger" id="eStickerUnlockBtn" onclick="doUnlockStickerFromEntry()" style="display:none" title="Unlock stickering (Admin only)">&#128275; Unlock Sticker</button>
+        </div>
+        <div id="lockInfo" style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px;margin-top:-6px;min-height:16px"></div>
+        <div id="eStickerLockInfo" style="font-size:12px;color:var(--g600);font-weight:600;margin-bottom:10px;min-height:16px"></div>
+
+        <!-- 2. ITEM NAME (searchable) + Code + Qty -->
+        <div class="entry-grid">
+          <div class="fg">
+            <label>Item Name</label>
+            <div class="cs-wrap" id="itemSelectWrap">
+              <div class="cs-box">
+                <input type="text" id="eItemSearch" placeholder="Type to search or select…" oninput="csFilter()" onfocus="csOpen()" autocomplete="off" autocorrect="off" spellcheck="false">
+                <button type="button" class="cs-arrow" onclick="csToggle()">&#9660;</button>
+              </div>
+              <div class="cs-list" id="csItemList"></div>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Asset Code</label>
+            <input type="text" id="eCode" placeholder="Auto-filled" readonly>
+          </div>
+          <div class="fg">
+            <label>Quantity</label>
+            <input type="number" id="eQty" placeholder="1" value="1" oninput="updatePreview()">
+          </div>
+        </div>
+
+        <!-- 3. Items already recorded in this class (reference panel) -->
+        <div class="class-ref" id="classRef">
+          <div class="class-ref-title">Already recorded in this class</div>
+          <div id="classRefBody"></div>
+        </div>
+
+        <div class="preview" id="prevBox">
+          <span id="pVerb">Will add</span> <strong id="pQty">0</strong> unit(s) of
+          <strong id="pItem">—</strong> (<strong id="pCode">—</strong>)
+          <span id="pPrep">to</span> class <strong id="pClass">—</strong>.
+          <div id="pPrev" style="margin-top:6px;font-size:0.88em;opacity:0.8"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-p" id="submitBtn" onclick="submitEntry()">Save Entry</button>
+          <button class="btn btn-s" onclick="clearForm()">Clear</button>
+        </div>
+        <div id="sm" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- ASSET REGISTER -->
+    <div class="tab-panel" id="panel-view">
+      <div class="stats-row">
+        <div class="stat"><div class="stat-lbl">Items</div><div class="stat-val" id="si">—</div></div>
+        <div class="stat"><div class="stat-lbl">Classes</div><div class="stat-val" id="sc">—</div></div>
+        <div class="stat"><div class="stat-lbl">Units</div><div class="stat-val" id="su">—</div></div>
+        <div class="stat" style="border-color:var(--amber-b);background:var(--amber-bg)">
+          <div class="stat-lbl" style="color:var(--amber)">No Entries</div>
+          <div class="stat-val" id="sp" style="color:var(--amber)">—</div>
+        </div>
+        <div class="stat" style="border-color:var(--amber-b);background:var(--amber-bg)">
+          <div class="stat-lbl" style="color:var(--amber)">Submit Pending</div>
+          <div class="stat-val" id="sps" style="color:var(--amber)">—</div>
+        </div>
+        <div class="stat" style="border-color:var(--red-b);background:var(--red-bg)">
+          <div class="stat-lbl" style="color:var(--red)">Sticker Pending</div>
+          <div class="stat-val" id="spst" style="color:var(--red)">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Asset Register</div>
+        <div class="filter-bar">
+          <div class="fg"><label>Search</label>
+            <input type="text" id="vs" placeholder="Item name or code…" oninput="renderData()"></div>
+          <div class="fg"><label>Class</label>
+            <select id="vc" onchange="renderData()"><option value="">All Classes</option></select></div>
+          <div class="fg"><label>Show</label>
+            <select id="vNil" onchange="renderData()">
+              <option value="">All Items</option>
+              <option value="nil">Has Nil / Blank</option>
+              <option value="filled">All Filled</option>
+            </select></div>
+          <button class="btn-icon" onclick="loadData()" title="Refresh">&#8635;</button>
+        </div>
+        <div id="dataTbl">
+          <div class="tbl-loading"><span class="spin dk"></span><span>Loading…</span></div>
+        </div>
+        <div id="pendingPanel"></div>
+        <div id="pendingSubmitPanel"></div>
+        <div id="pendingStickerPanel"></div>
+      </div>
+    </div>
+
+    <!-- EDIT LOG -->
+    <div class="tab-panel" id="panel-log">
+      <div class="card">
+        <div class="card-title">Edit Log</div>
+        <div class="filter-bar">
+          <div class="fg"><label>Search</label>
+            <input type="text" id="ls" placeholder="User, item, class…" oninput="renderLog()"></div>
+          <div class="fg"><label>User</label>
+            <select id="lu2" onchange="renderLog()"><option value="">All Users</option></select></div>
+          <button class="btn-icon" onclick="loadLog()" title="Refresh">&#8635;</button>
+          <button class="btn btn-s" onclick="downloadExcel()" style="padding:0 14px;height:36px;font-size:13.5px">&#11015; Excel</button>
+        </div>
+        <div class="tbl-wrap" id="logTbl">
+          <div class="tbl-loading"><span class="spin dk"></span><span>Loading…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARCODE GENERATOR -->
+    <div class="tab-panel" id="panel-barcode">
+      <div class="card">
+        <div class="card-title">Barcode Generator &amp; Word Export</div>
+
+        <div class="bc-toolbar">
+          <div class="fg" style="max-width:160px">
+            <label>School Code</label>
+            <input type="text" id="bcSchoolCode" placeholder="e.g. SCH" value="SCH" style="text-transform:uppercase">
+          </div>
+          <div class="fg">
+            <label>Filter Class</label>
+            <select id="bcClass"><option value="">All Classes</option></select>
+          </div>
+          <button class="btn btn-p" onclick="generateBarcodes()" id="bcGenBtn">🏷️ Generate Labels</button>
+          <button class="btn btn-s" id="bcWordBtn" onclick="downloadWordDoc()" style="display:none">📄 Download Word (.docx)</button>
+          <button class="btn btn-s" id="bcWordByUserBtn" onclick="downloadWordDocByUser()" style="display:none" title="One page per user — classes flow together, no wasted sticker space">👤 Download Word (By User)</button>
+        </div>
+
+        <div id="bcMsg" class="msg"></div>
+
+        <!-- Summary counts after generation -->
+        <div id="bcSummary" style="display:none;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+            <span id="bcSourceBadge" style="font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--s200);color:var(--s600)">—</span>
+          </div>
+          <div class="stats-row" style="max-width:480px">
+            <div class="stat"><div class="stat-lbl">Classes</div><div class="stat-val" id="bcStatCls">0</div></div>
+            <div class="stat"><div class="stat-lbl">Items</div><div class="stat-val" id="bcStatItems">0</div></div>
+            <div class="stat"><div class="stat-lbl">Labels</div><div class="stat-val" id="bcStatTotal">0</div></div>
+          </div>
+        </div>
+
+        <!-- Barcode grid (rendered here) -->
+        <div id="bcContainer"></div>
+      </div>
+    </div>
+
+    <!-- STICKERING -->
+    <div class="tab-panel" id="panel-stickering">
+
+      <!-- CANCEL STICKERS (Admin only) — TOP -->
+      <div class="card" id="stCancelCard">
+        <div class="card-title">❌ Cancel Stickers</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
+          <div class="fg" style="min-width:180px">
+            <label>Step 1 — Class</label>
+            <select id="stCancelClass" onchange="stCancelClassChange()">
+              <option value="">— Select Class —</option>
+            </select>
+          </div>
+          <div class="fg" style="min-width:200px">
+            <label>Step 2 — Item Name</label>
+            <div class="cs-wrap" id="stCancelItemWrap">
+              <div class="cs-box" id="stCancelItemBox" style="opacity:.55;pointer-events:none">
+                <input type="text" id="stCancelItemSearch" placeholder="Type to search or select…"
+                  oninput="stCancelCsFilter()" onfocus="stCancelCsOpen()"
+                  autocomplete="off" autocorrect="off" spellcheck="false">
+                <button type="button" class="cs-arrow" onclick="stCancelCsToggle()">&#9660;</button>
+              </div>
+              <div class="cs-list" id="stCancelCsList"></div>
+            </div>
+          </div>
+          <button class="btn btn-s" onclick="initStickeringTab()" style="height:42px">🔄 Refresh</button>
+        </div>
+        <div id="stBcCheckWrap" style="display:none">
+          <label style="font-size:11.5px;font-weight:700;color:var(--s600);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:10px">Step 3 — Select Bar Codes to Cancel</label>
+          <div id="stBcCheckList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-s" style="font-size:12.5px;padding:6px 14px" onclick="stSelectAllBc(true)">Select All</button>
+            <button class="btn btn-s" style="font-size:12.5px;padding:6px 14px" onclick="stSelectAllBc(false)">Clear All</button>
+            <span id="stBcSelCount" style="font-size:13px;color:var(--s500)">0 selected</span>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn btn-danger" id="stSubmitCancelBtn" onclick="stSubmitCancel()" disabled>❌ Mark as Cancelled</button>
+          </div>
+        </div>
+        <div id="stCancelMsg" class="msg"></div>
+      </div>
+
+      <!-- ADD NEW CODE -->
+      <div class="card">
+        <div class="card-title">➕ Add New Sticker Code</div>
+
+        <!-- Class row with sticker lock (mirrors Add Entry tab pattern) -->
+        <div class="class-row">
+          <div class="fg">
+            <label>Class Name</label>
+            <select id="stNewClass" onchange="stNewClassChange()"><option value="">— Select Class —</option></select>
+          </div>
+          <button class="btn btn-warn" id="stStickerLockBtn" onclick="doLockStickerClass()" style="display:none" title="Submit stickering — only Admin can undo">&#128274; Submit Sticker</button>
+          <button class="btn btn-danger" id="stStickerUnlockBtn" onclick="doUnlockStickerClass()" style="display:none" title="Unlock stickering (Admin only)">&#128275; Unlock Sticker</button>
+        </div>
+        <div id="stStickerLockInfo" style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:10px;margin-top:-6px;min-height:16px"></div>
+
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+          <div class="fg">
+            <label>Item Name</label>
+            <div class="cs-wrap" id="stItemSelectWrap">
+              <div class="cs-box" id="stNewItemBox" style="opacity:.55;pointer-events:none">
+                <input type="text" id="stNewItem" placeholder="Type to search or select…" oninput="stCsFilter()" onfocus="stCsOpen()" autocomplete="off" autocorrect="off" spellcheck="false">
+                <button type="button" class="cs-arrow" onclick="stCsToggle()">&#9660;</button>
+              </div>
+              <div class="cs-list" id="stCsItemList"></div>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Bar Code <span id="stNewCodeHint" style="font-weight:400;color:var(--s400);font-size:11px;text-transform:none"></span></label>
+            <input type="text" id="stNewCode" placeholder="Auto-suggested or type manually" style="text-transform:uppercase">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn btn-p" id="stAddBtn" onclick="stickeringAddNew()">➕ Add New Code</button>
+          <button class="btn btn-s" onclick="stickeringClearAdd()">Clear</button>
+        </div>
+        <div id="stAddMsg" class="msg"></div>
+      </div>
+
+      <!-- VIEW RECORDS -->
+      <div class="card">
+        <div class="card-title">📋 Stickering Records</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+          <div class="fg" style="min-width:160px">
+            <label>Filter by Class</label>
+            <select id="stFilterClass" onchange="stickeringLoad()"><option value="">All Classes</option></select>
+          </div>
+          <div class="fg" style="min-width:160px">
+            <label>Filter by Status</label>
+            <select id="stFilterStatus" onchange="stickeringRender()">
+              <option value="">All</option>
+              <option value="New Added">New Added</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Active">Active</option>
+            </select>
+          </div>
+          <button class="btn btn-s" onclick="stickeringLoad()" style="height:42px">🔄 Refresh</button>
+        </div>
+        <div id="stTableWrap">
+          <div class="tbl-loading"><span class="spin dk"></span><span>Loading…</span></div>
+        </div>
+      </div>
+
+      <!-- SUMMARY STATS -->
+      <div class="card">
+        <div class="card-title">📊 Stickering Summary</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-lbl">Total</div><div class="stat-val" id="stStatTotal">—</div></div>
+          <div class="stat"><div class="stat-lbl">Active</div><div class="stat-val" id="stStatActive">—</div></div>
+          <div class="stat"><div class="stat-lbl">New Added</div><div class="stat-val" id="stStatNew">—</div></div>
+          <div class="stat"><div class="stat-lbl">Cancelled</div><div class="stat-val" id="stStatCancelled">—</div></div>
+        </div>
+      </div>
+
+    </div><!-- /panel-stickering -->
+
+    <!-- ADMIN -->
+    <div class="tab-panel" id="panel-admin">
+
+      <!-- Branch filter for admin (view data by branch) -->
+      <div class="card" id="adminBranchViewCard">
+        <div class="card-title">Viewing Branch</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="fg" style="flex:1;min-width:180px">
+            <label>Select Branch to View Data</label>
+            <select id="adminViewBranch" onchange="adminSetViewBranch()">
+              <option value="">All Branches</option>
+            </select>
+          </div>
+          <button class="btn btn-s" onclick="adminRefreshData()" style="height:42px;margin-top:20px">Apply &amp; Refresh Data</button>
+        </div>
+      </div>
+
+      <!-- Branch Management -->
+      <div class="card">
+        <div class="card-title">Branch Management</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
+          <div class="fg" style="flex:1;min-width:160px"><label>Branch Name</label><input type="text" id="admBranchName" placeholder="e.g. Main Campus"></div>
+          <div class="fg" style="flex:1;min-width:120px"><label>Branch Code</label><input type="text" id="admBranchCode" placeholder="e.g. MC01"></div>
+          <button class="btn btn-p" onclick="admBranchCreate()" style="height:42px">+ Add Branch</button>
+          <button class="btn btn-s" onclick="admDownloadTemplate('branch')" style="height:42px" title="Download Excel template">⬇ Template</button>
+          <button class="btn btn-s" onclick="document.getElementById('admBranchFile').click()" style="height:42px" title="Upload filled template">📂 Upload Excel</button>
+          <input type="file" id="admBranchFile" accept=".xlsx,.xls" style="display:none" onchange="admUploadExcel('branch',this)">
+        </div>
+        <div id="admBranchMsg" class="msg"></div>
+        <div id="admBranchTable"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
+
+      <!-- Class Management -->
+      <div class="card">
+        <div class="card-title">Class Management</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
+          <div class="fg" style="flex:1;min-width:180px"><label>Class Name</label><input type="text" id="admClassName" placeholder="e.g. Room 101"></div>
+          <div class="fg" style="flex:1;min-width:160px">
+            <label>Assign to Branch</label>
+            <select id="admClassBranch"><option value="">— Select Branch —</option></select>
+          </div>
+          <button class="btn btn-p" onclick="admClassCreate()" style="height:42px">+ Add Class</button>
+          <button class="btn btn-s" onclick="admDownloadTemplate('class')" style="height:42px" title="Download Excel template">⬇ Template</button>
+          <button class="btn btn-s" onclick="document.getElementById('admClassFile').click()" style="height:42px" title="Upload filled template">📂 Upload Excel</button>
+          <input type="file" id="admClassFile" accept=".xlsx,.xls" style="display:none" onchange="admUploadExcel('class',this)">
+        </div>
+        <div id="admClassMsg" class="msg"></div>
+        <div id="admClassTable"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
+
+      <!-- Asset Management -->
+      <div class="card">
+        <div class="card-title">Asset Management (Item Names &amp; Codes)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
+          <div class="fg" style="flex:2;min-width:200px"><label>Item Name</label><input type="text" id="admAssetName" placeholder="e.g. Chair"></div>
+          <div class="fg" style="flex:1;min-width:140px"><label>Asset Code</label><input type="text" id="admAssetCode" placeholder="e.g. CHR001"></div>
+          <button class="btn btn-p" onclick="admAssetCreate()" style="height:42px">+ Add Asset</button>
+          <button class="btn btn-s" onclick="admDownloadTemplate('asset')" style="height:42px" title="Download Excel template">⬇ Template</button>
+          <button class="btn btn-s" onclick="document.getElementById('admAssetFile').click()" style="height:42px" title="Upload filled template">📂 Upload Excel</button>
+          <input type="file" id="admAssetFile" accept=".xlsx,.xls" style="display:none" onchange="admUploadExcel('asset',this)">
+        </div>
+        <div id="admAssetMsg" class="msg"></div>
+        <div id="admAssetTable"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
+
+      <!-- User Management -->
+      <div class="card">
+        <div class="card-title">User Management</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
+          <div class="fg" style="flex:1;min-width:140px"><label>Username</label><input type="text" id="admUserName" placeholder="Username"></div>
+          <div class="fg" style="flex:1;min-width:120px"><label>Password</label><input type="password" id="admUserPass" placeholder="Password"></div>
+          <div class="fg" style="min-width:120px">
+            <label>Role</label>
+            <select id="admUserRole">
+              <option value="Editor">Editor</option>
+              <option value="Admin">Admin</option>
+              <option value="Demo">Demo</option>
+            </select>
+          </div>
+          <button class="btn btn-p" onclick="admUserCreate()" style="height:42px">+ Add User</button>
+          <button class="btn btn-s" onclick="admDownloadTemplate('user')" style="height:42px" title="Download Excel template">⬇ Template</button>
+          <button class="btn btn-s" onclick="document.getElementById('admUserFile').click()" style="height:42px" title="Upload filled template">📂 Upload Excel</button>
+          <input type="file" id="admUserFile" accept=".xlsx,.xls" style="display:none" onchange="admUploadExcel('user',this)">
+        </div>
+        <div id="admUserMsg" class="msg"></div>
+        <div id="admUserTable"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
+
+      <!-- Export -->
+      <div class="card">
+        <div class="card-title">Export Data to Excel</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fg" style="flex:1;min-width:200px">
+            <label>Select Branches (hold Ctrl for multiple)</label>
+            <select id="admExportBranches" multiple size="4" style="height:auto"></select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-p" onclick="admExport()">⬇ Download Excel</button>
+            <small style="color:var(--s500)">Leave blank to export all branches</small>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel-admin -->
+
+  </div><!-- /main -->
+  <div class="mob-out"><button onclick="doLogout()">Sign Out</button></div>
+</div><!-- /appScreen -->
+
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+// When served from backend, use relative URLs.
+// When opened as a local file, fall back to localhost.
+const API_URL = location.protocol === 'file:' ? 'http://localhost:8001' : '';
+
+// ══════════════════════════════════════════════════════════
+//  UNIFIED API LAYER  (REST + JWT)
+// ══════════════════════════════════════════════════════════
+function call(fn, args, onSuccess, onError) {
+  let p;
+  if (fn === 'validateLogin') {
+    // handled directly in doLogin() — should not reach here
+    onError('validateLogin must be called via doLogin()'); return;
+  } else if (fn === 'getDataSheetInfo') {
+    p = apiGet('/api/data' + _branchQ());
+  } else if (fn === 'getEditLog') {
+    p = apiGet('/api/log' + _branchQ());
+  } else if (fn === 'submitEntry') {
+    p = apiPost('/api/submit', args[0]);
+  } else if (fn === 'getLockedClasses') {
+    p = apiGet('/api/classes' + _branchQ());
+  } else if (fn === 'lockClass') {
+    p = apiPost('/api/classes/lock', args[0]);
+  } else if (fn === 'unlockClass') {
+    p = apiPost('/api/classes/unlock', args[0]);
+  } else if (fn === 'lockStickerClass') {
+    p = apiPost('/api/classes/lock-sticker', args[0]);
+  } else if (fn === 'unlockStickerClass') {
+    p = apiPost('/api/classes/unlock-sticker', args[0]);
+  } else if (fn === 'saveBarcodes') {
+    p = apiPost('/api/barcodes/save', args[0]);
+  } else if (fn === 'getStickeringData') {
+    p = apiGet('/api/stickering?filterClass=' + encodeURIComponent(args[0] || ''));
+  } else if (fn === 'updateStickeringRemarks') {
+    p = apiPost('/api/stickering/remarks', { slNos: args[0], remark: args[1] });
+  } else if (fn === 'addStickeringRow') {
+    p = apiPost('/api/stickering/add', args[0]);
+  } else if (fn === 'getLastModified') {
+    p = apiGet('/api/last-modified');
+  } else if (fn === 'getBarCodeTabData') {
+    p = apiGet('/api/barcodes');
+  } else if (fn === 'cancelBarCodes') {
+    p = apiPost('/api/barcodes/cancel', { slNos: args[0] });
+  } else {
+    onError('Unknown function: ' + fn); return;
+  }
+  p.then(onSuccess).catch(e => onError(String(e)));
+}
+
+function _authHeader() {
+  const token = store.getItem('assetMgrToken');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+
+function _branchQ() {
+  if (currentRole === 'Admin' && adminViewBranchId) return `?branch_id=${adminViewBranchId}`;
+  return '';
+}
+
+async function apiGet(path) {
+  const res = await fetch(API_URL + path, { headers: _authHeader() });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired. Please log in again.'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_URL + path, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ..._authHeader() },
+    body:    JSON.stringify(body),
+  });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired. Please log in again.'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+async function apiPatch(path, body) {
+  const res = await fetch(API_URL + path, {
+    method:  'PATCH',
+    headers: { 'Content-Type': 'application/json', ..._authHeader() },
+    body:    body ? JSON.stringify(body) : undefined,
+  });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired. Please log in again.'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+async function apiDelete(path) {
+  const res = await fetch(API_URL + path, {
+    method:  'DELETE',
+    headers: _authHeader(),
+  });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired. Please log in again.'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'HTTP ' + res.status);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let currentUser     = '';
+let currentRole     = ''; // Admin | Editor | Demo
+let currentBranchIds  = [];   // list of branch IDs the current user belongs to
+let currentBranchNames = [];  // matching names
+let adminViewBranchId = null; // branch Admin is currently viewing (null = all)
+let sheetData   = { classHeaders: [], rows: [] };
+let logData     = [];
+let itemMap     = {}; // itemName → assetCode
+let lockedClasses        = new Map(); // className → { lockedBy, timestamp }
+let stickerLockedClasses = new Map(); // className → { lockedBy, timestamp }  (column F)
+let classAssignments     = new Map(); // className → assignedUser
+
+// ══════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════
+function showMsg(id, text, type) { const e=document.getElementById(id); e.textContent=text; e.className='msg '+type; }
+function clearMsg(id)            { const e=document.getElementById(id); e.textContent=''; e.className='msg'; }
+function setBusy(id, busy, lbl) {
+  const b=document.getElementById(id);
+  b.disabled=busy;
+  b.innerHTML=busy?`<span class="spin"></span> ${lbl}…`:lbl;
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOGIN / LOGOUT
+// ══════════════════════════════════════════════════════════
+function switchLoginTab(tab) {
+  const isSignIn = tab === 'signin';
+  document.getElementById('panelSignIn').style.display   = isSignIn ? '' : 'none';
+  document.getElementById('panelRegister').style.display = isSignIn ? 'none' : '';
+  document.getElementById('tabSignIn').style.background   = isSignIn ? 'var(--g600)' : '#fff';
+  document.getElementById('tabSignIn').style.color        = isSignIn ? '#fff' : 'var(--s500)';
+  document.getElementById('tabRegister').style.background = isSignIn ? '#fff' : 'var(--g600)';
+  document.getElementById('tabRegister').style.color      = isSignIn ? 'var(--s500)' : '#fff';
+}
+
+function doRegister() {
+  const instName = document.getElementById('ri').value.trim();
+  const username = document.getElementById('ru').value.trim();
+  const password = document.getElementById('rp').value;
+  if (!instName) { showMsg('rm', 'Institution name is required.', 'err'); return; }
+  if (!username || !password) { showMsg('rm', 'Username and password are required.', 'err'); return; }
+  setBusy('registerBtn', true, 'Create Institution');
+  fetch(API_URL + '/auth/register', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ institution_name: instName, username, password }),
+  })
+  .then(res => res.ok ? res.json() : res.json().then(e => Promise.reject(e.detail || 'Registration failed.')))
+  .then(() => {
+    setBusy('registerBtn', false, 'Create Institution');
+    showMsg('rm', 'Institution created! You can now sign in.', 'ok');
+    document.getElementById('ri').value = '';
+    document.getElementById('ru').value = '';
+    document.getElementById('rp').value = '';
+    setTimeout(() => { switchLoginTab('signin'); document.getElementById('lu').value = username; }, 1500);
+  })
+  .catch(err => {
+    setBusy('registerBtn', false, 'Create Institution');
+    showMsg('rm', String(err) || 'Registration failed.', 'err');
+  });
+}
+
+function doLogin() {
+  const user = document.getElementById('lu').value.trim();
+  const pass = document.getElementById('lp').value.trim();
+  if (!user || !pass) { showMsg('lm','Please enter both username and password.','err'); return; }
+  setBusy('loginBtn', true, 'Sign In');
+  showMsg('lm','Verifying credentials…','info');
+
+  fetch(API_URL + '/auth/login', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ username: user, password: pass }),
+  })
+  .then(res => res.ok ? res.json() : res.json().then(e => Promise.reject(e.detail || 'Login failed.')))
+  .then(res => {
+    setBusy('loginBtn', false, 'Sign In');
+    store.setItem('assetMgrToken',           res.access_token);
+    store.setItem('assetMgrBranchIds',       JSON.stringify(res.branch_ids   || []));
+    store.setItem('assetMgrBranchNames',     JSON.stringify(res.branch_names || []));
+    store.setItem('assetMgrInstitutionName', res.institution_name || '');
+    loginAs(res.username, res.role || 'Editor', res.branch_ids || [], res.branch_names || [], res.institution_name || '');
+  })
+  .catch(err => {
+    setBusy('loginBtn', false, 'Sign In');
+    showMsg('lm', String(err) || 'Login failed.', 'err');
+  });
+}
+
+function loginAs(username, role, branchIds, branchNames, institutionName) {
+  currentUser        = username;
+  currentRole        = (role || 'Editor').trim();
+  currentBranchIds   = Array.isArray(branchIds)  ? branchIds  : [];
+  currentBranchNames = Array.isArray(branchNames) ? branchNames : [];
+  adminViewBranchId  = null;
+  store.setItem('assetMgrUser', username);
+  store.setItem('assetMgrRole', currentRole);
+  const instEl = document.getElementById('institutionName');
+  if (instEl) instEl.textContent = institutionName || store.getItem('assetMgrInstitutionName') || '';
+  document.getElementById('loginScreen').style.display = 'none';
+
+  if (currentRole === 'SuperAdmin') {
+    document.getElementById('superAdminScreen').style.display = 'block';
+    document.getElementById('appScreen').style.display        = 'none';
+    saSwitchTab('dashboard');
+    loadOverview();
+    return;
+  }
+
+  document.getElementById('appScreen').style.display   = 'block';
+  document.getElementById('uname').textContent = currentUser;
+  document.getElementById('uav').textContent   = currentUser.charAt(0).toUpperCase();
+  applyRoleRestrictions(currentRole);
+  // Show pending badge + drain any queue left from a previous offline session
+  oqUpdateUI();
+  if (navigator.onLine) oqDrain();
+
+  loadLockedClasses(() => {
+    loadData();
+    loadLog();
+    // Pre-load Bar Code tab data so Stickering tab works immediately
+    call('getBarCodeTabData', [], res => { barCodeTabData = Array.isArray(res) ? res : []; }, () => {});
+    startAutoRefresh();
+  });
+}
+
+function loadLockedClasses(callback) {
+  call('getLockedClasses', [],
+    res => {
+      lockedClasses        = new Map();
+      classAssignments     = new Map();
+      stickerLockedClasses = new Map();
+      (Array.isArray(res) ? res : []).forEach(r => {
+        if (!r.className) return;
+        if (r.assignedTo)    classAssignments.set(r.className, r.assignedTo);
+        if (r.locked)        lockedClasses.set(r.className, { lockedBy: r.lockedBy || '', timestamp: r.timestamp || '' });
+        if (r.stickerLocked) stickerLockedClasses.set(r.className, { lockedBy: r.stickerLockedBy || '', timestamp: r.stickerTimestamp || '' });
+      });
+      if (callback) callback();
+    },
+    () => { if (callback) callback(); }
+  );
+}
+
+['lu','lp'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+});
+
+// ── SuperAdmin tab helpers ──────────────────────────────────────────────────
+function saSwitchTab(tab) {
+  ['dashboard','activity','access'].forEach(t => {
+    document.getElementById(`saPane-${t}`).style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById(`saTab-${t}`);
+    btn.style.color       = t === tab ? 'var(--g600)' : 'var(--s400)';
+    btn.style.fontWeight  = t === tab ? '600' : '500';
+    btn.style.borderBottom = t === tab ? '2px solid var(--g600)' : '2px solid transparent';
+  });
+  if (tab === 'activity') loadActivity();
+  if (tab === 'access')   loadAccess();
+}
+
+function _relTime(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+
+// ── Dashboard ───────────────────────────────────────────────────────────────
+async function loadOverview() {
+  document.getElementById('overviewTable').innerHTML = '<p style="padding:16px;color:var(--s400);font-size:13px">Loading…</p>';
+  try {
+    const rows = await apiGet('/auth/overview');
+    const now = Date.now();
+    const cutoff = now - 24*60*60*1000;
+    const totalClasses   = rows.reduce((s, r) => s + r.classes, 0);
+    const totalItems     = rows.reduce((s, r) => s + r.line_items, 0);
+    const totalQty       = rows.reduce((s, r) => s + r.total_qty, 0);
+    const activeInstToday = rows.filter(r => r.last_active && new Date(r.last_active).getTime() > cutoff).length;
+    const activeUsersToday = rows.reduce((s, r) => s + (r.active_users_today || 0), 0);
+    document.getElementById('ovTotalInst').textContent    = rows.length;
+    document.getElementById('ovActiveToday').textContent  = activeInstToday;
+    document.getElementById('ovActiveUsers').textContent  = activeUsersToday;
+    document.getElementById('ovTotalClasses').textContent = totalClasses;
+    document.getElementById('ovTotalItems').textContent   = totalItems;
+    document.getElementById('ovTotalQty').textContent     = totalQty % 1 === 0 ? totalQty : totalQty.toFixed(2);
+    if (!rows.length) {
+      document.getElementById('overviewTable').innerHTML = '<p style="padding:16px;color:var(--s400);font-size:13px">No institutions yet.</p>';
+      return;
+    }
+    let html = '<table style="width:100%;border-collapse:collapse">';
+    html += '<thead><tr style="background:var(--g700);color:#fff">';
+    ['Institution','Status','Users','Classes','Line Items','Total Qty','Last Active','Since'].forEach(h =>
+      html += `<th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:600">${h}</th>`);
+    html += '</tr></thead><tbody>';
+    rows.forEach((r, i) => {
+      const bg  = i % 2 === 0 ? '#fff' : 'var(--s50)';
+      const qty = r.total_qty % 1 === 0 ? r.total_qty : r.total_qty.toFixed(2);
+      const statusBadge = r.is_active
+        ? '<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">Active</span>'
+        : '<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">Disabled</span>';
+      html += `<tr style="background:${bg}">
+        <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--s800)">${_esc(r.name)}</td>
+        <td style="padding:10px 14px">${statusBadge}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s600)">${r.users}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s600)">${r.classes}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s600)">${r.line_items}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s600)">${qty}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s400)">${_relTime(r.last_active)}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--s400)">${r.created_at}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('overviewTable').innerHTML = html;
+  } catch(e) {
+    document.getElementById('overviewTable').innerHTML = `<p style="padding:16px;color:var(--err)">Failed to load: ${e}</p>`;
+  }
+}
+
+// ── Activity ────────────────────────────────────────────────────────────────
+async function loadActivity() {
+  document.getElementById('actLoginsList').innerHTML = '<span style="color:var(--s400)">Loading…</span>';
+  document.getElementById('actEditsList').innerHTML  = '<span style="color:var(--s400)">Loading…</span>';
+  try {
+    const data = await apiGet('/auth/activity');
+    if (!data.logins.length) {
+      document.getElementById('actLoginsList').innerHTML = '<span style="color:var(--s400)">No logins yet.</span>';
+    } else {
+      let h = '';
+      data.logins.forEach(l => {
+        h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--s100)">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--s800)">${_esc(l.username)}</div>
+            <div style="font-size:12px;color:var(--s400)">${_esc(l.institution)}</div>
+          </div>
+          <div style="font-size:12px;color:var(--s400);white-space:nowrap;margin-left:12px">${_relTime(l.last_login)}</div>
+        </div>`;
+      });
+      document.getElementById('actLoginsList').innerHTML = h;
+    }
+    if (!data.edits.length) {
+      document.getElementById('actEditsList').innerHTML = '<span style="color:var(--s400)">No edits yet.</span>';
+    } else {
+      let h = '';
+      data.edits.forEach(e => {
+        h += `<div style="padding:8px 0;border-bottom:1px solid var(--s100)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="font-size:13px;font-weight:600;color:var(--s800)">${_esc(e.item_name || '—')}</div>
+            <div style="font-size:12px;color:var(--s400);white-space:nowrap;margin-left:12px">${_relTime(e.timestamp)}</div>
+          </div>
+          <div style="font-size:12px;color:var(--s400)">${_esc(e.username)} · ${_esc(e.institution)} · ${_esc(e.class_name || '—')} · qty ${e.qty}</div>
+        </div>`;
+      });
+      document.getElementById('actEditsList').innerHTML = h;
+    }
+  } catch(err) {
+    document.getElementById('actLoginsList').innerHTML = `<span style="color:var(--err)">${err}</span>`;
+  }
+}
+
+// ── Access ──────────────────────────────────────────────────────────────────
+let _saAccessRows = [];
+let _saResetInstId = null;
+let _saAddAdminInstId = null;
+let _saExpandedInstId = null;
+
+async function loadAccess() {
+  document.getElementById('accessTable').innerHTML = '<p style="padding:16px;color:var(--s400);font-size:13px">Loading…</p>';
+  try {
+    _saAccessRows = await apiGet('/auth/overview');
+    _renderAccessTable();
+  } catch(e) {
+    document.getElementById('accessTable').innerHTML = `<p style="padding:16px;color:var(--err)">Failed to load: ${e}</p>`;
+  }
+}
+
+function _renderAccessTable() {
+  if (!_saAccessRows.length) {
+    document.getElementById('accessTable').innerHTML = '<p style="padding:16px;color:var(--s400);font-size:13px">No institutions.</p>';
+    return;
+  }
+  let html = '<table style="width:100%;border-collapse:collapse">';
+  html += '<thead><tr style="background:var(--g700);color:#fff">';
+  ['Institution','Status','Users','Actions'].forEach(h =>
+    html += `<th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:600">${h}</th>`);
+  html += '</tr></thead><tbody>';
+  _saAccessRows.forEach((r, i) => {
+    const bg = i % 2 === 0 ? '#fff' : 'var(--s50)';
+    const statusBadge = r.is_active
+      ? '<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">Active</span>'
+      : '<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">Disabled</span>';
+    const toggleLabel = r.is_active ? 'Disable' : 'Enable';
+    const toggleStyle = r.is_active
+      ? 'background:#fef9c3;color:#92400e;border:1px solid #fde68a'
+      : 'background:#dcfce7;color:#166534;border:1px solid #bbf7d0';
+    html += `<tr style="background:${bg}">
+      <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--s800)">${_esc(r.name)}</td>
+      <td style="padding:10px 14px">${statusBadge}</td>
+      <td style="padding:10px 14px;font-size:13px;color:var(--s600)">${r.users}</td>
+      <td style="padding:10px 14px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="saToggle(${r.id})" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;${toggleStyle}">${toggleLabel}</button>
+          <button onclick="saOpenReset(${r.id},'${_esc(r.name)}')" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">Reset Pwd</button>
+          <button onclick="saOpenAddAdmin(${r.id},'${_esc(r.name)}')" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe">Add Admin</button>
+          <button onclick="saToggleUsers(${r.id})" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--s100);color:var(--s600);border:1px solid var(--s200)">Users ▾</button>
+          <button onclick="saDeleteInst(${r.id},'${_esc(r.name)}')" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+    if (_saExpandedInstId === r.id) {
+      html += `<tr style="background:#f8fafc"><td colspan="4" style="padding:12px 16px 16px 24px" id="usersPane-${r.id}"><span style="color:var(--s400);font-size:13px">Loading users…</span></td></tr>`;
+    }
+  });
+  html += '</tbody></table>';
+  document.getElementById('accessTable').innerHTML = html;
+  if (_saExpandedInstId !== null) _loadInstUsers(_saExpandedInstId);
+}
+
+async function _loadInstUsers(instId) {
+  const pane = document.getElementById(`usersPane-${instId}`);
+  if (!pane) return;
+  try {
+    const users = await apiGet(`/auth/institution/${instId}/users`);
+    if (!users.length) { pane.innerHTML = '<span style="color:var(--s400);font-size:13px">No users.</span>'; return; }
+    let h = '<table style="border-collapse:collapse;font-size:12px;width:100%">';
+    h += '<tr style="color:var(--s400)"><th style="padding:4px 10px;text-align:left">Username</th><th style="padding:4px 10px;text-align:left">Role</th><th style="padding:4px 10px;text-align:left">Last Login</th><th></th></tr>';
+    users.forEach(u => {
+      h += `<tr>
+        <td style="padding:5px 10px;font-weight:600;color:var(--s800)">${_esc(u.username)}</td>
+        <td style="padding:5px 10px;color:var(--s600)">${u.role}</td>
+        <td style="padding:5px 10px;color:var(--s400)">${_relTime(u.last_login)}</td>
+        <td style="padding:5px 10px"><button onclick="saDeleteUser(${u.id},'${_esc(u.username)}')" style="padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">Remove</button></td>
+      </tr>`;
+    });
+    h += '</table>';
+    pane.innerHTML = h;
+  } catch(e) { pane.innerHTML = `<span style="color:var(--err);font-size:13px">${e}</span>`; }
+}
+
+function saToggleUsers(instId) {
+  _saExpandedInstId = _saExpandedInstId === instId ? null : instId;
+  _renderAccessTable();
+}
+
+async function saToggle(instId) {
+  try {
+    await apiPatch(`/auth/institution/${instId}/toggle`);
+    await loadAccess();
+  } catch(e) { alert('Error: ' + e); }
+}
+
+function saOpenReset(instId, name) {
+  _saResetInstId = instId;
+  document.getElementById('saResetInstName').textContent = name;
+  document.getElementById('saResetPwd').value = '';
+  document.getElementById('saResetModal').style.display = 'flex';
+}
+
+async function saDoResetPassword() {
+  const pwd = document.getElementById('saResetPwd').value.trim();
+  if (!pwd) { alert('Enter a new password.'); return; }
+  try {
+    await apiPost(`/auth/institution/${_saResetInstId}/reset-password`, { new_password: pwd });
+    document.getElementById('saResetModal').style.display = 'none';
+    alert('Password reset successfully.');
+  } catch(e) { alert('Error: ' + e); }
+}
+
+function saOpenAddAdmin(instId, name) {
+  _saAddAdminInstId = instId;
+  document.getElementById('saAddAdminInstName').textContent = name;
+  document.getElementById('saAddAdminUser').value = '';
+  document.getElementById('saAddAdminPwd').value  = '';
+  document.getElementById('saAddAdminModal').style.display = 'flex';
+}
+
+async function saDoAddAdmin() {
+  const user = document.getElementById('saAddAdminUser').value.trim();
+  const pwd  = document.getElementById('saAddAdminPwd').value;
+  if (!user || !pwd) { alert('Username and password are required.'); return; }
+  try {
+    await apiPost(`/auth/institution/${_saAddAdminInstId}/admin`, { username: user, password: pwd });
+    document.getElementById('saAddAdminModal').style.display = 'none';
+    alert(`Admin user "${user}" created.`);
+    if (_saExpandedInstId === _saAddAdminInstId) _loadInstUsers(_saAddAdminInstId);
+  } catch(e) { alert('Error: ' + e); }
+}
+
+async function saDeleteUser(userId, username) {
+  if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+  try {
+    await apiDelete(`/auth/user/${userId}`);
+    _loadInstUsers(_saExpandedInstId);
+  } catch(e) { alert('Error: ' + e); }
+}
+
+async function saDeleteInst(instId, name) {
+  if (!confirm(`DELETE institution "${name}" and ALL its data permanently?\n\nThis cannot be undone.`)) return;
+  try {
+    await apiDelete(`/auth/institution/${instId}`);
+    await loadAccess();
+  } catch(e) { alert('Error: ' + e); }
+}
+
+function doLogout() {
+  stopAutoRefresh();
+  store.removeItem('assetMgrUser');
+  store.removeItem('assetMgrRole');
+  store.removeItem('assetMgrToken');
+  store.removeItem('assetMgrBranchIds');
+  store.removeItem('assetMgrBranchNames');
+  store.removeItem('assetMgrInstitutionName');
+  const instEl = document.getElementById('institutionName');
+  if (instEl) instEl.textContent = '';
+  document.getElementById('superAdminScreen').style.display = 'none';
+  currentUser        = '';
+  currentRole        = '';
+  currentBranchIds   = [];
+  currentBranchNames = [];
+  adminViewBranchId  = null;
+  lockedClasses.clear();
+  stickerLockedClasses.clear();
+  classAssignments.clear();
+  document.getElementById('lu').value = '';
+  document.getElementById('lp').value = '';
+  clearMsg('lm');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display   = 'none';
+  // Reset lock UI
+  updateLockUI('');
+}
+
+function applyRoleRestrictions(role) {
+  const isAdmin = role === 'Admin';
+  const isDemo  = role === 'Demo';
+
+  // Admin tab: Admin only
+  const tabAdmin = document.getElementById('tab-admin');
+  if (tabAdmin) tabAdmin.style.display = isAdmin ? '' : 'none';
+
+  // Barcodes tab: Admin only
+  const tabBarcode = document.getElementById('tab-barcode');
+  if (tabBarcode) tabBarcode.style.display = isAdmin ? '' : 'none';
+
+  // Show branch name in topbar for editors
+  const branchChip = document.getElementById('branchChip');
+  if (branchChip) {
+    if (!isAdmin && currentBranchNames.length) {
+      branchChip.textContent = currentBranchNames.join(', ');
+      branchChip.style.display = 'inline';
+    } else {
+      branchChip.style.display = 'none';
+    }
+  }
+
+  // Demo: disable all write actions
+  const writeEls = [
+    'submitBtn', 'lockClassBtn', 'unlockClassBtn', 'bcGenBtn', 'bcWordBtn', 'bcWordByUserBtn',
+    'stStickerLockBtn', 'stStickerUnlockBtn', 'eStickerLockBtn', 'eStickerUnlockBtn'
+  ];
+  writeEls.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isDemo) {
+      el.disabled = true;
+      el.title = 'Read-only access';
+    }
+  });
+
+  // Demo: hide Excel download button
+  if (isDemo) {
+    document.querySelectorAll('button').forEach(btn => {
+      if (btn.textContent.includes('Excel')) {
+        btn.disabled = true;
+        btn.title = 'Read-only access';
+      }
+    });
+  }
+}
+
+// ── Safe storage wrapper (falls back to in-memory when localStorage is blocked) ──
+const store = (() => {
+  const mem = {};
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch(e) { return { getItem: k=>mem[k]||null, setItem:(k,v)=>{ mem[k]=v; }, removeItem: k=>{ delete mem[k]; } }; }
+})();
+
+// Restore session on page load (no logout on refresh)
+window.addEventListener('load', () => {
+  const saved      = store.getItem('assetMgrUser');
+  const savedRole  = store.getItem('assetMgrRole');
+  const savedToken = store.getItem('assetMgrToken');
+  const savedBIds   = JSON.parse(store.getItem('assetMgrBranchIds')   || '[]');
+  const savedBNames = JSON.parse(store.getItem('assetMgrBranchNames') || '[]');
+  if (saved && savedToken) loginAs(saved, savedRole || 'Editor', savedBIds, savedBNames);
+});
+
+// ══════════════════════════════════════════════════════════
+//  AUTO REFRESH — only active tab, 5 s interval to avoid hangs
+// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  SMART SYNC — timestamp-based delta polling
+//  Polls a lightweight timestamp every 2s.
+//  Only fetches full data when the timestamp changed.
+//  ~95% less data transferred vs full polling.
+// ══════════════════════════════════════════════════════════
+let syncInterval    = null;
+let lastSyncTs      = null; // last known sheet timestamp
+let syncInFlight    = false; // prevent overlapping polls
+let syncRetries     = 0;
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  const ind = document.getElementById('liveIndicator');
+  if (ind) ind.style.display = 'inline-flex';
+  syncInterval = setInterval(pollTimestamp, 2000);
+  pollTimestamp(); // immediate first check
+}
+
+function stopAutoRefresh() {
+  if (syncInterval) { clearInterval(syncInterval); syncInterval = null; }
+  const ind = document.getElementById('liveIndicator');
+  if (ind) ind.style.display = 'none';
+  syncInFlight = false;
+}
+
+// ══════════════════════════════════════════════════════════
+//  OFFLINE QUEUE  — saves to localStorage, drains on reconnect
+// ══════════════════════════════════════════════════════════
+const OQ_KEY = 'assetMgrOfflineQueue';
+
+function oqGet()       { try { return JSON.parse(localStorage.getItem(OQ_KEY) || '[]'); } catch { return []; } }
+function oqSave(q)     { localStorage.setItem(OQ_KEY, JSON.stringify(q)); }
+
+function oqPush(item) {
+  const q = oqGet();
+  q.push({ ...item, qid: Date.now() + '_' + Math.random().toString(36).slice(2) });
+  oqSave(q);
+  oqUpdateUI();
+}
+
+function oqRemove(qid) {
+  oqSave(oqGet().filter(i => i.qid !== qid));
+  oqUpdateUI();
+}
+
+function oqUpdateUI() {
+  const q   = oqGet();
+  const n   = q.length;
+  const badge = document.getElementById('qBadge');
+  const count = document.getElementById('qBadgeCount');
+  const bar   = document.getElementById('offlineBar');
+  const oqc   = document.getElementById('offlineQCount');
+  if (badge) { badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
+  if (count) count.textContent = n;
+  if (oqc)   oqc.textContent   = n > 0 ? n + ' item' + (n > 1 ? 's' : '') + ' queued' : '';
+  if (bar && !navigator.onLine) bar.style.display = 'flex';
+}
+
+async function oqDrain() {
+  if (!navigator.onLine) return;
+  const q = oqGet();
+  if (!q.length) return;
+  let synced = 0;
+  for (const item of [...q]) {
+    try {
+      await new Promise((resolve, reject) => call(item.fn, item.args, resolve, reject));
+      oqRemove(item.qid);
+      synced++;
+    } catch(e) {
+      break; // network still unstable — try again next time
+    }
+  }
+  if (synced > 0) {
+    silentLoadData();
+    silentLoadLog();
+  }
+}
+
+window.addEventListener('online', () => {
+  const bar = document.getElementById('offlineBar');
+  if (bar) bar.style.display = 'none';
+  setLiveDot(true);
+  startAutoRefresh();
+  oqDrain();
+});
+
+window.addEventListener('offline', () => {
+  const bar = document.getElementById('offlineBar');
+  if (bar) bar.style.display = 'flex';
+  setLiveDot(false);
+  stopAutoRefresh();
+  oqUpdateUI();
+});
+
+function pollTimestamp() {
+  if (syncInFlight) return; // skip if previous poll still running
+  syncInFlight = true;
+  call('getLastModified', [], res => {
+    syncInFlight = false;
+    syncRetries  = 0;
+    setLiveDot(true);
+    const ts = res && res.ts ? String(res.ts) : null;
+    if (!ts || ts === lastSyncTs) return; // nothing changed
+    lastSyncTs = ts;
+    syncChangedData(); // something changed — fetch what's needed
+  }, () => {
+    syncInFlight = false;
+    syncRetries++;
+    if (syncRetries > 3) setLiveDot(false); // show offline after 3 fails
+  });
+}
+
+function setLiveDot(online) {
+  const dot = document.getElementById('liveDot');
+  if (!dot) return;
+  dot.style.background = online ? '#4ade80' : '#f87171';
+  dot.style.animation  = online ? 'livePulse 1.8s ease-in-out infinite' : 'none';
+}
+
+function syncChangedData() {
+  // Always keep locks fresh — affects all tabs
+  silentLoadLocks();
+  // Refresh active tab data
+  const activePanel = document.querySelector('.tab-panel.active');
+  const id = activePanel ? activePanel.id : '';
+  if (id === 'panel-view')       silentLoadData();
+  else if (id === 'panel-log')   silentLoadLog();
+  else if (id === 'panel-add')   {} // locks already refreshed above
+  else if (id === 'panel-stickering') {
+    call('getStickeringData', [document.getElementById('stFilterClass').value], res => {
+      stickeringData = Array.isArray(res) ? res : [];
+      stickeringRender();
+      stickeringUpdateStats();
+    }, () => {});
+  }
+}
+
+function silentLoadData() {
+  call('getDataSheetInfo', [],
+    res => {
+      if (!res || res.error) return;
+      if (JSON.stringify(res) === JSON.stringify(sheetData)) return;
+      sheetData = res;
+      populateDDs();
+      renderData();
+      updateStats();
+      updateClassRef();
+    },
+    () => {}
+  );
+}
+
+function silentLoadLocks() {
+  call('getLockedClasses', [],
+    res => {
+      const incomingLocks        = new Map();
+      const incomingAssign       = new Map();
+      const incomingStickerLocks = new Map();
+      (Array.isArray(res) ? res : []).forEach(r => {
+        if (!r.className) return;
+        if (r.assignedTo)    incomingAssign.set(r.className, r.assignedTo);
+        if (r.locked)        incomingLocks.set(r.className, { lockedBy: r.lockedBy || '', timestamp: r.timestamp || '' });
+        if (r.stickerLocked) incomingStickerLocks.set(r.className, { lockedBy: r.stickerLockedBy || '', timestamp: r.stickerTimestamp || '' });
+      });
+      if (JSON.stringify([...incomingLocks])        === JSON.stringify([...lockedClasses]) &&
+          JSON.stringify([...incomingAssign])        === JSON.stringify([...classAssignments]) &&
+          JSON.stringify([...incomingStickerLocks])  === JSON.stringify([...stickerLockedClasses])) return;
+      lockedClasses        = incomingLocks;
+      classAssignments     = incomingAssign;
+      stickerLockedClasses = incomingStickerLocks;
+      applyClassLockState();
+      // Refresh sticker lock UI on both tabs
+      const eClass = document.getElementById('eClass') ? document.getElementById('eClass').value : '';
+      if (eClass) updateStickerLockUIEntry(eClass);
+      const stCls = document.getElementById('stNewClass') ? document.getElementById('stNewClass').value : '';
+      if (stCls) applyStickerLockState();
+    },
+    () => {}
+  );
+}
+
+function silentLoadLog() {
+  call('getEditLog', [],
+    res => {
+      const incoming = (Array.isArray(res) ? res : []).map(r =>
+        Object.fromEntries(Object.entries(r).map(([k, v]) => [k.toUpperCase(), v]))
+      );
+      if (JSON.stringify(incoming) === JSON.stringify(logData)) return;
+      logData = incoming;
+      const users = [...new Set(logData.map(r => r['USER NAME']).filter(Boolean))];
+      const sel = document.getElementById('lu2'), cur = sel.value;
+      sel.innerHTML = '<option value="">All Users</option>';
+      users.forEach(u => sel.appendChild(new Option(u, u)));
+      if (cur) sel.value = cur;
+      renderLog();
+    },
+    () => {}
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(name) {
+  ['add','view','log','barcode','stickering','admin'].forEach(t => {
+    const panel = document.getElementById('panel-'+t);
+    const tab   = document.getElementById('tab-'+t);
+    if (panel) panel.classList.toggle('active', t===name);
+    if (tab)   tab.classList.toggle('active', t===name);
+  });
+  if (name==='add' || name==='stickering') {
+    silentLoadLocks();
+    if (name==='add' && (!sheetData.classHeaders || !sheetData.classHeaders.length)) loadData();
+  }
+  if (name==='view')       loadData();
+  if (name==='log')        loadLog();
+  if (name==='barcode')    initBarcodeTab();
+  if (name==='stickering') initStickeringTab();
+  if (name==='admin')      adminLoad();
+}
+
+// ══════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════
+function loadData() {
+  document.getElementById('dataTbl').innerHTML =
+    '<div class="tbl-loading"><span class="spin dk"></span><span>Loading data…</span></div>';
+
+  call('getDataSheetInfo', [],
+    res => {
+      if (res && res.error) {
+        document.getElementById('dataTbl').innerHTML =
+          '<div class="tbl-empty" style="color:var(--red)">'+res.error+'</div>'; return;
+      }
+      sheetData = res || { classHeaders:[], rows:[] };
+      populateDDs();
+      renderData();
+      updateStats();
+      updateClassRef();
+      applyClassLockState(); // restore lock UI for current class after reload
+      updatePreview();
+    },
+    err => {
+      document.getElementById('dataTbl').innerHTML =
+        '<div class="tbl-empty" style="color:var(--red)">Error: '+err+'</div>';
+    }
+  );
+}
+
+function updateStats() {
+  let u=0;
+  sheetData.rows.forEach(r => r.classCounts.forEach(v=>{ const n=parseFloat(v); if(!isNaN(n)) u+=n; }));
+  const pending        = sheetData.classHeaders.filter((_,ci) =>
+    sheetData.rows.every(r => { const n=parseFloat(r.classCounts[ci]); return isNaN(n)||n===0; })
+  ).length;
+  const pendingSubmit  = sheetData.classHeaders.filter(c => !lockedClasses.has(c)).length;
+  const pendingSticker = sheetData.classHeaders.filter(c => !stickerLockedClasses.has(c)).length;
+  document.getElementById('si').textContent   = sheetData.rows.length;
+  document.getElementById('sc').textContent   = sheetData.classHeaders.length;
+  document.getElementById('su').textContent   = u;
+  document.getElementById('sp').textContent   = pending;
+  document.getElementById('sps').textContent  = pendingSubmit;
+  document.getElementById('spst').textContent = pendingSticker;
+}
+
+function populateDDs() {
+  // Build item map for custom dropdown
+  itemMap = {};
+  sheetData.rows.forEach(r => { if (r.itemName) itemMap[r.itemName] = r.assetCode; });
+
+  // Class dropdowns
+  ['eClass','vc','bcClass'].forEach(id => {
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML = id==='eClass'
+      ? '<option value="">— Select Class —</option>'
+      : '<option value="">All Classes</option>';
+    sheetData.classHeaders.forEach(h => sel.appendChild(new Option(h,h)));
+    if(cur) sel.value=cur;
+  });
+}
+
+function renderData() {
+  const srch  = document.getElementById('vs').value.toLowerCase();
+  const fcls  = document.getElementById('vc').value;
+  const vNil  = (document.getElementById('vNil') || {}).value || '';
+  const { classHeaders, rows } = sheetData;
+  const pendingDiv = document.getElementById('pendingPanel');
+
+  if (!classHeaders || !rows) return;
+
+  // Visible columns
+  const colIdx = fcls
+    ? classHeaders.map((h,i) => h===fcls ? i : -1).filter(i => i>=0)
+    : classHeaders.map((_,i) => i);
+
+  // Search filter
+  let filtered = rows.filter(r =>
+    !srch || r.itemName.toLowerCase().includes(srch) || r.assetCode.toLowerCase().includes(srch));
+
+  // Nil / Filled filter
+  if (vNil === 'nil') {
+    filtered = filtered.filter(r => colIdx.some(ci => {
+      const n = parseFloat(r.classCounts[ci]); return isNaN(n) || n === 0;
+    }));
+  } else if (vNil === 'filled') {
+    filtered = filtered.filter(r => colIdx.every(ci => {
+      const n = parseFloat(r.classCounts[ci]); return !isNaN(n) && n > 0;
+    }));
+  }
+
+  if (!filtered.length) {
+    document.getElementById('dataTbl').innerHTML = '<div class="tbl-empty">No records found.</div>';
+    if (pendingDiv) pendingDiv.innerHTML = '';
+    return;
+  }
+
+  const visH = colIdx.map(i => classHeaders[i]);
+
+  // Column totals (over visible + filtered rows)
+  const colTotals = colIdx.map(ci =>
+    filtered.reduce((s, r) => s + (parseFloat(r.classCounts[ci]) || 0), 0)
+  );
+  const grandTotal = colTotals.reduce((a,b) => a+b, 0);
+
+  // Build table
+  let html = `<table>
+    <thead>
+      <tr class="reg-tot-row">
+        <th class="rs1">Grand Total</th>
+        <th class="rs2" style="text-align:right;padding-right:16px">${grandTotal > 0 ? grandTotal : '—'}</th>
+        <th class="rs3"></th>
+        ${colTotals.map((t,j) =>
+          `<th class="num${t===0?' rt-nil-col':''}">${t > 0 ? t : 'Nil'}</th>`
+        ).join('')}
+      </tr>
+      <tr class="reg-hdr-row">
+        <th class="rs1">#</th>
+        <th class="rs2">Item Name</th>
+        <th class="rs3">Code</th>
+        ${visH.map((h,j) =>
+          `<th class="num${colTotals[j]===0?' rt-nil-col':''}">${h}</th>`
+        ).join('')}
+      </tr>
+    </thead>
+    <tbody>`;
+
+  filtered.forEach((r, ri) => {
+    html += `<tr>
+      <td class="mono rs1">${r.slNo || ri+1}</td>
+      <td class="rs2" style="font-weight:600">${r.itemName}</td>
+      <td class="mono rs3">${r.assetCode}</td>`;
+    colIdx.forEach((ci, j) => {
+      const n = parseFloat(r.classCounts[ci]);
+      html += (!isNaN(n) && n > 0)
+        ? `<td style="text-align:center"><span class="qb">${n}</span></td>`
+        : `<td class="rt-nil-cell">Nil</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('dataTbl').innerHTML = html;
+
+  // Pending classes = those with 0 total across ALL rows (not just filtered)
+  const allColTotals = colIdx.map(ci =>
+    rows.reduce((s, r) => s + (parseFloat(r.classCounts[ci]) || 0), 0)
+  );
+  const pendingClasses = colIdx
+    .filter((_, j) => allColTotals[j] === 0)
+    .map(ci => classHeaders[ci]);
+
+  if (pendingDiv) {
+    if (pendingClasses.length) {
+      const rows10 = pendingClasses.reduce((acc, c, i) => {
+        const row = Math.floor(i / 6);
+        if (!acc[row]) acc[row] = [];
+        acc[row].push(c);
+        return acc;
+      }, []);
+      pendingDiv.innerHTML = `
+        <div style="margin-top:16px;border:1.5px solid var(--amber-b);border-radius:var(--r12);overflow:hidden">
+          <button onclick="this.parentElement.querySelector('.pc-body').style.display=this.parentElement.querySelector('.pc-body').style.display==='none'?'block':'none';this.querySelector('.pc-chevron').style.transform=this.parentElement.querySelector('.pc-body').style.display==='none'?'rotate(0deg)':'rotate(180deg)'"
+            style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--amber-bg);border:none;cursor:pointer;font-family:inherit">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px">&#9888;</span>
+              <span style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em">Pending Classes — No entries recorded yet</span>
+              <span style="background:var(--amber);color:#fff;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:700">${pendingClasses.length}</span>
+            </span>
+            <span class="pc-chevron" style="color:var(--amber);font-size:12px;transition:transform .2s;transform:rotate(0deg)">&#9660;</span>
+          </button>
+          <div class="pc-body" style="display:none;background:var(--amber-bg);border-top:1px solid var(--amber-b);max-height:320px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg);white-space:nowrap;width:48px">#</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Assigned To</th>
+              </tr></thead>
+              <tbody>
+                ${pendingClasses.map((c, i) => `
+                  <tr>
+                    <td style="padding:7px 14px;color:var(--s400);font-family:'DM Mono',monospace;font-size:12px;border-bottom:1px solid var(--amber-b);white-space:nowrap">${i + 1}</td>
+                    <td style="padding:7px 14px;color:var(--amber);font-weight:600;border-bottom:1px solid var(--amber-b)">${c}</td>
+                    <td style="padding:7px 14px;color:var(--s600);border-bottom:1px solid var(--amber-b)">${classAssignments.get(c) || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } else {
+      pendingDiv.innerHTML = colIdx.length > 0
+        ? `<div style="margin-top:12px;padding:10px 14px;background:var(--g50);border:1.5px solid var(--g100);border-radius:var(--r8);font-size:13px;color:var(--g700);font-weight:600">&#10003; All visible classes have entries recorded</div>`
+        : '';
+    }
+  }
+
+  // ── Pending Submit panel (classes not yet locked in col C) ──
+  const submitDiv = document.getElementById('pendingSubmitPanel');
+  if (submitDiv) {
+    const pendingSubmitClasses = sheetData.classHeaders.filter(c => !lockedClasses.has(c));
+    if (pendingSubmitClasses.length) {
+      submitDiv.innerHTML = `
+        <div style="margin-top:12px;border:1.5px solid var(--amber-b);border-radius:var(--r12);overflow:hidden">
+          <button onclick="this.parentElement.querySelector('.ps-body').style.display=this.parentElement.querySelector('.ps-body').style.display==='none'?'block':'none';this.querySelector('.ps-chevron').style.transform=this.parentElement.querySelector('.ps-body').style.display==='none'?'rotate(0deg)':'rotate(180deg)'"
+            style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--amber-bg);border:none;cursor:pointer;font-family:inherit">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px">&#128274;</span>
+              <span style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em">Submit Pending — Entry not yet submitted</span>
+              <span style="background:var(--amber);color:#fff;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:700">${pendingSubmitClasses.length}</span>
+            </span>
+            <span class="ps-chevron" style="color:var(--amber);font-size:12px;transition:transform .2s;transform:rotate(0deg)">&#9660;</span>
+          </button>
+          <div class="ps-body" style="display:none;background:var(--amber-bg);border-top:1px solid var(--amber-b);max-height:320px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg);white-space:nowrap;width:48px">#</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Assigned To</th>
+              </tr></thead>
+              <tbody>
+                ${pendingSubmitClasses.map((c, i) => `
+                  <tr>
+                    <td style="padding:7px 14px;color:var(--s400);font-family:'DM Mono',monospace;font-size:12px;border-bottom:1px solid var(--amber-b);white-space:nowrap">${i + 1}</td>
+                    <td style="padding:7px 14px;color:var(--amber);font-weight:600;border-bottom:1px solid var(--amber-b)">${c}</td>
+                    <td style="padding:7px 14px;color:var(--s600);border-bottom:1px solid var(--amber-b)">${classAssignments.get(c) || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } else {
+      submitDiv.innerHTML = `<div style="margin-top:12px;padding:10px 14px;background:var(--g50);border:1.5px solid var(--g100);border-radius:var(--r8);font-size:13px;color:var(--g700);font-weight:600">&#10003; All classes have been submitted</div>`;
+    }
+  }
+
+  // ── Pending Sticker panel (classes not yet sticker-submitted in col F) ──
+  const stickerDiv = document.getElementById('pendingStickerPanel');
+  if (stickerDiv) {
+    const pendingStickerClasses = sheetData.classHeaders.filter(c => !stickerLockedClasses.has(c));
+    if (pendingStickerClasses.length) {
+      stickerDiv.innerHTML = `
+        <div style="margin-top:12px;border:1.5px solid var(--red-b);border-radius:var(--r12);overflow:hidden">
+          <button onclick="this.parentElement.querySelector('.pst-body').style.display=this.parentElement.querySelector('.pst-body').style.display==='none'?'block':'none';this.querySelector('.pst-chevron').style.transform=this.parentElement.querySelector('.pst-body').style.display==='none'?'rotate(0deg)':'rotate(180deg)'"
+            style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--red-bg);border:none;cursor:pointer;font-family:inherit">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px">&#128204;</span>
+              <span style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em">Sticker Pending — Stickering not yet submitted</span>
+              <span style="background:var(--red);color:#fff;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:700">${pendingStickerClasses.length}</span>
+            </span>
+            <span class="pst-chevron" style="color:var(--red);font-size:12px;transition:transform .2s;transform:rotate(0deg)">&#9660;</span>
+          </button>
+          <div class="pst-body" style="display:none;background:var(--red-bg);border-top:1px solid var(--red-b);max-height:320px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg);white-space:nowrap;width:48px">#</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg)">Assigned To</th>
+              </tr></thead>
+              <tbody>
+                ${pendingStickerClasses.map((c, i) => `
+                  <tr>
+                    <td style="padding:7px 14px;color:var(--s400);font-family:'DM Mono',monospace;font-size:12px;border-bottom:1px solid var(--red-b);white-space:nowrap">${i + 1}</td>
+                    <td style="padding:7px 14px;color:var(--red);font-weight:600;border-bottom:1px solid var(--red-b)">${c}</td>
+                    <td style="padding:7px 14px;color:var(--s600);border-bottom:1px solid var(--red-b)">${classAssignments.get(c) || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } else {
+      stickerDiv.innerHTML = `<div style="margin-top:12px;padding:10px 14px;background:var(--g50);border:1.5px solid var(--g100);border-radius:var(--r8);font-size:13px;color:var(--g700);font-weight:600">&#10003; All classes have stickering submitted</div>`;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  CLASS REFERENCE PANEL
+// ══════════════════════════════════════════════════════════
+function updateClassRef() {
+  const cls = document.getElementById('eClass').value;
+  const ref = document.getElementById('classRef');
+  if (!cls || !sheetData.classHeaders || !sheetData.classHeaders.length) {
+    ref.style.display = 'none'; return;
+  }
+  const ci = sheetData.classHeaders.indexOf(cls);
+  if (ci < 0) { ref.style.display = 'none'; return; }
+
+  const items = sheetData.rows.filter(r => {
+    const v = parseFloat(r.classCounts[ci]);
+    return !isNaN(v) && v > 0;
+  });
+
+  const body = document.getElementById('classRefBody');
+  if (!items.length) {
+    body.innerHTML = '<div class="no-items">No items recorded for this class yet.</div>';
+  } else {
+    let html = '<table><thead><tr><th>Item</th><th>Code</th><th style="text-align:center">Qty</th></tr></thead><tbody>';
+    items.forEach(r => {
+      html += `<tr><td>${r.itemName}</td><td style="font-family:monospace;font-size:11.5px">${r.assetCode}</td><td style="text-align:center"><span class="qb">${r.classCounts[ci]}</span></td></tr>`;
+    });
+    html += '</tbody></table>';
+    body.innerHTML = html;
+  }
+  ref.style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════════════
+//  CLASS LOCK / UNLOCK
+// ══════════════════════════════════════════════════════════
+function doLockClass() {
+  const cls = document.getElementById('eClass').value;
+  if (!cls) return;
+  const timestamp = new Date().toLocaleString();
+  setBusy('lockClassBtn', true, '&#128274; Submit Class');
+  call('lockClass', [{ className: cls, lockedBy: currentUser, timestamp }],
+    () => {
+      lockedClasses.set(cls, { lockedBy: currentUser, timestamp });
+      setBusy('lockClassBtn', false, '&#128274; Submit Class');
+      updateLockUI(cls);
+      document.getElementById('submitBtn').disabled = true;
+      showMsg('sm', `"${cls}" locked by ${currentUser} at ${timestamp}. Only Kush or Darsh can unlock.`, 'info');
+    },
+    err => { setBusy('lockClassBtn', false, '&#128274; Submit Class'); showMsg('sm', 'Lock failed: ' + err, 'err'); }
+  );
+}
+
+function doUnlockClass() {
+  if (!currentRole === 'Admin') {
+    showMsg('sm', 'Only Kush or Darsh can unlock a class.', 'err');
+    return;
+  }
+  const cls = document.getElementById('eClass').value;
+  setBusy('unlockClassBtn', true, '&#128275; Unlock Class');
+  call('unlockClass', [{ className: cls }],
+    () => {
+      lockedClasses.delete(cls);
+      setBusy('unlockClassBtn', false, '&#128275; Unlock Class');
+      updateLockUI(cls);
+      document.getElementById('submitBtn').disabled = false;
+      clearMsg('sm');
+    },
+    err => { setBusy('unlockClassBtn', false, '&#128275; Unlock Class'); showMsg('sm', 'Unlock failed: ' + err, 'err'); }
+  );
+}
+
+// Apply lock state for whatever class is currently selected in the dropdown
+function applyClassLockState() {
+  const cls        = document.getElementById('eClass').value;
+  const locked     = lockedClasses.has(cls);
+  const assignedTo = classAssignments.get(cls) || '';
+  const isBlocked  = assignedTo && assignedTo !== currentUser && !currentRole === 'Admin';
+
+  updateLockUI(cls);
+  updateStickerLockUIEntry(cls);
+  document.getElementById('submitBtn').disabled = locked || isBlocked || currentRole === 'Demo';
+
+  if (cls && locked) {
+    const info = lockedClasses.get(cls);
+    showMsg('sm', `"${cls}" is locked by ${info.lockedBy}. Only Kush or Darsh can unlock.`, 'info');
+  } else if (cls && isBlocked) {
+    showMsg('sm', `"${cls}" is assigned to ${assignedTo} only. You cannot add entries here.`, 'err');
+  } else if (cls && assignedTo && currentRole === 'Admin') {
+    showMsg('sm', `"${cls}" is assigned to ${assignedTo}.`, 'info');
+  } else {
+    clearMsg('sm');
+  }
+}
+
+function updateLockUI(cls) {
+  const locked = lockedClasses.has(cls);
+  const isDemo = currentRole === 'Demo';
+  document.getElementById('lockClassBtn').style.display   = (!isDemo && cls && !locked) ? '' : 'none';
+  document.getElementById('unlockClassBtn').style.display = (!isDemo && cls && locked)  ? '' : 'none';
+  // Show who locked it
+  const info = locked ? lockedClasses.get(cls) : null;
+  const lockInfoEl = document.getElementById('lockInfo');
+  if (lockInfoEl) lockInfoEl.textContent = info ? `Locked by ${info.lockedBy} · ${info.timestamp}` : '';
+}
+
+// ── Sticker lock buttons in Add Entry tab ────────────────
+function doLockStickerFromEntry() {
+  const cls = document.getElementById('eClass').value;
+  if (!cls) return;
+  const timestamp = new Date().toLocaleString();
+  setBusy('eStickerLockBtn', true, '&#128274; Submit Sticker');
+  call('lockStickerClass', [{ className: cls, lockedBy: currentUser, timestamp }],
+    () => {
+      stickerLockedClasses.set(cls, { lockedBy: currentUser, timestamp });
+      setBusy('eStickerLockBtn', false, '&#128274; Submit Sticker');
+      updateStickerLockUIEntry(cls);
+      updateStickerLockUI(cls);
+      showMsg('sm', `Stickering for "${cls}" submitted by ${currentUser}. Only Admin can unlock.`, 'info');
+    },
+    err => { setBusy('eStickerLockBtn', false, '&#128274; Submit Sticker'); showMsg('sm', 'Submit failed: ' + err, 'err'); }
+  );
+}
+
+function doUnlockStickerFromEntry() {
+  if (!currentRole === 'Admin') {
+    showMsg('sm', 'Only Admin can unlock stickering.', 'err'); return;
+  }
+  const cls = document.getElementById('eClass').value;
+  setBusy('eStickerUnlockBtn', true, '&#128275; Unlock Sticker');
+  call('unlockStickerClass', [{ className: cls }],
+    () => {
+      stickerLockedClasses.delete(cls);
+      setBusy('eStickerUnlockBtn', false, '&#128275; Unlock Sticker');
+      updateStickerLockUIEntry(cls);
+      updateStickerLockUI(cls);
+      clearMsg('sm');
+    },
+    err => { setBusy('eStickerUnlockBtn', false, '&#128275; Unlock Sticker'); showMsg('sm', 'Unlock failed: ' + err, 'err'); }
+  );
+}
+
+function updateStickerLockUIEntry(cls) {
+  const locked  = stickerLockedClasses.has(cls);
+  const isDemo  = currentRole === 'Demo';
+  const isAdmin = currentRole === 'Admin';
+  const lockBtn   = document.getElementById('eStickerLockBtn');
+  const unlockBtn = document.getElementById('eStickerUnlockBtn');
+  if (lockBtn)   lockBtn.style.display   = (!isDemo && cls && !locked) ? '' : 'none';
+  if (unlockBtn) unlockBtn.style.display = (!isDemo && cls && locked && isAdmin) ? '' : 'none';
+  const info   = locked ? stickerLockedClasses.get(cls) : null;
+  const infoEl = document.getElementById('eStickerLockInfo');
+  if (infoEl) infoEl.textContent = info ? `Stickering submitted by ${info.lockedBy} · ${info.timestamp}` : '';
+}
+
+// ══════════════════════════════════════════════════════════
+//  STICKER LOCK / UNLOCK  (column F of Assign & Lock class)
+// ══════════════════════════════════════════════════════════
+function doLockStickerClass() {
+  const cls = document.getElementById('stNewClass').value;
+  if (!cls) return;
+  const timestamp = new Date().toLocaleString();
+  setBusy('stStickerLockBtn', true, '&#128274; Submit Sticker');
+  call('lockStickerClass', [{ className: cls, lockedBy: currentUser, timestamp }],
+    () => {
+      stickerLockedClasses.set(cls, { lockedBy: currentUser, timestamp });
+      setBusy('stStickerLockBtn', false, '&#128274; Submit Sticker');
+      updateStickerLockUI(cls);
+      document.getElementById('stAddBtn').disabled = true;
+      showMsg('stAddMsg', `Stickering for "${cls}" submitted by ${currentUser}. Only Admin can unlock.`, 'info');
+    },
+    err => { setBusy('stStickerLockBtn', false, '&#128274; Submit Sticker'); showMsg('stAddMsg', 'Submit failed: ' + err, 'err'); }
+  );
+}
+
+function doUnlockStickerClass() {
+  if (!currentRole === 'Admin') {
+    showMsg('stAddMsg', 'Only Admin can unlock stickering.', 'err');
+    return;
+  }
+  const cls = document.getElementById('stNewClass').value;
+  setBusy('stStickerUnlockBtn', true, '&#128275; Unlock Sticker');
+  call('unlockStickerClass', [{ className: cls }],
+    () => {
+      stickerLockedClasses.delete(cls);
+      setBusy('stStickerUnlockBtn', false, '&#128275; Unlock Sticker');
+      updateStickerLockUI(cls);
+      document.getElementById('stAddBtn').disabled = false;
+      clearMsg('stAddMsg');
+    },
+    err => { setBusy('stStickerUnlockBtn', false, '&#128275; Unlock Sticker'); showMsg('stAddMsg', 'Unlock failed: ' + err, 'err'); }
+  );
+}
+
+function updateStickerLockUI(cls) {
+  const locked    = stickerLockedClasses.has(cls);
+  const isDemo    = currentRole === 'Demo';
+  const isAdmin   = currentRole === 'Admin';
+  const lockBtn   = document.getElementById('stStickerLockBtn');
+  const unlockBtn = document.getElementById('stStickerUnlockBtn');
+  if (lockBtn)   lockBtn.style.display   = (!isDemo && cls && !locked) ? '' : 'none';
+  if (unlockBtn) unlockBtn.style.display = (!isDemo && cls && locked && isAdmin) ? '' : 'none';
+  const info = locked ? stickerLockedClasses.get(cls) : null;
+  const infoEl = document.getElementById('stStickerLockInfo');
+  if (infoEl) infoEl.textContent = info ? `Submitted by ${info.lockedBy} · ${info.timestamp}` : '';
+}
+
+function applyStickerLockState() {
+  const cls    = document.getElementById('stNewClass').value;
+  const locked = stickerLockedClasses.has(cls);
+  updateStickerLockUI(cls);
+  const stAddBtn = document.getElementById('stAddBtn');
+  if (stAddBtn) stAddBtn.disabled = locked || currentRole === 'Demo';
+  if (cls && locked) {
+    const info = stickerLockedClasses.get(cls);
+    showMsg('stAddMsg', `Stickering for "${cls}" is submitted by ${info.lockedBy}. Only Admin can unlock.`, 'info');
+  } else {
+    clearMsg('stAddMsg');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOG
+// ══════════════════════════════════════════════════════════
+function loadLog() {
+  document.getElementById('logTbl').innerHTML =
+    '<div class="tbl-loading"><span class="spin dk"></span><span>Loading log…</span></div>';
+
+  call('getEditLog', [],
+    res => {
+      logData = (Array.isArray(res) ? res : []).map(r =>
+        Object.fromEntries(Object.entries(r).map(([k, v]) => [k.toUpperCase(), v]))
+      );
+      const users = [...new Set(logData.map(r=>r['USER NAME']).filter(Boolean))];
+      const sel=document.getElementById('lu2'), cur=sel.value;
+      sel.innerHTML='<option value="">All Users</option>';
+      users.forEach(u=>sel.appendChild(new Option(u,u)));
+      if(cur) sel.value=cur;
+      renderLog();
+    },
+    err => {
+      document.getElementById('logTbl').innerHTML =
+        '<div class="tbl-empty" style="color:var(--red)">Error: '+err+'</div>';
+    }
+  );
+}
+
+function renderLog() {
+  const srch = document.getElementById('ls').value.toLowerCase();
+  const usr  = document.getElementById('lu2').value;
+  const filtered = logData.filter(r =>
+    (!usr||r['USER NAME']===usr) &&
+    (!srch||Object.values(r).some(v=>String(v).toLowerCase().includes(srch))));
+
+  if (!filtered.length) {
+    document.getElementById('logTbl').innerHTML='<div class="tbl-empty">No log entries found.</div>'; return;
+  }
+
+  const cols=['USER NAME','ITEM NAME','ASSET CLASSIFICATION CODE','CLASS NAME','QTY','TIMESTAMP'];
+  let html='<table><thead><tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+  filtered.forEach(r=>{
+    html+='<tr>'+cols.map(c=>{
+      if(c==='QTY')       return `<td style="text-align:center"><span class="qb">${r[c]}</span></td>`;
+      if(c==='TIMESTAMP') return `<td class="mono" style="white-space:nowrap">${r[c]||'—'}</td>`;
+      return `<td>${r[c]||'—'}</td>`;
+    }).join('')+'</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('logTbl').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════════
+//  EXCEL DOWNLOAD
+// ══════════════════════════════════════════════════════════
+function downloadExcel() {
+  if (typeof XLSX === 'undefined') { alert('Excel library not loaded. Check your internet connection.'); return; }
+  const srch = document.getElementById('ls').value.toLowerCase();
+  const usr  = document.getElementById('lu2').value;
+  const filtered = logData.filter(r =>
+    (!usr||r['USER NAME']===usr) &&
+    (!srch||Object.values(r).some(v=>String(v).toLowerCase().includes(srch))));
+
+  if (!filtered.length) { alert('No data to download.'); return; }
+
+  const cols = ['USER NAME','ITEM NAME','ASSET CLASSIFICATION CODE','CLASS NAME','QTY','TIMESTAMP'];
+  const wsData = [cols, ...filtered.map(r => cols.map(c => r[c] !== undefined ? r[c] : ''))];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = cols.map(c => ({ wch: Math.max(c.length, ...filtered.map(r => String(r[c]||'').length), 10) }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Edit Log');
+  const filename = usr ? `EditLog_${usr}.xlsx` : `EditLog_All.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
+// ══════════════════════════════════════════════════════════
+//  ENTRY FORM
+// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  CUSTOM ITEM DROPDOWN
+// ══════════════════════════════════════════════════════════
+function csRender(names) {
+  const list = document.getElementById('csItemList');
+  if (!names.length) {
+    list.innerHTML = '<div class="cs-empty">No items found</div>';
+  } else {
+    list.innerHTML = '';
+    names.forEach(name => {
+      const d = document.createElement('div');
+      d.className = 'cs-opt';
+      d.textContent = name;
+      // Desktop: mousedown + preventDefault keeps dropdown open (prevents input blur before click)
+      d.addEventListener('mousedown', e => { e.preventDefault(); csSelect(name); });
+      // Mobile: click never fires during a scroll — safest touch selection
+      d.addEventListener('click', () => { csSelect(name); });
+      list.appendChild(d);
+    });
+  }
+  list.style.display = 'block';
+}
+
+function csOpen() {
+  const val = document.getElementById('eItemSearch').value.toLowerCase();
+  const names = Object.keys(itemMap).filter(n => !val || n.toLowerCase().includes(val));
+  csRender(names);
+}
+
+function csFilter() {
+  const val = document.getElementById('eItemSearch').value.toLowerCase();
+  const names = Object.keys(itemMap).filter(n => n.toLowerCase().includes(val));
+  csRender(names);
+  onItemSearch();
+}
+
+function csToggle() {
+  const list = document.getElementById('csItemList');
+  if (list.style.display === 'block') { list.style.display = 'none'; }
+  else { csOpen(); document.getElementById('eItemSearch').focus(); }
+}
+
+function csSelect(name) {
+  document.getElementById('eItemSearch').value = name;
+  document.getElementById('csItemList').style.display = 'none';
+  onItemSearch();
+}
+
+function csClose(e) {
+  if (!document.getElementById('itemSelectWrap').contains(e.target)) {
+    document.getElementById('csItemList').style.display = 'none';
+  }
+}
+document.addEventListener('mousedown', csClose);
+document.addEventListener('touchstart', csClose);
+
+function onClassChange() {
+  applyClassLockState();
+  updateClassRef();
+  updatePreview();
+  updateStickerLockUIEntry(document.getElementById('eClass').value);
+}
+
+function onItemSearch() {
+  const val  = document.getElementById('eItemSearch').value;
+  const code = itemMap[val] || '';
+  document.getElementById('eCode').value = code;
+  updatePreview();
+}
+
+function updatePreview() {
+  const itemName = document.getElementById('eItemSearch').value;
+  const code     = document.getElementById('eCode').value;
+  const cls      = document.getElementById('eClass').value;
+  const qty      = parseInt(document.getElementById('eQty').value, 10);
+  const box      = document.getElementById('prevBox');
+
+  // Need a valid item (must match datalist), class, and non-zero qty
+  if (itemName && itemMap[itemName] && cls && !isNaN(qty) && qty !== 0) {
+    document.getElementById('pItem').textContent  = itemName;
+    document.getElementById('pCode').textContent  = code;
+    document.getElementById('pClass').textContent = cls;
+    document.getElementById('pQty').textContent   = Math.abs(qty);
+    document.getElementById('pVerb').textContent  = qty < 0 ? 'Will remove' : 'Will add';
+    document.getElementById('pPrep').textContent  = qty < 0 ? 'from' : 'to';
+
+    // Use sheetData (live from server) — not logData — so count is always accurate
+    const ci  = sheetData.classHeaders.indexOf(cls);
+    const row = sheetData.rows.find(r => r.assetCode === code);
+    let current = 0;
+    if (row && ci >= 0) current = parseFloat(row.classCounts[ci]) || 0;
+
+    const after = current + qty;
+    document.getElementById('pPrev').textContent = current > 0
+      ? `Currently in class: ${current} unit(s)  →  After save: ${after}`
+      : `No entries yet in this class${qty > 0 ? '  →  After save: ' + qty : ''}`;
+
+    box.classList.add('show');
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+function submitEntry() {
+  clearMsg('sm');
+  const itemName  = document.getElementById('eItemSearch').value.trim();
+  const assetCode = document.getElementById('eCode').value.trim();
+  const className = document.getElementById('eClass').value.trim();
+  const qty       = parseInt(document.getElementById('eQty').value, 10);
+
+  const assignedTo = classAssignments.get(className) || '';
+  if (assignedTo && assignedTo !== currentUser && !currentRole === 'Admin') {
+    showMsg('sm', `"${className}" is assigned to ${assignedTo} only.`, 'err'); return;
+  }
+  if (lockedClasses.has(className)) { showMsg('sm', `"${className}" is locked. Only Kush or Darsh can unlock it.`, 'err'); return; }
+  if (!itemName || !itemMap[itemName]) { showMsg('sm','Please select a valid item from the list.','err'); return; }
+  if (!assetCode)                      { showMsg('sm','Asset code is missing.','err'); return; }
+  if (!className)                      { showMsg('sm','Please select a class.','err'); return; }
+  if (isNaN(qty) || qty === 0)         { showMsg('sm','Enter a valid quantity (cannot be 0).','err'); return; }
+
+  // Prevent going negative (req 6)
+  const ci  = sheetData.classHeaders.indexOf(className);
+  const row = sheetData.rows.find(r => r.assetCode === assetCode);
+  if (row && ci >= 0) {
+    const current = parseFloat(row.classCounts[ci]) || 0;
+    if (current + qty < 0) {
+      showMsg('sm', `Cannot go negative: current qty is ${current}, removing ${Math.abs(qty)} would give ${current + qty}.`, 'err');
+      return;
+    }
+  }
+
+  // ── OPTIMISTIC UPDATE — instant UI, GAS saves in background ──
+  // 1. Snapshot for rollback
+  const rollbackCounts = row ? [...row.classCounts] : null;
+
+  // 2. Apply update locally right now (<1ms)
+  if (row && ci >= 0) row.classCounts[ci] = (parseFloat(row.classCounts[ci]) || 0) + qty;
+
+  // 3. Optimistically append to logData
+  const optimisticLog = {
+    'USER NAME': currentUser, 'ITEM NAME': itemName,
+    'ASSET CLASSIFICATION CODE': assetCode, 'CLASS NAME': className,
+    'QTY': qty, 'TIMESTAMP': new Date().toLocaleString('en-IN')
+  };
+  logData.unshift(optimisticLog);
+
+  // 4. Re-render UI instantly
+  updateClassRef();
+  updateStats();
+  clearForm();
+
+  const _entryArgs = [{ username: currentUser, itemName, assetCode, className, qty }];
+
+  // 5. If offline — queue immediately, skip GAS call
+  if (!navigator.onLine) {
+    oqPush({ fn: 'submitEntry', args: _entryArgs, label: `${qty > 0 ? '+' : ''}${qty} ${itemName} → ${className}` });
+    showMsg('sm', '📶 Offline — saved locally, will sync when connected.', 'info');
+    setTimeout(() => clearMsg('sm'), 3500);
+    return;
+  }
+
+  showMsg('sm', '⏳ Saving…', 'info');
+
+  // 6. Online — save to GAS in background
+  call('submitEntry', _entryArgs,
+    res => {
+      if (res && res.success) {
+        showMsg('sm', '✓ Saved', 'ok');
+        setTimeout(() => clearMsg('sm'), 2000);
+      } else {
+        // Server rejected — rollback
+        if (row && ci >= 0 && rollbackCounts) row.classCounts[ci] = rollbackCounts[ci];
+        logData.shift();
+        updateClassRef(); updateStats();
+        showMsg('sm', (res && res.message) || 'Save failed — please retry.', 'err');
+      }
+    },
+    err => {
+      if (!navigator.onLine) {
+        // Network dropped mid-request — keep optimistic state, queue it
+        oqPush({ fn: 'submitEntry', args: _entryArgs, label: `${qty > 0 ? '+' : ''}${qty} ${itemName} → ${className}` });
+        showMsg('sm', '📶 Went offline — saved locally, will sync when connected.', 'info');
+        setTimeout(() => clearMsg('sm'), 3500);
+      } else {
+        // Actual error — rollback
+        if (row && ci >= 0 && rollbackCounts) row.classCounts[ci] = rollbackCounts[ci];
+        logData.shift();
+        updateClassRef(); updateStats();
+        showMsg('sm', 'Error: ' + err, 'err');
+      }
+    }
+  );
+}
+
+function clearForm() {
+  // Keep class selection (req 1 — persists for next entry)
+  document.getElementById('eItemSearch').value = '';
+  document.getElementById('eCode').value        = '';
+  document.getElementById('eQty').value         = '1';
+  document.getElementById('prevBox').classList.remove('show');
+  clearMsg('sm');
+}
+
+// ══════════════════════════════════════════════════════════
+//  BARCODE / LABEL TAB  (text codes only, matches VBA)
+// ══════════════════════════════════════════════════════════
+let bcData = []; // [{className, itemName, assetCode, codeText}]
+
+function initBarcodeTab() {
+  if (sheetData.classHeaders.length) {
+    const sel = document.getElementById('bcClass');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Classes</option>';
+    sheetData.classHeaders.forEach(h => sel.appendChild(new Option(h, h)));
+    if (cur) sel.value = cur;
+  }
+  // Load previously generated data from Bar Code sheet
+  loadExistingBarcodes();
+}
+
+function loadExistingBarcodes() {
+  document.getElementById('bcContainer').innerHTML =
+    '<div class="tbl-loading"><span class="spin dk"></span><span>Checking Bar Code sheet…</span></div>';
+
+  call('getBarCodeTabData', [], res => {
+    const rows = Array.isArray(res) ? res.filter(r => r.barCode && !r.remarks) : [];
+    // Also include cancelled ones — show all
+    const allRows = Array.isArray(res) ? res.filter(r => r.barCode) : [];
+
+    if (!allRows.length) {
+      document.getElementById('bcContainer').innerHTML =
+        '<div class="tbl-empty" style="color:var(--s400);padding:24px 0">No labels generated yet — click "Generate Labels" to create them.</div>';
+      document.getElementById('bcSummary').style.display = 'none';
+      document.getElementById('bcWordBtn').style.display = 'none';
+      document.getElementById('bcWordByUserBtn').style.display = 'none';
+      return;
+    }
+
+    // Convert Bar Code sheet rows → bcData format
+    bcData = allRows.map(r => ({
+      className: r.className,
+      itemName:  r.itemName,
+      assetCode: (r.barCode.split('/')[1]) || '',
+      codeText:  r.barCode,
+      cancelled: r.remarks === 'Cancelled'
+    }));
+
+    // Update stats
+    const active = bcData.filter(b => !b.cancelled);
+    document.getElementById('bcStatCls').textContent   = [...new Set(active.map(b => b.className))].length;
+    document.getElementById('bcStatItems').textContent  = [...new Set(active.map(b => b.assetCode))].length;
+    document.getElementById('bcStatTotal').textContent  = active.length;
+    document.getElementById('bcSummary').style.display       = '';
+    document.getElementById('bcWordBtn').style.display        = '';
+    document.getElementById('bcWordByUserBtn').style.display  = '';
+
+    // Badge: loaded from sheet
+    const badge = document.getElementById('bcSourceBadge');
+    badge.textContent  = '📂 Loaded from Bar Code sheet';
+    badge.style.background = 'var(--amber-bg)';
+    badge.style.color      = 'var(--amber)';
+
+    renderBarcodeGrid();
+  }, () => {
+    document.getElementById('bcContainer').innerHTML =
+      '<div class="tbl-empty" style="color:var(--s400);padding:24px 0">Could not load existing data — connect to Google Sheets.</div>';
+  });
+}
+
+function generateBarcodes() {
+  clearMsg('bcMsg');
+  if (!sheetData || !sheetData.rows || !sheetData.rows.length) {
+    showMsg('bcMsg', 'No data loaded yet — visit the Register tab first, then come back here.', 'err');
+    return;
+  }
+
+  const schoolCode = (document.getElementById('bcSchoolCode').value.trim() || 'SCH').toUpperCase();
+  const filterCls  = document.getElementById('bcClass').value;
+
+  // Sequence per assetCode resets across the WHOLE dataset
+  // (same logic as GAS generateBarcodes)
+  const seqMap = {};
+  bcData = [];
+
+  sheetData.classHeaders.forEach(cls => {
+    if (filterCls && cls !== filterCls) return;
+    const ci = sheetData.classHeaders.indexOf(cls);
+
+    sheetData.rows.forEach(row => {
+      const qty = Math.max(0, parseInt(row.classCounts[ci]) || 0);
+      if (!qty) return;
+
+      if (!seqMap[row.assetCode]) seqMap[row.assetCode] = 0;
+
+      for (let q = 0; q < qty; q++) {
+        seqMap[row.assetCode]++;
+        const seq = String(seqMap[row.assetCode]).padStart(4, '0');
+        bcData.push({
+          className: cls,
+          itemName:  row.itemName,
+          assetCode: row.assetCode,
+          codeText:  `${schoolCode}/${row.assetCode}/${seq}`
+        });
+      }
+    });
+  });
+
+  if (!bcData.length) {
+    showMsg('bcMsg', 'No items with quantities found for the selected class.', 'err');
+    document.getElementById('bcSummary').style.display      = 'none';
+    document.getElementById('bcWordBtn').style.display       = 'none';
+    document.getElementById('bcWordByUserBtn').style.display = 'none';
+    document.getElementById('bcContainer').innerHTML         = '';
+    return;
+  }
+
+  // Stats
+  document.getElementById('bcStatCls').textContent   = [...new Set(bcData.map(b => b.className))].length;
+  document.getElementById('bcStatItems').textContent  = [...new Set(bcData.map(b => b.assetCode))].length;
+  document.getElementById('bcStatTotal').textContent  = bcData.length;
+  document.getElementById('bcSummary').style.display       = '';
+  document.getElementById('bcWordBtn').style.display        = '';
+  document.getElementById('bcWordByUserBtn').style.display  = '';
+
+  // Badge: freshly generated
+  const badge = document.getElementById('bcSourceBadge');
+  badge.textContent  = '✨ Freshly Generated — ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+  badge.style.background = 'var(--g50)';
+  badge.style.color      = 'var(--g700)';
+
+  renderBarcodeGrid();
+
+  // Save to Bar Code sheet (replaces old data — no duplicates)
+  showMsg('bcMsg', '⏳ Saving to Google Sheet…', 'info');
+  const payload = bcData.map((b, i) => ({
+    slNo:      i + 1,
+    codeText:  b.codeText,
+    itemName:  b.itemName,
+    className: b.className
+  }));
+
+  call('saveBarcodes', [payload],
+    res => {
+      if (res && res.success) {
+        showMsg('bcMsg', `✓ ${res.count} labels saved to Bar Code sheet.`, 'ok');
+      } else {
+        showMsg('bcMsg', (res && res.message) || 'Saved (no confirmation).', 'ok');
+      }
+    },
+    err => showMsg('bcMsg', '⚠️ Labels shown above — sheet save failed: ' + err, 'err')
+  );
+}
+
+function renderBarcodeGrid() {
+  // Group by class (preserve order)
+  const byClass = {}, classOrder = [];
+  bcData.forEach(b => {
+    if (!byClass[b.className]) { byClass[b.className] = []; classOrder.push(b.className); }
+    byClass[b.className].push(b);
+  });
+  const classes = [...new Set(classOrder)];
+
+  let html = '';
+  classes.forEach(cls => {
+    const items = byClass[cls];
+    html += `<div class="bc-class-section">
+      <div class="bc-class-title">${cls}
+        <span class="bc-count">${items.length} label${items.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="bc-grid">`;
+    // First card = class name (matches Word output)
+    html += `<div class="bc-card bc-card-cls"><div class="bc-code-text" style="color:var(--g700);font-size:13px">${cls}</div></div>`;
+    items.forEach(b => {
+      if (b.cancelled) {
+        html += `<div class="bc-card" style="opacity:.4;background:#fef2f2;border-color:#fecaca" title="Cancelled">
+          <div class="bc-code-text" style="text-decoration:line-through;color:#dc2626">${b.codeText}</div>
+          <div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:2px">CANCELLED</div>
+        </div>`;
+      } else {
+        html += `<div class="bc-card"><div class="bc-code-text">${b.codeText}</div></div>`;
+      }
+    });
+    html += `</div></div>`;
+  });
+
+  document.getElementById('bcContainer').innerHTML = html;
+}
+
+// ──────────────────────────────────────────────────────
+//  WORD DOWNLOAD  — JSZip + raw Open XML (no external docx lib needed)
+//  Matches VBA exactly:
+//    A4, top=0.1cm, bottom=0, left/right=0.5cm
+//    4 cols × 5cm (2835 DXA), row height 2.1cm exact (1191 DXA)
+//    Times New Roman 14pt, centred, no bold, no borders
+// ──────────────────────────────────────────────────────
+// ── Shared Word XML helpers ──────────────────────────────────
+const _docxEsc = s => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+
+const _NO_BORDER =
+  '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>' +
+  '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>' +
+  '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>' +
+  '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>';
+
+function _xmlCell(code) {
+  return `<w:tc>
+    <w:tcPr>
+      <w:tcW w:w="2835" w:type="dxa"/>
+      <w:tcBorders>${_NO_BORDER}</w:tcBorders>
+      <w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="57" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tcMar>
+      <w:vAlign w:val="center"/>
+    </w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr>
+        <w:t>${_docxEsc(code)}</w:t></w:r></w:p>
+  </w:tc>`;
+}
+
+function _xmlClassCell(cls) {
+  return `<w:tc>
+    <w:tcPr>
+      <w:tcW w:w="2835" w:type="dxa"/>
+      <w:tcBorders>${_NO_BORDER}</w:tcBorders>
+      <w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="57" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tcMar>
+      <w:vAlign w:val="center"/>
+      <w:shd w:val="clear" w:color="auto" w:fill="D9EAD3"/>
+    </w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr>
+        <w:t>${_docxEsc(cls)}</w:t></w:r></w:p>
+  </w:tc>`;
+}
+
+function _xmlPageNumCell(pageNum) {
+  return `<w:tc>
+    <w:tcPr>
+      <w:tcW w:w="2835" w:type="dxa"/>
+      <w:tcBorders>${_NO_BORDER}</w:tcBorders>
+      <w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="57" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tcMar>
+      <w:vAlign w:val="center"/>
+    </w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="60"/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr>
+        <w:t>Page ${pageNum}</w:t></w:r></w:p>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="16"/><w:szCs w:val="16"/><w:color w:val="888888"/></w:rPr>
+        <w:t>(Not to be used)</w:t></w:r></w:p>
+  </w:tc>`;
+}
+
+// Cell variants that force a page break — used for the first cell of every new page
+function _xmlCellBreak(code) {
+  return `<w:tc>
+    <w:tcPr>
+      <w:tcW w:w="2835" w:type="dxa"/>
+      <w:tcBorders>${_NO_BORDER}</w:tcBorders>
+      <w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="57" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tcMar>
+      <w:vAlign w:val="center"/>
+    </w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/><w:pageBreakBefore/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr>
+        <w:t>${_docxEsc(code)}</w:t></w:r></w:p>
+  </w:tc>`;
+}
+
+function _xmlClassCellBreak(cls) {
+  return `<w:tc>
+    <w:tcPr>
+      <w:tcW w:w="2835" w:type="dxa"/>
+      <w:tcBorders>${_NO_BORDER}</w:tcBorders>
+      <w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="57" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tcMar>
+      <w:vAlign w:val="center"/>
+      <w:shd w:val="clear" w:color="auto" w:fill="D9EAD3"/>
+    </w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/><w:pageBreakBefore/></w:pPr>
+      <w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr>
+        <w:t>${_docxEsc(cls)}</w:t></w:r></w:p>
+  </w:tc>`;
+}
+
+const _SECT_PR =
+  `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>` +
+  `<w:pgMar w:top="57" w:right="284" w:bottom="0" w:left="284" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>`;
+
+const _TBL_WRAP = (rows) =>
+  `<w:tbl><w:tblPr><w:tblW w:w="11340" w:type="dxa"/>` +
+  `<w:tblBorders>${_NO_BORDER}<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/><w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/></w:tblBorders></w:tblPr>` +
+  `<w:tblGrid><w:gridCol w:w="2835"/><w:gridCol w:w="2835"/><w:gridCol w:w="2835"/><w:gridCol w:w="2835"/></w:tblGrid>` +
+  rows + `</w:tbl>`;
+
+function _buildDocxRows(allItems) {
+  let rows = '';
+  const numRows = Math.ceil(allItems.length / 4);
+  for (let r = 0; r < numRows; r++) {
+    rows += `<w:tr><w:trPr><w:trHeight w:val="1191" w:hRule="exact"/></w:trPr>`;
+    for (let c = 0; c < 4; c++) {
+      const idx  = r * 4 + c;
+      const item = idx < allItems.length ? allItems[idx] : null;
+      rows += (item && item.isClass) ? _xmlClassCell(item.value) : _xmlCell(item ? item.value : '');
+    }
+    rows += `</w:tr>`;
+  }
+  return rows;
+}
+
+function _wrapDocx(body) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+    `<w:body>${body}</w:body></w:document>`;
+}
+
+async function _saveDocx(body, filename) {
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
+  zip.file('_rels/.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+  zip.file('word/_rels/document.xml.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`);
+  zip.file('word/document.xml', _wrapDocx(body));
+  const blob = await zip.generateAsync({ type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  saveAs(blob, filename);
+}
+// ─────────────────────────────────────────────────────────────
+
+async function downloadWordDoc() {
+  if (typeof JSZip === 'undefined') {
+    showMsg('bcMsg', 'ZIP library not loaded — check your internet and refresh.', 'err'); return;
+  }
+  if (!bcData.length) {
+    showMsg('bcMsg', 'Click "Generate Labels" first.', 'err'); return;
+  }
+  showMsg('bcMsg', '⏳ Building Word file…', 'info');
+  document.getElementById('bcWordBtn').disabled = true;
+
+  try {
+    // Group by class
+    const byClass = {}, classOrder = [];
+    bcData.forEach(b => {
+      if (!byClass[b.className]) { byClass[b.className] = []; classOrder.push(b.className); }
+      byClass[b.className].push(b.codeText);
+    });
+    const classes = [...new Set(classOrder)];
+
+    let body = '';
+    classes.forEach((cls, ci) => {
+      if (ci > 0) body += `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+      const allItems = [{ isClass:true, value:cls }, ...byClass[cls].map(c=>({isClass:false,value:c}))];
+      body += _TBL_WRAP(_buildDocxRows(allItems));
+    });
+
+    body += _SECT_PR;
+    await _saveDocx(body, 'Labels_ClassWise.docx');
+    clearMsg('bcMsg');
+
+  } catch(err) {
+    showMsg('bcMsg', '❌ Error: ' + (err.message || String(err)), 'err');
+    console.error(err);
+  } finally {
+    document.getElementById('bcWordBtn').disabled = false;
+  }
+}
+
+// ── Download Word grouped by assigned user ────────────────
+// Classes belonging to the same user flow together (no page break).
+// A new page starts only when the user changes.
+// Unassigned classes are grouped at the end under "Unassigned".
+async function downloadWordDocByUser() {
+  if (typeof JSZip === 'undefined') {
+    showMsg('bcMsg', 'ZIP library not loaded — check your internet and refresh.', 'err'); return;
+  }
+  if (!bcData.length) {
+    showMsg('bcMsg', 'Click "Generate Labels" first.', 'err'); return;
+  }
+  showMsg('bcMsg', '⏳ Building Word file (by user)…', 'info');
+  document.getElementById('bcWordByUserBtn').disabled = true;
+
+  try {
+    // Build ordered list of (user → [className, ...]) preserving class order
+    const userClasses = new Map(); // user → Set of classNames in order
+    const userOrder   = [];
+    bcData.forEach(b => {
+      const user = classAssignments.get(b.className) || 'Unassigned';
+      if (!userClasses.has(user)) { userClasses.set(user, []); userOrder.push(user); }
+      if (!userClasses.get(user).includes(b.className)) userClasses.get(user).push(b.className);
+    });
+    const users = [...new Set(userOrder)];
+
+    // Build code lookup: className → [codeText, ...]
+    const byClass = {};
+    bcData.forEach(b => {
+      if (!byClass[b.className]) byClass[b.className] = [];
+      byClass[b.className].push(b.codeText);
+    });
+
+    // Layout: 14 rows × 4 cols per page.
+    // Rows 1-13 (PAGE_SIZE = 52 slots) → sticker content.
+    // Row 14 → 3 empty cells + page number in col 4.
+    // PAGE_SIZE = 52 = 13 × 4 → always a multiple of 4 → class headers always at col 1,
+    // no items ever dropped.
+    const PAGE_SIZE = 52;
+
+    // Build flat items. Each class padded to multiple of 4.
+    // Each user's block padded to multiple of PAGE_SIZE → user starts on a fresh page.
+    const allItems = [];
+    users.forEach((user, ui) => {
+      const userItems = [];
+      userClasses.get(user).forEach(cls => {
+        const codes = byClass[cls] || [];
+        const clsItems = [
+          { isClass:true, value:cls },
+          ...codes.map(c => ({ isClass:false, value:c }))
+        ];
+        while (clsItems.length % 4 !== 0) clsItems.push({ isClass:false, value:'' });
+        userItems.push(...clsItems);
+      });
+      if (ui > 0) {
+        // Pad allItems to next PAGE_SIZE boundary → new user starts on a new page
+        const rem = allItems.length % PAGE_SIZE;
+        if (rem !== 0) {
+          for (let i = 0; i < PAGE_SIZE - rem; i++) allItems.push({ isClass:false, value:'' });
+        }
+      }
+      allItems.push(...userItems);
+    });
+    // Pad total to multiple of PAGE_SIZE
+    const finalRem = allItems.length % PAGE_SIZE;
+    if (finalRem !== 0) {
+      for (let i = 0; i < PAGE_SIZE - finalRem; i++) allItems.push({ isClass:false, value:'' });
+    }
+
+    // Render single table — one page per PAGE_SIZE items, no <w:p> between pages
+    let tblRows = '';
+    let globalPage = 1;
+
+    for (let offset = 0; offset < allItems.length; offset += PAGE_SIZE) {
+      const page = allItems.slice(offset, offset + PAGE_SIZE);
+
+      // Rows 1-13: all 52 sticker slots
+      for (let r = 0; r < 13; r++) {
+        tblRows += `<w:tr><w:trPr><w:trHeight w:val="1191" w:hRule="exact"/></w:trPr>`;
+        for (let c = 0; c < 4; c++) {
+          const item = page[r * 4 + c] || { isClass:false, value:'' };
+          const needsBreak = globalPage > 1 && r === 0 && c === 0;
+          if (needsBreak) {
+            tblRows += item.isClass ? _xmlClassCellBreak(item.value) : _xmlCellBreak(item.value);
+          } else {
+            tblRows += item.isClass ? _xmlClassCell(item.value) : _xmlCell(item.value);
+          }
+        }
+        tblRows += `</w:tr>`;
+      }
+
+      // Row 14: 3 empty cells + page number
+      tblRows += `<w:tr><w:trPr><w:trHeight w:val="1191" w:hRule="exact"/></w:trPr>`;
+      tblRows += _xmlCell('') + _xmlCell('') + _xmlCell('');
+      tblRows += _xmlPageNumCell(globalPage);
+      tblRows += `</w:tr>`;
+
+      globalPage++;
+    }
+
+    const body = _TBL_WRAP(tblRows) + _SECT_PR;
+    await _saveDocx(body, 'Labels_ByUser.docx');
+    clearMsg('bcMsg');
+
+  } catch(err) {
+    showMsg('bcMsg', '❌ Error: ' + (err.message || String(err)), 'err');
+    console.error(err);
+  } finally {
+    document.getElementById('bcWordByUserBtn').disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  STICKERING TAB
+// ══════════════════════════════════════════════════════════
+let stickeringData  = []; // rows from Stickering sheet
+let barCodeTabData  = []; // rows from Bar Code sheet (for cancel cascade)
+
+function initStickeringTab(_retried) {
+  // ── Guard: ensure prerequisite data is loaded before populating UI ──
+  const needsSheetData = !sheetData.classHeaders || !sheetData.classHeaders.length;
+  const needsBcData    = !barCodeTabData.length && currentRole !== 'Demo';
+
+  if ((needsSheetData || needsBcData) && !_retried) {
+    // Show loading state while we fetch missing data
+    document.getElementById('stTableWrap').innerHTML =
+      '<div class="tbl-loading"><span class="spin dk"></span><span>Loading data…</span></div>';
+
+    let pending = 0;
+    const done = () => { if (--pending === 0) initStickeringTab(true); };
+
+    if (needsSheetData) {
+      pending++;
+      call('getDataSheetInfo', [], res => {
+        if (res && !res.error) {
+          sheetData = res || { classHeaders:[], rows:[] };
+          populateDDs(); updateStats(); updateClassRef(); applyClassLockState();
+        }
+        done();
+      }, () => done());
+    }
+
+    if (needsBcData) {
+      pending++;
+      call('getBarCodeTabData', [], res => {
+        barCodeTabData = Array.isArray(res) ? res : [];
+        done();
+      }, () => done());
+    }
+    return;
+  }
+
+  // ── Data is ready — build UI ──
+  const isAdmin = currentRole === 'Admin';
+  document.getElementById('stCancelCard').style.display = (currentRole === 'Demo') ? 'none' : '';
+
+  // Populate class dropdowns
+  const classes = sheetData.classHeaders || [];
+  ['stCancelClass', 'stFilterClass', 'stNewClass'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const prev = sel.value;
+    if (id === 'stFilterClass') sel.innerHTML = '<option value="">All Classes</option>';
+    else sel.innerHTML = '<option value="">— Select Class —</option>';
+    classes.forEach(c => {
+      const o = document.createElement('option');
+      o.value = o.textContent = c;
+      sel.appendChild(o);
+    });
+    if (prev) sel.value = prev;
+  });
+
+  const isDemo = currentRole === 'Demo';
+  const stAddBtn = document.getElementById('stAddBtn');
+  if (stAddBtn) stAddBtn.disabled = isDemo;
+
+  // Apply sticker lock state for currently selected class
+  applyStickerLockState();
+
+  // Refresh Bar Code tab data silently (always keep it current)
+  call('getBarCodeTabData', [], res => {
+    barCodeTabData = Array.isArray(res) ? res : [];
+  }, () => {});
+
+  stickeringLoad();
+}
+
+function stickeringLoad() {
+  document.getElementById('stTableWrap').innerHTML =
+    '<div class="tbl-loading"><span class="spin dk"></span><span>Loading…</span></div>';
+  const cls = document.getElementById('stFilterClass').value;
+  call('getStickeringData', [cls], res => {
+    stickeringData = Array.isArray(res) ? res : [];
+    stickeringRender();
+    stickeringUpdateStats();
+  }, err => {
+    document.getElementById('stTableWrap').innerHTML =
+      '<div class="tbl-empty" style="color:var(--red)">Error: ' + err + '</div>';
+  });
+}
+
+// ── Cascading Cancel filters ───────────────────────────────
+
+let stCancelItems = []; // available item names for current class
+
+function stCancelClassChange() {
+  const cls = document.getElementById('stCancelClass').value;
+  const box = document.getElementById('stCancelItemBox');
+
+  // Reset Step 2
+  document.getElementById('stCancelItemSearch').value = '';
+  document.getElementById('stCancelCsList').style.display = 'none';
+  stCancelItems = [];
+
+  // Reset Step 3
+  document.getElementById('stBcCheckWrap').style.display = 'none';
+  document.getElementById('stBcCheckList').innerHTML = '';
+  document.getElementById('stBcSelCount').textContent = '0 selected';
+  document.getElementById('stSubmitCancelBtn').disabled = true;
+  clearMsg('stCancelMsg');
+
+  if (!cls) {
+    box.style.opacity = '.55';
+    box.style.pointerEvents = 'none';
+    return;
+  }
+
+  const cancelledCodes = new Set(
+    stickeringData.filter(r => r.remarks === 'Cancelled').map(r => r.barCode)
+  );
+  stCancelItems = [...new Set(
+    barCodeTabData
+      .filter(r => r.className === cls && !cancelledCodes.has(r.barCode))
+      .map(r => r.itemName)
+      .filter(Boolean)
+  )].sort();
+
+  if (!stCancelItems.length) {
+    showMsg('stCancelMsg', 'No active barcodes found for this class.', 'info');
+    box.style.opacity = '.55';
+    box.style.pointerEvents = 'none';
+    return;
+  }
+
+  box.style.opacity = '1';
+  box.style.pointerEvents = '';
+}
+
+function stCancelCsOpen() {
+  const val = document.getElementById('stCancelItemSearch').value.toLowerCase();
+  const filtered = stCancelItems.filter(n => !val || n.toLowerCase().includes(val));
+  stCancelCsRender(filtered);
+}
+
+function stCancelCsFilter() {
+  const val = document.getElementById('stCancelItemSearch').value.toLowerCase();
+  const filtered = stCancelItems.filter(n => n.toLowerCase().includes(val));
+  stCancelCsRender(filtered);
+}
+
+function stCancelCsToggle() {
+  const list = document.getElementById('stCancelCsList');
+  if (list.style.display === 'block') list.style.display = 'none';
+  else { stCancelCsOpen(); document.getElementById('stCancelItemSearch').focus(); }
+}
+
+function stCancelCsRender(items) {
+  const list = document.getElementById('stCancelCsList');
+  if (!items.length) {
+    list.innerHTML = '<div class="cs-empty">No items found</div>';
+  } else {
+    list.innerHTML = items.map(n =>
+      `<div class="cs-opt" onmousedown="event.preventDefault();stCancelCsSelect('${n.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();stCancelCsSelect('${n.replace(/'/g,"\\'")}')">${n}</div>`
+    ).join('');
+  }
+  list.style.display = 'block';
+}
+
+function stCancelCsSelect(name) {
+  document.getElementById('stCancelItemSearch').value = name;
+  document.getElementById('stCancelCsList').style.display = 'none';
+  stCancelItemChange(name);
+}
+
+document.addEventListener('mousedown', e => {
+  if (!document.getElementById('stCancelItemWrap').contains(e.target))
+    document.getElementById('stCancelCsList').style.display = 'none';
+});
+
+function stCancelItemChange(item) {
+  const cls  = document.getElementById('stCancelClass').value;
+  const wrap = document.getElementById('stBcCheckWrap');
+  const list = document.getElementById('stBcCheckList');
+  document.getElementById('stSubmitCancelBtn').disabled = true;
+  document.getElementById('stBcSelCount').textContent = '0 selected';
+  clearMsg('stCancelMsg');
+
+  if (!item) { wrap.style.display = 'none'; list.innerHTML = ''; return; }
+
+  const cancelledCodes = new Set(
+    stickeringData.filter(r => r.remarks === 'Cancelled').map(r => r.barCode)
+  );
+
+  const codes = barCodeTabData.filter(r =>
+    r.className === cls && r.itemName === item && !cancelledCodes.has(r.barCode)
+  );
+
+  if (!codes.length) {
+    wrap.style.display = 'none';
+    showMsg('stCancelMsg', 'No active barcodes found for this selection.', 'info');
+    return;
+  }
+
+  list.innerHTML = codes.map(r =>
+    `<label class="bc-pill" style="display:inline-flex;align-items:center;gap:7px;
+      background:var(--s50);border:2px solid var(--s300);border-radius:10px;
+      padding:7px 14px;cursor:pointer;font-family:monospace;font-size:13px;
+      font-weight:700;user-select:none;transition:all .15s;color:var(--s700)">
+      <input type="checkbox" class="st-bc-chk" data-slno="${r.slNo}" data-code="${r.barCode}"
+        onchange="stBcSelChange(this)" style="display:none">
+      <span class="bc-tick" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--s300);
+        display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+        background:#fff;transition:all .15s;font-size:11px"></span>
+      ${r.barCode}
+    </label>`
+  ).join('');
+
+  wrap.style.display = 'block';
+}
+
+function stBcSelChange(chk) {
+  // Update pill style for the changed checkbox
+  if (chk) {
+    const pill = chk.closest('.bc-pill');
+    const tick = pill.querySelector('.bc-tick');
+    if (chk.checked) {
+      pill.style.background  = '#fef2f2';
+      pill.style.borderColor = '#dc2626';
+      pill.style.color       = '#dc2626';
+      tick.style.background  = '#dc2626';
+      tick.style.borderColor = '#dc2626';
+      tick.textContent       = '✓';
+    } else {
+      pill.style.background  = 'var(--s50)';
+      pill.style.borderColor = 'var(--s300)';
+      pill.style.color       = 'var(--s700)';
+      tick.style.background  = '#fff';
+      tick.style.borderColor = 'var(--s300)';
+      tick.textContent       = '';
+    }
+  }
+  const count = document.querySelectorAll('.st-bc-chk:checked').length;
+  document.getElementById('stBcSelCount').textContent = count + ' selected';
+  document.getElementById('stSubmitCancelBtn').disabled = count === 0;
+}
+
+function stSelectAllBc(checked) {
+  document.querySelectorAll('.st-bc-chk').forEach(c => {
+    c.checked = checked;
+    stBcSelChange(c);
+  });
+}
+
+function stSubmitCancel() {
+  const checked = [...document.querySelectorAll('.st-bc-chk:checked')];
+  if (!checked.length) return;
+  const slNos = checked.map(c => c.dataset.slno);
+  const codes = checked.map(c => c.dataset.code);
+  if (!confirm(`Mark ${slNos.length} sticker(s) as Cancelled?\n\n${codes.join(', ')}`)) return;
+
+  // ── OPTIMISTIC UPDATE ──
+  // 1. Snapshot for rollback
+  const rollbackStickering = stickeringData.map(r => ({ ...r }));
+  const rollbackBcData     = barCodeTabData.map(r => ({ ...r }));
+  const nextSlNo = stickeringData.length ? Math.max(...stickeringData.map(r => Number(r.slNo) || 0)) + 1 : 1;
+
+  // 2. For each cancelled code: update stickeringData instantly
+  codes.forEach((code, i) => {
+    const existing = stickeringData.find(r => r.barCode.toUpperCase() === code.toUpperCase());
+    if (existing) {
+      existing.remarks = 'Cancelled';
+    } else {
+      const bcRow = barCodeTabData.find(r => r.barCode.toUpperCase() === code.toUpperCase());
+      stickeringData.push({
+        slNo: nextSlNo + i, barCode: code,
+        itemName: bcRow ? bcRow.itemName : '',
+        className: bcRow ? bcRow.className : '',
+        remarks: 'Cancelled'
+      });
+    }
+  });
+
+  // 3. Re-render instantly, reset cascade
+  stickeringRender();
+  stickeringUpdateStats();
+  document.getElementById('stCancelClass').value = '';
+  document.getElementById('stCancelItemSearch').value = '';
+  document.getElementById('stCancelCsList').style.display = 'none';
+  document.getElementById('stCancelItemBox').style.opacity = '.55';
+  document.getElementById('stCancelItemBox').style.pointerEvents = 'none';
+  stCancelItems = [];
+  document.getElementById('stBcCheckWrap').style.display = 'none';
+  document.getElementById('stBcCheckList').innerHTML = '';
+  const _cancelArgs = [slNos];
+
+  // If offline — queue immediately
+  if (!navigator.onLine) {
+    oqPush({ fn: 'cancelBarCodes', args: _cancelArgs, label: `Cancel ${slNos.length} sticker(s)` });
+    showMsg('stCancelMsg', '📶 Offline — saved locally, will sync when connected.', 'info');
+    setTimeout(() => clearMsg('stCancelMsg'), 3500);
+    return;
+  }
+
+  showMsg('stCancelMsg', `⏳ Saving ${slNos.length} cancellation(s)…`, 'info');
+
+  // Online — save to GAS in background
+  call('cancelBarCodes', _cancelArgs, res => {
+    showMsg('stCancelMsg', `✅ ${slNos.length} sticker(s) marked as Cancelled.`, 'ok');
+    setTimeout(() => clearMsg('stCancelMsg'), 2500);
+    call('getBarCodeTabData', [], r2 => { barCodeTabData = Array.isArray(r2) ? r2 : []; }, () => {});
+  }, err => {
+    if (!navigator.onLine) {
+      // Network dropped mid-request — keep optimistic state, queue it
+      oqPush({ fn: 'cancelBarCodes', args: _cancelArgs, label: `Cancel ${slNos.length} sticker(s)` });
+      showMsg('stCancelMsg', '📶 Went offline — saved locally, will sync when connected.', 'info');
+      setTimeout(() => clearMsg('stCancelMsg'), 3500);
+    } else {
+      // Actual error — rollback
+      stickeringData = rollbackStickering;
+      barCodeTabData = rollbackBcData;
+      stickeringRender();
+      stickeringUpdateStats();
+      showMsg('stCancelMsg', 'Error — rolled back: ' + err, 'err');
+    }
+  });
+}
+
+// ── Records table (view only) ─────────────────────────────
+
+function stickeringFilteredRows() {
+  const statusFilter = document.getElementById('stFilterStatus').value;
+  if (statusFilter === 'New Added') return stickeringData.filter(r => r.remarks === 'New Added');
+  if (statusFilter === 'Cancelled') return stickeringData.filter(r => r.remarks === 'Cancelled');
+  if (statusFilter === 'Active')    return stickeringData.filter(r => !r.remarks || (r.remarks !== 'New Added' && r.remarks !== 'Cancelled'));
+  return stickeringData;
+}
+
+function stickeringRender() {
+  const rows = stickeringFilteredRows();
+  if (!rows.length) {
+    document.getElementById('stTableWrap').innerHTML = '<div class="tbl-empty">No records found.</div>';
+    return;
+  }
+
+  let html = `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:580px">
+    <thead><tr>
+      <th>Sl No.</th><th>Bar Code</th><th>Item Name</th><th>Class Name</th><th>Remarks</th>
+    </tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const isCancelled = r.remarks === 'Cancelled';
+    const badgeStyle = isCancelled
+      ? 'background:#fecaca;color:#dc2626;'
+      : r.remarks === 'New Added'
+        ? 'background:#c6ecd8;color:#14532d;'
+        : 'background:#e2e8f0;color:#475569;';
+    const badge = `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;${badgeStyle}">${r.remarks || 'Active'}</span>`;
+    html += `<tr style="${isCancelled ? 'opacity:.5;' : ''}">
+      <td>${r.slNo}</td>
+      <td style="font-family:monospace;font-weight:600">${r.barCode}</td>
+      <td>${r.itemName}</td>
+      <td>${r.className}</td>
+      <td>${badge}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('stTableWrap').innerHTML = html;
+}
+
+// ── Add new sticker code ──────────────────────────────────
+
+// ── Add New — Class change → enable Item dropdown ─────────
+
+function stNewClassChange() {
+  const cls = document.getElementById('stNewClass').value;
+  const box = document.getElementById('stNewItemBox');
+  document.getElementById('stNewItem').value = '';
+  document.getElementById('stCsItemList').style.display = 'none';
+  document.getElementById('stNewCode').value = '';
+  document.getElementById('stNewCodeHint').textContent = '';
+  clearMsg('stAddMsg');
+  if (!cls) {
+    box.style.opacity = '.55';
+    box.style.pointerEvents = 'none';
+  } else {
+    box.style.opacity = '1';
+    box.style.pointerEvents = '';
+  }
+  applyStickerLockState();
+}
+
+// ── Add New — Item Name searchable dropdown ───────────────
+
+function stCsOpen() {
+  const val = document.getElementById('stNewItem').value.toLowerCase();
+  const names = [...new Set((sheetData.rows || []).map(r => r.itemName).filter(Boolean))].sort();
+  stCsRender(names.filter(n => !val || n.toLowerCase().includes(val)));
+}
+
+function stCsFilter() {
+  const val = document.getElementById('stNewItem').value.toLowerCase();
+  const names = [...new Set((sheetData.rows || []).map(r => r.itemName).filter(Boolean))].sort();
+  stCsRender(names.filter(n => n.toLowerCase().includes(val)));
+}
+
+function stCsToggle() {
+  const list = document.getElementById('stCsItemList');
+  if (list.style.display === 'block') list.style.display = 'none';
+  else { stCsOpen(); document.getElementById('stNewItem').focus(); }
+}
+
+function stCsRender(items) {
+  const list = document.getElementById('stCsItemList');
+  list.innerHTML = items.length
+    ? items.map(n => `<div class="cs-opt" onmousedown="event.preventDefault();stCsSelect('${n.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();stCsSelect('${n.replace(/'/g,"\\'")}')">${n}</div>`).join('')
+    : '<div class="cs-empty">No items found</div>';
+  list.style.display = 'block';
+}
+
+function stCsSelect(name) {
+  document.getElementById('stNewItem').value = name;
+  document.getElementById('stCsItemList').style.display = 'none';
+  stSuggestBarCode(name);
+}
+
+// Auto-suggest next bar code when item is selected
+function stSuggestBarCode(itemName) {
+  const hint = document.getElementById('stNewCodeHint');
+  // Find asset code from sheetData rows
+  const row = (sheetData.rows || []).find(r => r.itemName === itemName);
+  if (!row || !row.assetCode) { hint.textContent = ''; return; }
+
+  const assetCode = row.assetCode;
+  // Find school code prefix from existing barCodeTabData
+  const existing = barCodeTabData.filter(r => r.barCode && r.barCode.includes('/' + assetCode + '/'));
+  let schoolCode = 'SCH';
+  if (existing.length) {
+    const parts = existing[0].barCode.split('/');
+    if (parts.length >= 1) schoolCode = parts[0];
+  }
+
+  // Find highest sequence number for this asset code across Bar Code tab
+  let maxSeq = 0;
+  barCodeTabData.forEach(r => {
+    const parts = String(r.barCode || '').split('/');
+    if (parts.length === 3 && parts[1] === assetCode) {
+      const seq = parseInt(parts[2]) || 0;
+      if (seq > maxSeq) maxSeq = seq;
+    }
+  });
+  // Also check stickeringData
+  stickeringData.forEach(r => {
+    const parts = String(r.barCode || '').split('/');
+    if (parts.length === 3 && parts[1] === assetCode) {
+      const seq = parseInt(parts[2]) || 0;
+      if (seq > maxSeq) maxSeq = seq;
+    }
+  });
+
+  const nextSeq = String(maxSeq + 1).padStart(4, '0');
+  const suggested = `${schoolCode}/${assetCode}/${nextSeq}`;
+  document.getElementById('stNewCode').value = suggested;
+  hint.textContent = '(auto-suggested)';
+}
+
+document.addEventListener('mousedown', e => {
+  if (!document.getElementById('stItemSelectWrap').contains(e.target))
+    document.getElementById('stCsItemList').style.display = 'none';
+});
+
+function stickeringAddNew() {
+  if (currentRole === 'Demo') return;
+  const code = document.getElementById('stNewCode').value.trim().toUpperCase();
+  const item = document.getElementById('stNewItem').value.trim();
+  const cls  = document.getElementById('stNewClass').value;
+  if (!cls)  { showMsg('stAddMsg', 'Please select a Class Name.', 'err'); return; }
+  if (stickerLockedClasses.has(cls)) {
+    showMsg('stAddMsg', `Stickering for "${cls}" is already submitted. Only Admin can unlock.`, 'err'); return;
+  }
+  if (!item) { showMsg('stAddMsg', 'Please select an Item Name.', 'err'); return; }
+  if (!code) { showMsg('stAddMsg', 'Please enter a Bar Code.', 'err'); return; }
+
+  // Client-side duplicate check — Bar Code tab
+  const inBarCode = barCodeTabData.some(r => r.barCode.toUpperCase() === code);
+  // Client-side duplicate check — Stickering tab
+  const inStickering = stickeringData.some(r => r.barCode.toUpperCase() === code);
+
+  if (inBarCode || inStickering) {
+    const where = inBarCode && inStickering ? 'Bar Code and Stickering tabs'
+                : inBarCode ? 'Bar Code tab' : 'Stickering tab';
+    if (!confirm(`⚠️ Bar code "${code}" already exists in the ${where}.\n\nDo you still want to add it?`)) return;
+  }
+
+  // ── OPTIMISTIC UPDATE ──
+  // 1. Build new row and add to local data instantly
+  const nextSlNo = stickeringData.length
+    ? Math.max(...stickeringData.map(r => Number(r.slNo) || 0)) + 1 : 1;
+  const newRow = { slNo: nextSlNo, barCode: code, itemName: item, className: cls, remarks: 'New Added' };
+  stickeringData.push(newRow);
+
+  // 2. Re-render instantly
+  stickeringRender();
+  stickeringUpdateStats();
+  stickeringClearAdd();
+
+  const _addArgs = [{ barCode: code, itemName: item, className: cls }];
+
+  // If offline — queue immediately, keep optimistic row
+  if (!navigator.onLine) {
+    oqPush({ fn: 'addStickeringRow', args: _addArgs, label: `Add sticker ${code}` });
+    showMsg('stAddMsg', '📶 Offline — saved locally, will sync when connected.', 'info');
+    setTimeout(() => clearMsg('stAddMsg'), 3500);
+    return;
+  }
+
+  showMsg('stAddMsg', `⏳ Saving "${code}"…`, 'info');
+
+  // 3. Online — save to GAS in background
+  call('addStickeringRow', _addArgs, res => {
+    if (res && res.duplicate) {
+      showMsg('stAddMsg', `✅ "${code}" recorded (already in sheet).`, 'ok');
+    } else {
+      showMsg('stAddMsg', `✅ "${code}" added successfully.`, 'ok');
+    }
+    setTimeout(() => clearMsg('stAddMsg'), 2500);
+    call('getBarCodeTabData', [], r2 => { barCodeTabData = Array.isArray(r2) ? r2 : []; }, () => {});
+  }, err => {
+    if (!navigator.onLine) {
+      // Network dropped mid-request — keep optimistic row, queue it
+      oqPush({ fn: 'addStickeringRow', args: _addArgs, label: `Add sticker ${code}` });
+      showMsg('stAddMsg', '📶 Went offline — saved locally, will sync when connected.', 'info');
+      setTimeout(() => clearMsg('stAddMsg'), 3500);
+    } else {
+      // Actual error — rollback
+      const idx = stickeringData.indexOf(newRow);
+      if (idx > -1) stickeringData.splice(idx, 1);
+      stickeringRender();
+      stickeringUpdateStats();
+      showMsg('stAddMsg', 'Error — rolled back: ' + err, 'err');
+    }
+  });
+}
+
+function stickeringClearAdd() {
+  document.getElementById('stNewClass').value = '';
+  document.getElementById('stNewItem').value  = '';
+  document.getElementById('stCsItemList').style.display = 'none';
+  document.getElementById('stNewItemBox').style.opacity = '.55';
+  document.getElementById('stNewItemBox').style.pointerEvents = 'none';
+  document.getElementById('stNewCode').value  = '';
+  document.getElementById('stNewCodeHint').textContent = '';
+  clearMsg('stAddMsg');
+}
+
+// ── Stats ─────────────────────────────────────────────────
+
+function stickeringUpdateStats() {
+  const total     = stickeringData.length;
+  const cancelled = stickeringData.filter(r => r.remarks === 'Cancelled').length;
+  const newAdded  = stickeringData.filter(r => r.remarks === 'New Added').length;
+  const active    = total - cancelled - newAdded;
+  document.getElementById('stStatTotal').textContent     = total;
+  document.getElementById('stStatActive').textContent    = active;
+  document.getElementById('stStatNew').textContent       = newAdded;
+  document.getElementById('stStatCancelled').textContent = cancelled;
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN TAB
+// ══════════════════════════════════════════════════════════
+let _admBranches = [];
+let _admUsers    = [];
+let _admClasses  = [];
+
+async function adminLoad() {
+  await Promise.all([admBranchesLoad(), admUsersLoad(), admClassesLoad(), admAssetsLoad()]);
+  admClassesRender();
+}
+
+// ── Branch helpers ────────────────────────────────────────
+async function admBranchesLoad() {
+  try {
+    _admBranches = await apiGet('/api/branches');
+    admBranchesRender();
+    _admPopulateBranchSelects();
+  } catch(e) { showMsg('admBranchMsg', 'Failed to load branches: ' + e, 'err'); }
+}
+
+function _admPopulateBranchSelects() {
+  const opts = _admBranches.map(b => `<option value="${b.id}">${_esc(b.name)} (${_esc(b.code)})</option>`).join('');
+  // Class branch selector
+  const cb = document.getElementById('admClassBranch');
+  if (cb) cb.innerHTML = '<option value="">— Select Branch —</option>' + opts;
+  // Admin view selector
+  const vb = document.getElementById('adminViewBranch');
+  if (vb) {
+    vb.innerHTML = '<option value="">All Branches</option>' + opts;
+    if (adminViewBranchId) vb.value = adminViewBranchId;
+  }
+  // Export multi-select
+  const eb = document.getElementById('admExportBranches');
+  if (eb) eb.innerHTML = opts;
+}
+
+function admBranchesRender() {
+  const wrap = document.getElementById('admBranchTable');
+  if (!_admBranches.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No branches yet.</p>'; return; }
+  let html = '<table><thead><tr><th>Name</th><th>Code</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  _admBranches.forEach(b => {
+    const status = b.is_active
+      ? '<span style="color:var(--g600);font-weight:600">Active</span>'
+      : '<span style="color:var(--s400)">Inactive</span>';
+    html += `<tr>
+      <td>${_esc(b.name)}</td>
+      <td class="mono">${_esc(b.code)}</td>
+      <td>${status}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-s" style="padding:4px 10px;font-size:12px" onclick="admBranchToggle(${b.id},${b.is_active})">${b.is_active ? 'Deactivate' : 'Activate'}</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="admBranchDelete(${b.id},'${_esc(b.name)}')">Delete</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+async function admBranchCreate() {
+  const name = document.getElementById('admBranchName').value.trim();
+  const code = document.getElementById('admBranchCode').value.trim();
+  if (!name || !code) { showMsg('admBranchMsg', 'Name and code are required.', 'err'); return; }
+  try {
+    await apiPost('/api/branches', { name, code, is_active: true });
+    document.getElementById('admBranchName').value = '';
+    document.getElementById('admBranchCode').value = '';
+    showMsg('admBranchMsg', 'Branch created.', 'ok');
+    await admBranchesLoad();
+  } catch(e) { showMsg('admBranchMsg', String(e), 'err'); }
+}
+
+async function admBranchToggle(id, currentlyActive) {
+  try {
+    await apiPut('/api/branches/' + id, { is_active: !currentlyActive });
+    await admBranchesLoad();
+  } catch(e) { showMsg('admBranchMsg', String(e), 'err'); }
+}
+
+async function admBranchDelete(id, name) {
+  if (!confirm(`Delete branch "${name}"? Classes assigned to it will become unassigned.`)) return;
+  try {
+    await apiDel('/api/branches/' + id);
+    showMsg('admBranchMsg', 'Branch deleted.', 'ok');
+    await admBranchesLoad();
+  } catch(e) { showMsg('admBranchMsg', String(e), 'err'); }
+}
+
+// ── Class helpers ─────────────────────────────────────────
+async function admClassesLoad() {
+  try {
+    _admClasses = await apiGet('/api/classes');
+    admClassesRender();
+  } catch(e) { showMsg('admClassMsg', 'Failed to load classes: ' + e, 'err'); }
+}
+
+
+async function admClassCreate() {
+  const name     = document.getElementById('admClassName').value.trim();
+  const branchId = document.getElementById('admClassBranch').value;
+  if (!name) { showMsg('admClassMsg', 'Class name is required.', 'err'); return; }
+  try {
+    await apiPost('/api/classes/create', { className: name, branchId: branchId ? parseInt(branchId) : null });
+    document.getElementById('admClassName').value = '';
+    showMsg('admClassMsg', 'Class created.', 'ok');
+    await admClassesLoad();
+    // Refresh data so new class appears in dropdowns
+    loadData();
+  } catch(e) { showMsg('admClassMsg', String(e), 'err'); }
+}
+
+async function admClassDelete(className) {
+  if (!confirm(`Delete class "${className}"? All count data for this class will also be deleted.`)) return;
+  try {
+    await apiDel('/api/classes/delete?className=' + encodeURIComponent(className));
+    showMsg('admClassMsg', 'Class deleted.', 'ok');
+    await admClassesLoad();
+    loadData();
+  } catch(e) { showMsg('admClassMsg', String(e), 'err'); }
+}
+
+// ── User helpers ──────────────────────────────────────────
+async function admUsersLoad() {
+  try {
+    _admUsers = await apiGet('/api/users');
+    admUsersRender();
+  } catch(e) { showMsg('admUserMsg', 'Failed to load users: ' + e, 'err'); }
+}
+
+function admUsersRender() {
+  const wrap = document.getElementById('admUserTable');
+  if (!_admUsers.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No users.</p>'; return; }
+  let html = '<table><thead><tr><th>Username</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
+  _admUsers.forEach(u => {
+    const roleOpts = ['Editor','Admin','Demo'].map(r =>
+      `<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('');
+    html += `<tr>
+      <td>${_esc(u.username)}</td>
+      <td><select style="font-size:12px;padding:3px 6px" onchange="admUserUpdateRole(${u.id},this.value)">${roleOpts}</select></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-warn" style="padding:4px 10px;font-size:12px" onclick="admUserResetPwd(${u.id},'${_esc(u.username)}')">Reset Pwd</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="admUserDelete(${u.id},'${_esc(u.username)}')">Delete</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+
+async function admUserCreate() {
+  const username = document.getElementById('admUserName').value.trim();
+  const password = document.getElementById('admUserPass').value;
+  const role     = document.getElementById('admUserRole').value;
+  if (!username || !password) { showMsg('admUserMsg', 'Username and password are required.', 'err'); return; }
+  try {
+    await apiPost('/api/users', { username, password, role, branch_ids: [] });
+    document.getElementById('admUserName').value = '';
+    document.getElementById('admUserPass').value = '';
+    sel.selectedIndex = -1;
+    showMsg('admUserMsg', 'User created.', 'ok');
+    await admUsersLoad();
+  } catch(e) { showMsg('admUserMsg', String(e), 'err'); }
+}
+
+async function admUserUpdateRole(id, role) {
+  try {
+    await apiPut('/api/users/' + id, { role });
+    showMsg('admUserMsg', 'Role updated.', 'ok');
+    setTimeout(() => clearMsg('admUserMsg'), 2000);
+  } catch(e) { showMsg('admUserMsg', String(e), 'err'); await admUsersLoad(); }
+}
+
+async function admUserResetPwd(id, username) {
+  const pwd = prompt(`Enter new password for "${username}":`);
+  if (!pwd) return;
+  try {
+    await apiPut('/api/users/' + id, { password: pwd });
+    showMsg('admUserMsg', 'Password reset.', 'ok');
+    setTimeout(() => clearMsg('admUserMsg'), 2000);
+  } catch(e) { showMsg('admUserMsg', String(e), 'err'); }
+}
+
+async function admUserDelete(id, username) {
+  if (!confirm(`Delete user "${username}"?`)) return;
+  try {
+    await apiDel('/api/users/' + id);
+    showMsg('admUserMsg', 'User deleted.', 'ok');
+    await admUsersLoad();
+  } catch(e) { showMsg('admUserMsg', String(e), 'err'); }
+}
+
+// ── Admin view-branch selector ────────────────────────────
+function adminSetViewBranch() {
+  const v = document.getElementById('adminViewBranch').value;
+  adminViewBranchId = v ? parseInt(v) : null;
+}
+
+function adminRefreshData() {
+  loadData();
+  loadLog();
+  loadLockedClasses(() => {});
+  showMsg('admBranchMsg', 'Data refreshed for selected branch.', 'ok');
+  setTimeout(() => clearMsg('admBranchMsg'), 2000);
+}
+
+// ── Export ────────────────────────────────────────────────
+function admExport() {
+  const sel = document.getElementById('admExportBranches');
+  const ids = Array.from(sel.selectedOptions).map(o => o.value).join(',');
+  const url = '/api/export' + (ids ? '?branch_ids=' + ids : '');
+  // Must pass auth header — use fetch + blob
+  fetch(url, { headers: _authHeader() })
+    .then(r => r.blob())
+    .then(blob => {
+      const burl = URL.createObjectURL(blob);
+      const a2 = document.createElement('a'); a2.href = burl;
+      a2.download = 'asset_export.xlsx'; document.body.appendChild(a2); a2.click();
+      setTimeout(() => { URL.revokeObjectURL(burl); a2.remove(); }, 1000);
+    })
+    .catch(e => alert('Export failed: ' + e));
+}
+
+// ── Asset Management ──────────────────────────────────────
+let _admAssets = [];
+
+async function admAssetsLoad() {
+  try {
+    _admAssets = await apiGet('/api/assets/list');
+    admAssetsRender();
+  } catch(e) { showMsg('admAssetMsg', 'Failed to load assets: ' + e, 'err'); }
+}
+
+function admAssetsRender() {
+  const wrap = document.getElementById('admAssetTable');
+  if (!_admAssets.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No assets yet.</p>'; return; }
+  let html = '<table><thead><tr><th>#</th><th>Item Name</th><th>Asset Code</th><th>Actions</th></tr></thead><tbody>';
+  _admAssets.forEach(a => {
+    html += `<tr id="arow-${a.id}">
+      <td>${a.slNo ?? ''}</td>
+      <td><input type="text" value="${_esc(a.itemName)}" id="aname-${a.id}" style="font-size:13px;padding:4px 8px;width:100%;border:1.5px solid var(--s300);border-radius:6px;background:var(--s50)"></td>
+      <td><input type="text" value="${_esc(a.assetCode)}" id="acode-${a.id}" style="font-size:13px;padding:4px 8px;width:100%;border:1.5px solid var(--s300);border-radius:6px;background:var(--s50);font-family:var(--mono,monospace)"></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-s" style="padding:4px 10px;font-size:12px" onclick="admAssetSave(${a.id})">Save</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="admAssetDelete(${a.id})">Delete</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+async function admAssetCreate() {
+  const name = document.getElementById('admAssetName').value.trim();
+  const code = document.getElementById('admAssetCode').value.trim();
+  if (!name || !code) { showMsg('admAssetMsg', 'Item name and asset code are required.', 'err'); return; }
+  try {
+    await apiPost('/api/assets', { item_name: name, asset_code: code });
+    document.getElementById('admAssetName').value = '';
+    document.getElementById('admAssetCode').value = '';
+    showMsg('admAssetMsg', 'Asset created.', 'ok');
+    await admAssetsLoad();
+    loadData(); // refresh main data so new asset appears in dropdowns
+  } catch(e) { showMsg('admAssetMsg', String(e), 'err'); }
+}
+
+async function admAssetSave(id) {
+  const name = document.getElementById('aname-' + id).value.trim();
+  const code = document.getElementById('acode-' + id).value.trim();
+  if (!name || !code) { showMsg('admAssetMsg', 'Name and code cannot be empty.', 'err'); return; }
+  try {
+    await apiPut('/api/assets/' + id, { item_name: name, asset_code: code });
+    showMsg('admAssetMsg', 'Asset updated.', 'ok');
+    setTimeout(() => clearMsg('admAssetMsg'), 2000);
+    await admAssetsLoad();
+    loadData();
+  } catch(e) { showMsg('admAssetMsg', String(e), 'err'); }
+}
+
+async function admAssetDelete(id) {
+  const asset = _admAssets.find(a => a.id === id);
+  if (!confirm(`Delete "${asset?.itemName || id}"? All count entries for this asset will also be deleted.`)) return;
+  try {
+    await apiDel('/api/assets/' + id);
+    showMsg('admAssetMsg', 'Asset deleted.', 'ok');
+    await admAssetsLoad();
+    loadData();
+  } catch(e) { showMsg('admAssetMsg', String(e), 'err'); }
+}
+
+// ── Class assignment helper ───────────────────────────────
+function admClassesRender() {
+  const wrap = document.getElementById('admClassTable');
+  if (!_admClasses.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No classes yet.</p>'; return; }
+  // Build user list for assignment dropdown
+  const userOpts = '<option value="">— Unassigned —</option>' +
+    _admUsers.filter(u => u.role !== 'Demo').map(u => `<option value="${_esc(u.username)}">${_esc(u.username)}</option>`).join('');
+  let html = '<table><thead><tr><th>Class Name</th><th>Branch</th><th>Assigned To</th><th>Actions</th></tr></thead><tbody>';
+  _admClasses.forEach(c => {
+    const userSel = userOpts.replace(`value="${_esc(c.assignedTo)}"`, `value="${_esc(c.assignedTo)}" selected`);
+    html += `<tr>
+      <td>${_esc(c.className)}</td>
+      <td>${_esc(c.branchName || '—')}</td>
+      <td>
+        <select style="font-size:12px;padding:3px 6px" onchange="admClassAssign('${_esc(c.className)}',this.value)">
+          ${userSel}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="admClassDelete('${_esc(c.className)}')">Delete</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+async function admClassAssign(className, assignedTo) {
+  try {
+    await apiPost('/api/classes/assign', { className, assignedTo });
+    showMsg('admClassMsg', `"${className}" assigned to ${assignedTo || 'nobody'}.`, 'ok');
+    setTimeout(() => clearMsg('admClassMsg'), 2000);
+    // Refresh locked class data so main tab reflects new assignment
+    loadLockedClasses(() => {});
+  } catch(e) { showMsg('admClassMsg', String(e), 'err'); }
+}
+
+// ── Excel template download ───────────────────────────────
+function admDownloadTemplate(type) {
+  if (typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
+  const wb = XLSX.utils.book_new();
+  let ws, sheetName;
+  if (type === 'branch') {
+    ws = XLSX.utils.aoa_to_sheet([
+      ['Name', 'Code', 'Active (yes/no)'],
+      ['Main Campus', 'MC01', 'yes'],
+      ['North Branch', 'NB02', 'yes'],
+    ]);
+    sheetName = 'Branches';
+  } else if (type === 'class') {
+    const branchCodes = _admBranches.map(b => b.code).join(', ') || 'MC01';
+    ws = XLSX.utils.aoa_to_sheet([
+      ['Class Name', 'Branch Code'],
+      ['Room 101', _admBranches[0]?.code || 'MC01'],
+      ['Room 102', _admBranches[0]?.code || 'MC01'],
+    ]);
+    ws['C1'] = { t: 's', v: `Branch codes available: ${branchCodes}` };
+    sheetName = 'Classes';
+  } else if (type === 'asset') {
+    ws = XLSX.utils.aoa_to_sheet([
+      ['Item Name', 'Asset Code', 'Sl No (optional)'],
+      ['Chair', 'CHR001', 1],
+      ['Table', 'TBL001', 2],
+      ['Projector', 'PRJ001', 3],
+    ]);
+    sheetName = 'Assets';
+  } else {
+    const branchCodes = _admBranches.map(b => b.code).join(', ') || 'MC01';
+    ws = XLSX.utils.aoa_to_sheet([
+      ['Username', 'Password', 'Role (Admin/Editor/Demo)', 'Branch Code'],
+      ['john.doe', 'password123', 'Editor', _admBranches[0]?.code || 'MC01'],
+      ['jane.admin', 'securepass', 'Admin', ''],
+    ]);
+    ws['E1'] = { t: 's', v: `Branch codes available: ${branchCodes}` };
+    sheetName = 'Users';
+  }
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `template_${type}s.xlsx`);
+}
+
+// ── Excel upload & bulk create ────────────────────────────
+async function admUploadExcel(type, input) {
+  if (!input.files || !input.files[0]) return;
+  if (typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
+
+  const msgId   = type === 'branch' ? 'admBranchMsg' : type === 'class' ? 'admClassMsg' : 'admUserMsg';
+  const file    = input.files[0];
+  input.value   = ''; // reset so same file can be re-uploaded
+
+  showMsg(msgId, 'Reading file…', 'info');
+
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const wb      = XLSX.read(e.target.result, { type: 'array' });
+      const ws      = wb.Sheets[wb.SheetNames[0]];
+      const rows    = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      if (!rows.length) { showMsg(msgId, 'No data rows found in the file.', 'err'); return; }
+
+      let payload, endpoint;
+
+      if (type === 'branch') {
+        payload  = rows.map(r => ({
+          name:      String(r['Name'] || r['name'] || '').trim(),
+          code:      String(r['Code'] || r['code'] || '').trim(),
+          is_active: String(r['Active (yes/no)'] || r['active'] || 'yes').toLowerCase() !== 'no',
+        })).filter(r => r.name && r.code);
+        endpoint = '/api/branches/bulk';
+      } else if (type === 'class') {
+        payload  = rows.map(r => ({
+          class_name:  String(r['Class Name'] || r['class_name'] || '').trim(),
+          branch_code: String(r['Branch Code'] || r['branch_code'] || '').trim() || null,
+        })).filter(r => r.class_name);
+        endpoint = '/api/classes/bulk';
+      } else if (type === 'asset') {
+        payload  = rows.map(r => ({
+          item_name:  String(r['Item Name'] || r['item_name'] || '').trim(),
+          asset_code: String(r['Asset Code'] || r['asset_code'] || '').trim(),
+          sl_no:      r['Sl No (optional)'] ? parseInt(r['Sl No (optional)']) : null,
+        })).filter(r => r.item_name && r.asset_code);
+        endpoint = '/api/assets/bulk';
+      } else {
+        payload  = rows.map(r => ({
+          username:     String(r['Username'] || r['username'] || '').trim(),
+          password:     String(r['Password'] || r['password'] || '').trim(),
+          role:         String(r['Role (Admin/Editor/Demo)'] || r['role'] || 'Editor').trim(),
+          branch_codes: String(r['Branch Code'] || r['branch_code'] || r['Branch Codes'] || '').trim() || null,
+        })).filter(r => r.username && r.password);
+        endpoint = '/api/users/bulk';
+      }
+
+      if (!payload.length) { showMsg(msgId, 'No valid rows found. Check column headers match the template.', 'err'); return; }
+
+      showMsg(msgId, `Uploading ${payload.length} rows…`, 'info');
+      const result = await apiPost(endpoint, payload);
+      showMsg(msgId, `Done — ${result.created} created, ${result.skipped} skipped (duplicates).`, 'ok');
+
+      // Refresh the relevant table
+      if (type === 'branch')      { await admBranchesLoad(); }
+      else if (type === 'class')  { await admClassesLoad(); loadData(); }
+      else if (type === 'asset')  { await admAssetsLoad(); loadData(); }
+      else                        { await admUsersLoad(); }
+
+    } catch(err) { showMsg(msgId, 'Upload failed: ' + err, 'err'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── Extra HTTP verbs ──────────────────────────────────────
+async function apiPut(path, body) {
+  const res = await fetch(API_URL + path, {
+    method:  'PUT',
+    headers: { 'Content-Type': 'application/json', ..._authHeader() },
+    body:    JSON.stringify(body),
+  });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired.'); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || 'HTTP ' + res.status); }
+  return res.json();
+}
+
+async function apiDel(path) {
+  const res = await fetch(API_URL + path, { method: 'DELETE', headers: _authHeader() });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired.'); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || 'HTTP ' + res.status); }
+  return res.status === 204 ? null : res.json();
+}
+
+async function apiDel2(path, body) {
+  const res = await fetch(API_URL + path, {
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ..._authHeader() },
+    body:    JSON.stringify(body),
+  });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired.'); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || 'HTTP ' + res.status); }
+  return res.status === 204 ? null : res.json();
+}
+
+function _esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>

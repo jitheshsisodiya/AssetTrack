@@ -1,0 +1,508 @@
+// ══════════════════════════════════════════════════════════
+//  SCHOOL ASSET MANAGEMENT — GOOGLE APPS SCRIPT
+// ══════════════════════════════════════════════════════════
+
+// ── Timestamp helpers ─────────────────────────────────────
+function touchLastModified() {
+  PropertiesService.getScriptProperties()
+    .setProperty('lastModified', String(Date.now()));
+}
+
+function getLastModified() {
+  var ts = PropertiesService.getScriptProperties().getProperty('lastModified');
+  return { ts: ts || '0' };
+}
+
+// ── doGet ─────────────────────────────────────────────────
+function doGet(e) {
+  var action = e && e.parameter ? e.parameter.action : '';
+
+  if (!action) {
+    return HtmlService
+      .createHtmlOutputFromFile('Index')
+      .setTitle('Asset Management System')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  var result;
+  try {
+    if (action === 'login') {
+      result = validateLogin(e.parameter.user, e.parameter.pass);
+    } else if (action === 'getData') {
+      result = getDataSheetInfo();
+    } else if (action === 'getLog') {
+      result = getEditLog();
+    } else if (action === 'submit') {
+      result = submitEntry({
+        username:  e.parameter.username,
+        itemName:  e.parameter.itemName,
+        assetCode: e.parameter.assetCode,
+        className: e.parameter.className,
+        qty:       parseFloat(e.parameter.qty)
+      });
+    } else if (action === 'getLockedClasses') {
+      result = getLockedClasses();
+    } else if (action === 'lockClass') {
+      result = lockClass({
+        className: e.parameter.className,
+        lockedBy:  e.parameter.lockedBy,
+        timestamp: e.parameter.timestamp
+      });
+    } else if (action === 'unlockClass') {
+      result = unlockClass({ className: e.parameter.className });
+    } else if (action === 'lockStickerClass') {
+      result = lockStickerClass({
+        className: e.parameter.className,
+        lockedBy:  e.parameter.lockedBy,
+        timestamp: e.parameter.timestamp
+      });
+    } else if (action === 'unlockStickerClass') {
+      result = unlockStickerClass({ className: e.parameter.className });
+    } else if (action === 'getStickeringData') {
+      result = getStickeringData(e.parameter.filterClass || '');
+    } else if (action === 'getBarCodeTabData') {
+      result = getBarCodeTabData();
+    } else if (action === 'getLastModified') {
+      result = getLastModified();
+    } else {
+      result = { error: 'Unknown action: ' + action };
+    }
+  } catch (err) {
+    result = { error: err.message };
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── doPost ────────────────────────────────────────────────
+function doPost(e) {
+  try {
+    var action = e.parameter.action;
+    var body   = JSON.parse(e.postData.contents);
+    var result;
+
+    if (action === 'saveBarcodes') {
+      result = saveBarcodes(body);
+    } else if (action === 'updateStickeringRemarks') {
+      result = updateStickeringRemarks(body.slNos, body.remark);
+    } else if (action === 'addStickeringRow') {
+      result = addStickeringRow(body);
+    } else if (action === 'cancelBarCodes') {
+      result = cancelBarCodes(body.slNos);
+    } else {
+      result = { success: false, message: 'Unknown POST action: ' + action };
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════════════════════
+function validateLogin(username, password) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Login ID');
+  if (!ws) return { success: false, message: 'Login ID sheet not found.' };
+  var data = ws.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(username).trim() &&
+        String(data[i][1]).trim() === String(password).trim()) {
+      return {
+        success:  true,
+        username: String(data[i][0]).trim(),
+        role:     String(data[i][2]).trim()
+      };
+    }
+  }
+  return { success: false, message: 'Invalid username or password.' };
+}
+
+// ══════════════════════════════════════════════════════════
+//  DATA SHEET
+// ══════════════════════════════════════════════════════════
+function getDataSheetInfo() {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Data');
+  if (!ws) return { error: 'Data sheet not found.' };
+  var values = ws.getDataRange().getValues();
+  if (values.length < 2) return { classHeaders: [], rows: [] };
+  var headers      = values[0];
+  var classHeaders = headers.slice(3);
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    var row       = values[i];
+    var itemName  = String(row[0] || '').trim();
+    var assetCode = String(row[2] || '').trim();
+    if (!itemName && !assetCode) continue;
+    rows.push({
+      slNo:        row[1],
+      itemName:    itemName,
+      assetCode:   assetCode,
+      classCounts: row.slice(3)
+    });
+  }
+  return { classHeaders: classHeaders, rows: rows };
+}
+
+// ══════════════════════════════════════════════════════════
+//  SUBMIT ENTRY
+// ══════════════════════════════════════════════════════════
+function submitEntry(data) {
+  var ss     = SpreadsheetApp.getActiveSpreadsheet();
+  var dataWs = ss.getSheetByName('Data');
+  var logWs  = ss.getSheetByName('Edit Log');
+  if (!dataWs) return { success: false, message: 'Data sheet not found.' };
+  if (!logWs)  return { success: false, message: 'Edit Log sheet not found.' };
+
+  var values  = dataWs.getDataRange().getValues();
+  var headers = values[0];
+  var classCol = -1;
+  for (var c = 3; c < headers.length; c++) {
+    if (String(headers[c]).trim() === String(data.className).trim()) {
+      classCol = c;
+      break;
+    }
+  }
+  if (classCol < 0) return { success: false, message: '"' + data.className + '" not found.' };
+
+  var dataRow = -1;
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][2]).trim() === String(data.assetCode).trim()) {
+      dataRow = r;
+      break;
+    }
+  }
+  if (dataRow < 0) return { success: false, message: 'Asset code "' + data.assetCode + '" not found.' };
+
+  var newQty = (parseFloat(values[dataRow][classCol]) || 0) + parseFloat(data.qty);
+  dataWs.getRange(dataRow + 1, classCol + 1).setValue(newQty);
+  logWs.appendRow([
+    data.username,
+    data.itemName,
+    data.assetCode,
+    data.className,
+    data.qty,
+    new Date().toLocaleString('en-IN')
+  ]);
+  touchLastModified();
+  return { success: true, message: 'Entry saved successfully.' };
+}
+
+// ══════════════════════════════════════════════════════════
+//  EDIT LOG
+// ══════════════════════════════════════════════════════════
+function getEditLog() {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Edit Log');
+  if (!ws) return [];
+  var values = ws.getDataRange().getValues();
+  if (values.length < 2) return [];
+  var headers = values[0];
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    var obj = {};
+    headers.forEach(function(h, j) { obj[String(h)] = values[i][j]; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// ══════════════════════════════════════════════════════════
+//  CLASS LOCK & ASSIGN
+//
+//  "Assign & Lock class" sheet columns:
+//  A (0) = Class Name
+//  B (1) = Assigned To
+//  C (2) = Locked        (Yes / blank)
+//  D (3) = Locked By
+//  E (4) = Timestamp
+//  F (5) = Sticker Submitted  (Yes / blank)
+//  G (6) = Submitted By
+//  H (7) = Sticker Timestamp
+// ══════════════════════════════════════════════════════════
+function getLockedClasses() {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Assign & Lock class');
+  if (!ws) return [];
+  var values = ws.getDataRange().getValues();
+  if (values.length < 2) return [];
+  var result = [];
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    if (!row[0]) continue;
+    result.push({
+      className:        String(row[0]).trim(),
+      assignedTo:       String(row[1] || '').trim(),
+      locked:           String(row[2] || '').trim().toLowerCase() === 'yes',
+      lockedBy:         String(row[3] || '').trim(),
+      timestamp:        String(row[4] || '').trim(),
+      stickerLocked:    String(row[5] || '').trim().toLowerCase() === 'yes',
+      stickerLockedBy:  String(row[6] || '').trim(),
+      stickerTimestamp: String(row[7] || '').trim()
+    });
+  }
+  return result;
+}
+
+function lockClass(data) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Assign & Lock class');
+  if (!ws) return { success: false, message: 'Sheet not found.' };
+  var values = ws.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === String(data.className).trim()) {
+      ws.getRange(i + 1, 3).setValue('Yes');
+      ws.getRange(i + 1, 4).setValue(data.lockedBy);
+      ws.getRange(i + 1, 5).setValue(data.timestamp);
+      touchLastModified();
+      return { success: true };
+    }
+  }
+  return { success: false, message: 'Class not found.' };
+}
+
+function unlockClass(data) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Assign & Lock class');
+  if (!ws) return { success: false, message: 'Sheet not found.' };
+  var values = ws.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === String(data.className).trim()) {
+      ws.getRange(i + 1, 3, 1, 3).clearContent();
+      touchLastModified();
+      return { success: true };
+    }
+  }
+  return { success: false, message: 'Class not found.' };
+}
+
+function lockStickerClass(data) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Assign & Lock class');
+  if (!ws) return { success: false, message: 'Sheet not found.' };
+  var values = ws.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === String(data.className).trim()) {
+      ws.getRange(i + 1, 6).setValue('Yes');
+      ws.getRange(i + 1, 7).setValue(data.lockedBy);
+      ws.getRange(i + 1, 8).setValue(data.timestamp);
+      touchLastModified();
+      return { success: true };
+    }
+  }
+  return { success: false, message: 'Class not found.' };
+}
+
+function unlockStickerClass(data) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Assign & Lock class');
+  if (!ws) return { success: false, message: 'Sheet not found.' };
+  var values = ws.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]).trim() === String(data.className).trim()) {
+      ws.getRange(i + 1, 6, 1, 3).clearContent();
+      touchLastModified();
+      return { success: true };
+    }
+  }
+  return { success: false, message: 'Class not found.' };
+}
+
+// ══════════════════════════════════════════════════════════
+//  BAR CODE SHEET
+// ══════════════════════════════════════════════════════════
+function saveBarcodes(data) {
+  var ss     = SpreadsheetApp.getActiveSpreadsheet();
+  var ws     = ss.getSheetByName('Bar Code');
+  var dataWs = ss.getSheetByName('Data');
+  if (!ws) return { success: false, message: 'Bar Code sheet not found.' };
+
+  var itemNameMap = {};
+  if (dataWs) {
+    var dv = dataWs.getDataRange().getValues();
+    for (var i = 1; i < dv.length; i++) {
+      var iCode = String(dv[i][2] || '').trim();
+      if (iCode) itemNameMap[iCode] = String(dv[i][0] || '').trim();
+    }
+  }
+
+  var lastRow = ws.getLastRow();
+  if (lastRow >= 5) ws.getRange(5, 1, lastRow - 4, 5).clearContent();
+  if (!data || !data.length) {
+    touchLastModified();
+    return { success: true, count: 0 };
+  }
+
+  var rows = data.map(function(d, i) {
+    var parts     = String(d.codeText || '').split('/');
+    var assetCode = parts.length >= 2 ? parts[1] : '';
+    return [i + 1, d.codeText, itemNameMap[assetCode] || '', d.className, ''];
+  });
+  ws.getRange(5, 1, rows.length, 5).setValues(rows);
+  touchLastModified();
+  return { success: true, count: rows.length };
+}
+
+function getBarCodeTabData() {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Bar Code');
+  if (!ws) return [];
+  var data = ws.getDataRange().getValues();
+  var rows = [];
+  for (var i = 4; i < data.length; i++) {
+    var row = data[i];
+    if (!row[0] && !row[1]) continue;
+    rows.push({
+      slNo:      row[0],
+      barCode:   String(row[1] || '').trim(),
+      itemName:  String(row[2] || '').trim(),
+      className: String(row[3] || '').trim(),
+      remarks:   String(row[4] || '').trim()
+    });
+  }
+  return rows;
+}
+
+function cancelBarCodes(slNos) {
+  var ss   = SpreadsheetApp.getActiveSpreadsheet();
+  var bcWs = ss.getSheetByName('Bar Code');
+  var stWs = ss.getSheetByName('Stickering');
+  if (!bcWs) return { error: 'Bar Code sheet not found' };
+  if (!stWs) return { error: 'Stickering sheet not found' };
+
+  var bcData = bcWs.getDataRange().getValues();
+  var slSet  = {};
+  slNos.forEach(function(s) { slSet[String(s)] = true; });
+
+  var toCancel = [];
+  for (var i = 4; i < bcData.length; i++) {
+    if (slSet[String(bcData[i][0])]) {
+      toCancel.push({
+        barCode:   String(bcData[i][1] || '').trim(),
+        itemName:  String(bcData[i][2] || '').trim(),
+        className: String(bcData[i][3] || '').trim()
+      });
+    }
+  }
+  if (!toCancel.length) return { success: true, count: 0 };
+
+  var stData   = stWs.getDataRange().getValues();
+  var existing = {};
+  for (var j = 1; j < stData.length; j++) {
+    existing[String(stData[j][1] || '').trim().toUpperCase()] = j + 1;
+  }
+
+  var nextSlNo = stWs.getLastRow();
+  toCancel.forEach(function(entry) {
+    var bcUpper = entry.barCode.toUpperCase();
+    if (existing[bcUpper]) {
+      stWs.getRange(existing[bcUpper], 5).setValue('Cancelled');
+    } else {
+      nextSlNo++;
+      stWs.appendRow([nextSlNo, entry.barCode, entry.itemName, entry.className, 'Cancelled']);
+    }
+  });
+  touchLastModified();
+  return { success: true, count: toCancel.length };
+}
+
+function generateBarcodesFromSheet() {
+  var ui = SpreadsheetApp.getUi();
+  try {
+    var ss     = SpreadsheetApp.getActiveSpreadsheet();
+    var dataWs = ss.getSheetByName('Data');
+    var bcWs   = ss.getSheetByName('Bar Code');
+    if (!dataWs) { ui.alert('Data sheet not found.'); return; }
+    if (!bcWs)   { ui.alert('Bar Code sheet not found.'); return; }
+
+    var schoolCode   = String(bcWs.getRange(1, 2).getValue()).trim() || 'SCH';
+    var values       = dataWs.getDataRange().getValues();
+    var classHeaders = values[0].slice(3);
+    var seqMap = {}, result = [], slNo = 1;
+
+    classHeaders.forEach(function(cls, ci) {
+      for (var r = 1; r < values.length; r++) {
+        var row       = values[r];
+        var itemName  = String(row[0] || '').trim();
+        var assetCode = String(row[2] || '').trim();
+        if (!itemName || !assetCode) continue;
+        var qty = Math.max(0, parseInt(row[3 + ci]) || 0);
+        if (!qty) continue;
+        if (!seqMap[assetCode]) seqMap[assetCode] = 0;
+        for (var q = 0; q < qty; q++) {
+          seqMap[assetCode]++;
+          result.push([
+            slNo++,
+            schoolCode + '/' + assetCode + '/' + String(seqMap[assetCode]).padStart(4, '0'),
+            itemName,
+            cls,
+            ''
+          ]);
+        }
+      }
+    });
+
+    var last = bcWs.getLastRow();
+    if (last >= 5) bcWs.getRange(5, 1, last - 4, 5).clearContent();
+    if (result.length) bcWs.getRange(5, 1, result.length, 5).setValues(result);
+    touchLastModified();
+    ui.alert('Done! ' + result.length + ' labels written.');
+  } catch (err) {
+    ui.alert('Error: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  STICKERING SHEET
+// ══════════════════════════════════════════════════════════
+function getStickeringData(filterClass) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Stickering');
+  if (!ws) return [];
+  var data = ws.getDataRange().getValues();
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    if (!row[0] && !row[1]) continue;
+    var cls = String(row[3] || '').trim();
+    if (filterClass && cls !== filterClass) continue;
+    rows.push({
+      slNo:      row[0],
+      barCode:   String(row[1] || '').trim(),
+      itemName:  String(row[2] || '').trim(),
+      className: cls,
+      remarks:   String(row[4] || '').trim()
+    });
+  }
+  return rows;
+}
+
+function updateStickeringRemarks(slNos, remark) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Stickering');
+  if (!ws) return { error: 'Stickering sheet not found' };
+  var data  = ws.getDataRange().getValues();
+  var slSet = {};
+  slNos.forEach(function(s) { slSet[String(s)] = true; });
+  for (var i = 1; i < data.length; i++) {
+    if (slSet[String(data[i][0])]) ws.getRange(i + 1, 5).setValue(remark);
+  }
+  touchLastModified();
+  return { success: true };
+}
+
+function addStickeringRow(entry) {
+  var ws = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Stickering');
+  if (!ws) return { error: 'Stickering sheet not found' };
+  var data = ws.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][1]).trim().toUpperCase() === entry.barCode.toUpperCase()) {
+      return { duplicate: true };
+    }
+  }
+  var lastRow = ws.getLastRow();
+  ws.getRange(lastRow + 1, 1, 1, 5).setValues([
+    [lastRow, entry.barCode, entry.itemName, entry.className, 'New Added']
+  ]);
+  touchLastModified();
+  return { success: true };
+}
