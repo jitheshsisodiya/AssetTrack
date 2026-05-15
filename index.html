@@ -844,7 +844,7 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 // ══════════════════════════════════════════════════════════
 // When served from backend, use relative URLs.
 // When opened as a local file, fall back to localhost.
-const API_URL = location.protocol === 'file:' ? 'http://localhost:8001' : '';
+const API_URL = 'http://localhost:8001';
 
 // ══════════════════════════════════════════════════════════
 //  UNIFIED API LAYER  (REST + JWT)
