@@ -24,5 +24,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# Data files
+*.xlsx
+*.xls
+*.csv
+
 # Claude internal
 CLAUDE.md
