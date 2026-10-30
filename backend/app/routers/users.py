@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.auth.jwt import get_current_user, hash_password
+from app.auth.jwt import get_current_user, hash_password, username_taken
 from app.database import get_db
 from app.models.models import Branch, User
 from app.schemas.schemas import UserBulkItem, UserCreate, UserOut, UserUpdate
@@ -46,7 +46,7 @@ def list_users(db: Session = Depends(get_db), current_user: User = Depends(get_c
 def create_user(data: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     _require_admin(current_user)
     iid = current_user.institution_id
-    if db.query(User).filter(User.institution_id == iid, User.username == data.username).first():
+    if username_taken(db, data.username):
         raise HTTPException(status_code=400, detail="Username already exists.")
     user = User(institution_id=iid, username=data.username, password_hash=hash_password(data.password), role=data.role)
     db.add(user)
@@ -85,7 +85,7 @@ def bulk_create_users(items: list[UserBulkItem], db: Session = Depends(get_db), 
         username = item.username.strip()
         if not username or not item.password:
             skipped += 1; continue
-        if db.query(User).filter(User.institution_id == iid, User.username == username).first():
+        if username_taken(db, username):
             skipped += 1; continue
         user = User(institution_id=iid, username=username, password_hash=hash_password(item.password), role=item.role or "Editor")
         db.add(user)

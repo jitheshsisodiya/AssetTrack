@@ -9,8 +9,10 @@ class LoginRequest(BaseModel):
 
 class InstitutionRegister(BaseModel):
     institution_name: str
-    username: str
-    password: str
+    username:         str
+    password:         str
+    industry:         str = "Other"
+    group_label:      str = "Class"
 
 
 class TokenResponse(BaseModel):
@@ -19,6 +21,7 @@ class TokenResponse(BaseModel):
     username:         str
     role:             str
     institution_name: str = ""
+    group_label:      str = "Class"
     branch_ids:       List[int] = []
     branch_names:     List[str] = []
 

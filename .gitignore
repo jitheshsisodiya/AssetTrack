@@ -31,3 +31,9 @@ Thumbs.db
 
 # Claude internal
 CLAUDE.md
+
+# Uploaded asset files
+backend/uploads/
+
+# Local demo logins
+backend/create_demo.py

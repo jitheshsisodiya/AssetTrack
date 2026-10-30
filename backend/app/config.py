@@ -13,3 +13,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+from pathlib import Path as _Path
+
+UPLOAD_ROOT = _Path(__file__).resolve().parents[1] / "uploads"

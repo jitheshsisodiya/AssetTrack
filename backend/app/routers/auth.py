@@ -1,3 +1,4 @@
+import shutil
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,9 +6,18 @@ from pydantic import BaseModel
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
-from app.auth.jwt import create_access_token, get_current_user, hash_password, verify_password
+from app.auth.jwt import create_access_token, get_current_user, hash_password, username_taken, verify_password
+from app.config import UPLOAD_ROOT
 from app.database import get_db
 from app.models.models import Asset, AssetClassCount, Class, EditLog, Institution, User
+
+INDUSTRY_TEMPLATES: dict[str, list[str]] = {
+    "Retail":        ["Showroom Floor", "Storage Room", "Billing Counter", "Trial Room", "Manager Office"],
+    "Manufacturing": ["Production Floor", "Assembly Line", "Quality Control", "Warehouse", "Admin Office"],
+    "SaaS/Tech":     ["Engineering", "Server Room", "Conference Room", "Reception", "HR"],
+    "Healthcare":    ["Ward", "OPD", "Pharmacy", "Lab", "Admin"],
+    "School":        ["Classroom", "Lab", "Library", "Staff Room", "Principal Office"],
+}
 from app.schemas.schemas import InstitutionRegister, LoginRequest, TokenResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -46,6 +56,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         username=user.username,
         role=user.role,
         institution_name=institution.name if institution else "",
+        group_label=institution.group_label if institution else "Class",
         branch_ids=branch_ids,
         branch_names=branch_names,
     )
@@ -158,6 +169,7 @@ def delete_institution(inst_id: int, db: Session = Depends(get_db), current_user
         raise HTTPException(status_code=404, detail="Institution not found.")
     db.delete(inst)
     db.commit()
+    shutil.rmtree(UPLOAD_ROOT / str(inst_id), ignore_errors=True)
 
 
 class ResetPasswordBody(BaseModel):
@@ -197,9 +209,8 @@ def add_admin(inst_id: int, body: AddAdminBody, db: Session = Depends(get_db), c
     inst = db.get(Institution, inst_id)
     if not inst:
         raise HTTPException(status_code=404, detail="Institution not found.")
-    existing = db.query(User).filter(User.institution_id == inst_id, User.username == body.username.strip()).first()
-    if existing:
-        raise HTTPException(status_code=409, detail="Username already exists in this institution.")
+    if username_taken(db, body.username):
+        raise HTTPException(status_code=409, detail="That username is already taken.")
     user = User(institution_id=inst_id, username=body.username.strip(), password_hash=hash_password(body.password), role="Admin")
     db.add(user)
     db.commit()
@@ -227,7 +238,14 @@ def register(data: InstitutionRegister, db: Session = Depends(get_db)):
     if not username or not data.password:
         raise HTTPException(status_code=400, detail="Admin username and password are required.")
 
-    institution = Institution(name=name)
+    if username_taken(db, username):
+        raise HTTPException(status_code=409, detail="That username is already taken. Please choose another.")
+
+    institution = Institution(
+        name=name,
+        industry=data.industry.strip() or "Other",
+        group_label=data.group_label.strip() or "Class",
+    )
     db.add(institution)
     db.flush()
 
@@ -238,5 +256,9 @@ def register(data: InstitutionRegister, db: Session = Depends(get_db)):
         role="Admin",
     )
     db.add(admin)
+
+    for i, cat in enumerate(INDUSTRY_TEMPLATES.get(institution.industry, []), start=1):
+        db.add(Class(institution_id=institution.id, class_name=cat, display_order=i))
+
     db.commit()
     return {"success": True, "institution_name": name, "username": username}

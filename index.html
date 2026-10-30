@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Asset Management System</title>
+<title>AssetTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -241,8 +241,8 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
     <div class="login-icon">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
     </div>
-    <div class="login-title">Asset Manager</div>
-    <div class="login-sub">School Asset Management System</div>
+    <div class="login-title">AssetTrack</div>
+    <div class="login-sub">Asset Tracking &amp; Audit Platform</div>
 
     <!-- Tab toggle -->
     <div style="display:flex;gap:0;margin-bottom:20px;border:1.5px solid var(--s200);border-radius:10px;overflow:hidden">
@@ -264,8 +264,19 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 
     <!-- Register Institution panel -->
     <div id="panelRegister" style="display:none">
-      <div class="fg" style="margin-bottom:14px"><label>Institution Name</label>
-        <input type="text" id="ri" placeholder="e.g. Springfield School" autocapitalize="words"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Organisation Name</label>
+        <input type="text" id="ri" placeholder="e.g. Acme Retail Pvt Ltd" autocapitalize="words"></div>
+      <div class="fg" style="margin-bottom:14px"><label>Industry</label>
+        <select id="rind" onchange="regIndustryChanged()">
+          <option value="Retail">Retail</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="SaaS/Tech">SaaS / Tech</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="School">School</option>
+          <option value="Other">Other</option>
+        </select></div>
+      <div class="fg" style="margin-bottom:14px"><label>What do you call a location / group?</label>
+        <input type="text" id="rgl" placeholder="e.g. Department, Zone, Room, Aisle" autocapitalize="words" value="Location"></div>
       <div class="fg" style="margin-bottom:14px"><label>Admin Username</label>
         <input type="text" id="ru" placeholder="Choose a username" autocomplete="username" autocapitalize="none"></div>
       <div class="fg" style="margin-bottom:14px"><label>Admin Password</label>
@@ -285,7 +296,7 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
   <div style="background:var(--g800);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:10">
     <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px">
       <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
-      Asset Manager &nbsp;<span style="font-size:11px;font-weight:500;opacity:.7;background:rgba(255,255,255,.15);border-radius:20px;padding:2px 10px">Super Admin</span>
+      AssetTrack &nbsp;<span style="font-size:11px;font-weight:500;opacity:.7;background:rgba(255,255,255,.15);border-radius:20px;padding:2px 10px">Super Admin</span>
     </div>
     <div style="display:flex;align-items:center;gap:12px;font-size:13px">
       <span style="opacity:.8">Jithesh</span>
@@ -403,7 +414,7 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
   <div class="topbar">
     <div class="topbar-brand">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
-      <span class="brand-text">Asset Manager</span>
+      <span class="brand-text">AssetTrack</span>
       <span id="institutionName" style="font-size:11px;font-weight:500;color:rgba(255,255,255,.6);background:rgba(255,255,255,.1);border-radius:20px;padding:2px 10px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px"></span>
       <span id="liveIndicator" title="Live sync" style="display:none;align-items:center;gap:5px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border-radius:20px;padding:2px 9px 2px 6px;flex-shrink:0">
         <span id="liveDot" style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:livePulse 1.8s ease-in-out infinite"></span>LIVE
@@ -441,6 +452,9 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
     </button>
     <button class="tab-btn" id="tab-stickering" onclick="switchTab('stickering')">
       <span class="tab-icon">📌</span>Stickering
+    </button>
+    <button class="tab-btn" id="tab-far" onclick="switchTab('far')" style="display:none">
+      <span class="tab-icon">🏛️</span>Fixed Assets<span id="farTabBadge" style="display:none;background:#dc2626;color:#fff;border-radius:10px;padding:0 6px;font-size:10px;margin-left:5px;vertical-align:middle"></span>
     </button>
     <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display:none">
       <span class="tab-icon">⚙️</span>Admin
@@ -578,7 +592,7 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 
         <div class="bc-toolbar">
           <div class="fg" style="max-width:160px">
-            <label>School Code</label>
+            <label>Code Prefix</label>
             <input type="text" id="bcSchoolCode" placeholder="e.g. SCH" value="SCH" style="text-transform:uppercase">
           </div>
           <div class="fg">
@@ -588,6 +602,66 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
           <button class="btn btn-p" onclick="generateBarcodes()" id="bcGenBtn">🏷️ Generate Labels</button>
           <button class="btn btn-s" id="bcWordBtn" onclick="downloadWordDoc()" style="display:none">📄 Download Word (.docx)</button>
           <button class="btn btn-s" id="bcWordByUserBtn" onclick="downloadWordDocByUser()" style="display:none" title="One page per user — classes flow together, no wasted sticker space">👤 Download Word (By User)</button>
+        </div>
+
+        <details id="prSettings" style="margin:4px 0 14px">
+          <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--s600)">🖨️ Printer settings — <span id="prStatus" style="font-weight:500;color:var(--s400)">Browser print dialog</span></summary>
+          <div class="bc-toolbar" style="margin-top:12px">
+            <div class="fg" style="min-width:210px">
+              <label>Connection</label>
+              <select id="prMode" onchange="prSettingsChanged()">
+                <option value="browser">Browser print dialog</option>
+                <option value="bluetooth">Bluetooth (BLE)</option>
+                <option value="serial">Bluetooth / USB serial port</option>
+                <option value="network">Wi-Fi / LAN (IP address)</option>
+              </select>
+            </div>
+            <div class="fg" style="max-width:170px" id="prLangWrap">
+              <label>Printer language</label>
+              <select id="prLang" onchange="prSettingsChanged()">
+                <option value="zpl">ZPL (Zebra)</option>
+                <option value="tspl">TSPL (TSC, Xprinter…)</option>
+                <option value="escpos">ESC/POS</option>
+              </select>
+            </div>
+            <div class="fg" style="max-width:120px" id="prDpiWrap">
+              <label>Resolution</label>
+              <select id="prDpi" onchange="prSettingsChanged()">
+                <option value="203">203 dpi</option>
+                <option value="300">300 dpi</option>
+              </select>
+            </div>
+            <div class="fg" style="max-width:170px;display:none" id="prHostWrap">
+              <label>Printer IP address</label>
+              <input type="text" id="prHost" placeholder="192.168.1.50" onchange="prSettingsChanged()" autocomplete="off">
+            </div>
+            <label id="prInvertWrap" style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--s600);height:42px;text-transform:none;letter-spacing:0;white-space:nowrap"><input type="checkbox" id="prInvert" onchange="prSettingsChanged()" style="width:18px;height:18px;flex:none;padding:0;margin:0"> Invert image</label>
+            <button class="btn btn-s" id="prConnectBtn" type="button" onclick="prConnect()" style="display:none">🔗 Connect</button>
+            <button class="btn btn-s" type="button" onclick="prTest()">🧪 Test print</button>
+          </div>
+          <div id="prMsg" class="msg"></div>
+          <p style="font-size:12px;color:var(--s400);margin:6px 0 0">Bluetooth (BLE) works in Chrome or Edge on Android and desktop; serial port is desktop Chrome or Edge, with the printer paired or plugged in first. Direct printing sends a sharp black-and-white image of each label. If a test label comes out black-on-white inverted, tick “Invert image”. Wi-Fi/LAN printing is relayed by the server, so it works when the server is on the same network as the printer.</p>
+        </details>
+
+        <div class="bc-toolbar" id="bcPrintBar" style="display:none">
+          <div class="fg" style="max-width:170px">
+            <label>Label Size</label>
+            <select id="bcLabelSize">
+              <option value="50x25">50 × 25 mm</option>
+              <option value="38x25">38 × 25 mm</option>
+              <option value="75x50">75 × 50 mm</option>
+              <option value="100x50">100 × 50 mm</option>
+            </select>
+          </div>
+          <div class="fg" style="max-width:170px">
+            <label>Label Type</label>
+            <select id="bcLabelFmt">
+              <option value="qr">QR code</option>
+              <option value="barcode">Barcode (Code128)</option>
+            </select>
+          </div>
+          <button class="btn btn-p" onclick="printLabels(bcData.filter(b => !b.cancelled))" title="Print every label shown below on your label printer">🖨️ Print Labels</button>
+          <span style="font-size:12px;color:var(--s400)">Tip: tap 🖨 on a single label to print just that one. In the print dialog, set margins to None.</span>
         </div>
 
         <div id="bcMsg" class="msg"></div>
@@ -679,7 +753,10 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
           </div>
           <div class="fg">
             <label>Bar Code <span id="stNewCodeHint" style="font-weight:400;color:var(--s400);font-size:11px;text-transform:none"></span></label>
-            <input type="text" id="stNewCode" placeholder="Auto-suggested or type manually" style="text-transform:uppercase">
+            <div style="display:flex;gap:8px">
+              <input type="text" id="stNewCode" placeholder="Auto-suggested, type, or scan" style="text-transform:uppercase;flex:1;min-width:0">
+              <button class="btn btn-s" type="button" onclick="openScanner(stScanned)" title="Scan a sticker with the camera" style="flex:none;height:42px">📷 Scan</button>
+            </div>
           </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
@@ -729,14 +806,14 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
     <!-- ADMIN -->
     <div class="tab-panel" id="panel-admin">
 
-      <!-- Branch filter for admin (view data by branch) -->
+      <!-- Site filter for admin -->
       <div class="card" id="adminBranchViewCard">
-        <div class="card-title">Viewing Branch</div>
+        <div class="card-title">Viewing Site</div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <div class="fg" style="flex:1;min-width:180px">
-            <label>Select Branch to View Data</label>
+            <label>Select Site to View Data</label>
             <select id="adminViewBranch" onchange="adminSetViewBranch()">
-              <option value="">All Branches</option>
+              <option value="">All Sites</option>
             </select>
           </div>
           <button class="btn btn-s" onclick="adminRefreshData()" style="height:42px;margin-top:20px">Apply &amp; Refresh Data</button>
@@ -745,11 +822,11 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 
       <!-- Branch Management -->
       <div class="card">
-        <div class="card-title">Branch Management</div>
+        <div class="card-title">Site Management</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
-          <div class="fg" style="flex:1;min-width:160px"><label>Branch Name</label><input type="text" id="admBranchName" placeholder="e.g. Main Campus"></div>
-          <div class="fg" style="flex:1;min-width:120px"><label>Branch Code</label><input type="text" id="admBranchCode" placeholder="e.g. MC01"></div>
-          <button class="btn btn-p" onclick="admBranchCreate()" style="height:42px">+ Add Branch</button>
+          <div class="fg" style="flex:1;min-width:160px"><label>Site Name</label><input type="text" id="admBranchName" placeholder="e.g. Main Store"></div>
+          <div class="fg" style="flex:1;min-width:120px"><label>Site Code</label><input type="text" id="admBranchCode" placeholder="e.g. MC01"></div>
+          <button class="btn btn-p" onclick="admBranchCreate()" style="height:42px">+ Add Site</button>
           <button class="btn btn-s" onclick="admDownloadTemplate('branch')" style="height:42px" title="Download Excel template">⬇ Template</button>
           <button class="btn btn-s" onclick="document.getElementById('admBranchFile').click()" style="height:42px" title="Upload filled template">📂 Upload Excel</button>
           <input type="file" id="admBranchFile" accept=".xlsx,.xls" style="display:none" onchange="admUploadExcel('branch',this)">
@@ -764,8 +841,8 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end">
           <div class="fg" style="flex:1;min-width:180px"><label>Class Name</label><input type="text" id="admClassName" placeholder="e.g. Room 101"></div>
           <div class="fg" style="flex:1;min-width:160px">
-            <label>Assign to Branch</label>
-            <select id="admClassBranch"><option value="">— Select Branch —</option></select>
+            <label>Assign to Site</label>
+            <select id="admClassBranch"><option value="">— Select Site —</option></select>
           </div>
           <button class="btn btn-p" onclick="admClassCreate()" style="height:42px">+ Add Class</button>
           <button class="btn btn-s" onclick="admDownloadTemplate('class')" style="height:42px" title="Download Excel template">⬇ Template</button>
@@ -819,7 +896,7 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
         <div class="card-title">Export Data to Excel</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
           <div class="fg" style="flex:1;min-width:200px">
-            <label>Select Branches (hold Ctrl for multiple)</label>
+            <label>Select Sites (hold Ctrl for multiple)</label>
             <select id="admExportBranches" multiple size="4" style="height:auto"></select>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -831,13 +908,99 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 
     </div><!-- /panel-admin -->
 
+    <!-- FIXED ASSET REGISTER -->
+    <div class="tab-panel" id="panel-far">
+      <div class="card">
+        <div class="card-title">Fixed Asset Register — Companies Act 2013 (Schedule II / III) &amp; CARO 2020 clause 3(i)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+          <div class="fg" style="max-width:150px">
+            <label>Financial year</label>
+            <select id="farFy" onchange="farFyChanged()"></select>
+          </div>
+          <div id="farNav" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div id="farMsg" class="msg"></div>
+        <div id="farBody"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
+    </div><!-- /panel-far -->
+
   </div><!-- /main -->
   <div class="mob-out"><button onclick="doLogout()">Sign Out</button></div>
 </div><!-- /appScreen -->
 
+<div id="farModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;align-items:flex-start;justify-content:center;overflow:auto;padding:20px 12px">
+  <div style="background:#fff;border-radius:16px;padding:20px;width:min(96vw,760px);box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div id="farModalTitle" style="font-weight:700;font-size:16px;color:var(--s800)">Add asset</div>
+      <button class="btn btn-s" type="button" onclick="farCloseModal()">✕ Close</button>
+    </div>
+    <div id="farModalSub" style="font-size:12.5px;color:var(--s500);margin-bottom:10px;display:none"></div>
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="fg" style="grid-column:1/-1"><label>Description *</label><input type="text" id="fa_description" placeholder="e.g. Dell Latitude laptops"></div>
+      <div class="fg"><label>Category *</label><select id="fa_category" onchange="farCategoryChanged()"></select></div>
+      <div class="fg"><label>Register no. <span style="font-weight:400;text-transform:none">(auto if blank)</span></label><input type="text" id="fa_far_no" placeholder="FA-00001"></div>
+      <div class="fg"><label>Linked item <span style="font-weight:400;text-transform:none">(for physical check)</span></label><select id="fa_item"></select></div>
+      <div class="fg"><label id="fa_loc_lbl">Location</label><select id="fa_location"></select></div>
+      <div class="fg"><label>Quantity</label><input type="number" id="fa_quantity" min="0" step="any" value="1"></div>
+      <div class="fg"><label>Cost (₹) *</label><input type="number" id="fa_cost" min="0" step="0.01"></div>
+      <div class="fg"><label>Purchase date *</label><input type="date" id="fa_purchase"></div>
+      <div class="fg"><label>Put-to-use date <span style="font-weight:400;text-transform:none">(depreciation starts)</span></label><input type="date" id="fa_putuse"></div>
+      <div class="fg"><label>Vendor</label><input type="text" id="fa_vendor"></div>
+      <div class="fg"><label>Invoice no.</label><input type="text" id="fa_invoice"></div>
+      <div class="fg"><label>Serial no.</label><input type="text" id="fa_serial"></div>
+      <div class="fg"><label>Method</label><select id="fa_method" onchange="farCheckDeparture()"><option value="SLM">Straight line (SLM)</option><option value="WDV">Written down value (WDV)</option></select></div>
+      <div class="fg"><label>Useful life (years)</label><input type="number" id="fa_life" min="0" step="any" oninput="farCheckDeparture()"></div>
+      <div class="fg"><label>Residual value (% of cost)</label><input type="number" id="fa_resid" min="0" max="99" step="any" oninput="farCheckDeparture()"></div>
+      <div class="fg" style="grid-column:1/-1"><label id="fa_note_lbl">Policy note</label><input type="text" id="fa_note" placeholder="Required if life or residual differs from Schedule II"></div>
+      <div class="fg"><label>Warranty expires</label><input type="date" id="fa_warranty"></div>
+      <div class="fg"><label>Disposal date</label><input type="date" id="fa_disp_date"></div>
+      <div class="fg"><label>Disposal proceeds (₹)</label><input type="number" id="fa_disp_amt" min="0" step="0.01" value="0"></div>
+    </div>
+    <div id="fa_title_box" style="display:none;margin-top:14px;padding:12px;border:1.5px solid var(--s200);border-radius:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--s600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Title deeds — immovable property (CARO 3(i)(c))</div>
+      <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:0">
+        <div class="fg"><label>Title deed in the company's name?</label><select id="fa_t_in"><option value="">— Not recorded —</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="fg"><label>Held in the name of</label><input type="text" id="fa_t_holder"></div>
+        <div class="fg"><label>Holder is promoter / director / relative / employee?</label><select id="fa_t_rel"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="fg"><label>Held since</label><input type="date" id="fa_t_since"></div>
+        <div class="fg" style="grid-column:1/-1"><label>Reason for not being held in the company's name</label><input type="text" id="fa_t_reason"></div>
+      </div>
+    </div>
+    <div id="farModalMsg" class="msg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-s" type="button" onclick="farCloseModal()">Cancel</button>
+      <button class="btn btn-p" type="button" id="farSaveBtn" onclick="farSaveAsset()">Save asset</button>
+    </div>
+  </div>
+</div>
+<div id="opsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:260;align-items:center;justify-content:center;padding:12px;overflow:auto">
+  <div style="background:#fff;border-radius:16px;padding:20px;width:min(94vw,460px);box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div id="opsModalTitle" style="font-weight:700;font-size:16px;color:var(--s800);margin-bottom:4px"></div>
+    <div id="opsModalSub" style="font-size:12.5px;color:var(--s500);margin-bottom:10px"></div>
+    <div id="opsModalFields" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="opsModalMsg" class="msg"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-s" type="button" onclick="opsClose()" id="opsModalCancel">Cancel</button>
+      <button class="btn btn-p" type="button" id="opsModalGo">Save</button>
+    </div>
+  </div>
+</div>
+<div id="scanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:16px;width:min(92vw,420px)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-weight:700;color:var(--s800)">Scan barcode / QR</div>
+      <button class="btn btn-s" type="button" onclick="closeScanner()">✕ Close</button>
+    </div>
+    <div id="scanReader" style="width:100%;min-height:60px"></div>
+    <div id="scanMsg" class="msg"></div>
+  </div>
+</div>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════
 //  CONFIG
@@ -990,17 +1153,59 @@ function switchLoginTab(tab) {
   document.getElementById('tabRegister').style.color      = isSignIn ? 'var(--s500)' : '#fff';
 }
 
+const _pr = { mode: 'browser', lang: 'zpl', dpi: 203, invert: false, host: '', ble: null, bleName: '', port: null };
+const _BLE_SERVICES = [
+  '000018f0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb', '0000ff00-0000-1000-8000-00805f9b34fb',
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '0000fee7-0000-1000-8000-00805f9b34fb',
+];
+
+var _groupLabel = (function () { try { return localStorage.getItem('assetMgrGroupLabel') || 'Class'; } catch (e) { return 'Class'; } })();
+function gl()  { return _groupLabel; }
+function gls() { return _groupLabel.endsWith('s') ? _groupLabel : _groupLabel + 's'; }
+
+const _industryGroupDefaults = { 'Retail': 'Location', 'Manufacturing': 'Department', 'SaaS/Tech': 'Department', 'Healthcare': 'Ward', 'School': 'Class', 'Other': 'Location' };
+function regIndustryChanged() {
+  document.getElementById('rgl').value = _industryGroupDefaults[document.getElementById('rind').value] || 'Location';
+}
+
+// Rewrites static "Class"/"Classes" wording in the app UI with the institution's own label.
+const _glOrig = new Map();
+function applyGroupLabels() {
+  const swap = t => t.replace(/\bClasses\b/g, gls()).replace(/\bClass\b/g, gl()).replace(/\bclass\b/g, gl().toLowerCase());
+  const root = document.getElementById('appScreen');
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => (n.parentNode && /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => {
+    if (!_glOrig.has(n)) _glOrig.set(n, n.nodeValue);
+    const o = _glOrig.get(n);
+    if (/\b[Cc]lass(es)?\b/.test(o)) n.nodeValue = swap(o);
+  });
+  root.querySelectorAll('[title],[placeholder]').forEach(el => {
+    ['title', 'placeholder'].forEach(a => {
+      if (!el.hasAttribute(a)) return;
+      const k = '_glo_' + a;
+      if (el[k] === undefined) el[k] = el.getAttribute(a);
+      if (/\b[Cc]lass(es)?\b/.test(el[k])) el.setAttribute(a, swap(el[k]));
+    });
+  });
+}
+
 function doRegister() {
   const instName = document.getElementById('ri').value.trim();
+  const industry = document.getElementById('rind').value;
+  const groupLabel = document.getElementById('rgl').value.trim() || 'Location';
   const username = document.getElementById('ru').value.trim();
   const password = document.getElementById('rp').value;
-  if (!instName) { showMsg('rm', 'Institution name is required.', 'err'); return; }
+  if (!instName) { showMsg('rm', 'Organisation name is required.', 'err'); return; }
   if (!username || !password) { showMsg('rm', 'Username and password are required.', 'err'); return; }
   setBusy('registerBtn', true, 'Create Institution');
   fetch(API_URL + '/auth/register', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ institution_name: instName, username, password }),
+    body:    JSON.stringify({ institution_name: instName, username, password, industry, group_label: groupLabel }),
   })
   .then(res => res.ok ? res.json() : res.json().then(e => Promise.reject(e.detail || 'Registration failed.')))
   .then(() => {
@@ -1036,6 +1241,7 @@ function doLogin() {
     store.setItem('assetMgrBranchIds',       JSON.stringify(res.branch_ids   || []));
     store.setItem('assetMgrBranchNames',     JSON.stringify(res.branch_names || []));
     store.setItem('assetMgrInstitutionName', res.institution_name || '');
+    store.setItem('assetMgrGroupLabel',      res.group_label || 'Class');
     loginAs(res.username, res.role || 'Editor', res.branch_ids || [], res.branch_names || [], res.institution_name || '');
   })
   .catch(err => {
@@ -1054,6 +1260,9 @@ function loginAs(username, role, branchIds, branchNames, institutionName) {
   store.setItem('assetMgrRole', currentRole);
   const instEl = document.getElementById('institutionName');
   if (instEl) instEl.textContent = institutionName || store.getItem('assetMgrInstitutionName') || '';
+  _groupLabel = store.getItem('assetMgrGroupLabel') || 'Class';
+  applyGroupLabels();
+  prLoad();
   document.getElementById('loginScreen').style.display = 'none';
 
   if (currentRole === 'SuperAdmin') {
@@ -1371,6 +1580,8 @@ function doLogout() {
   store.removeItem('assetMgrBranchIds');
   store.removeItem('assetMgrBranchNames');
   store.removeItem('assetMgrInstitutionName');
+  store.removeItem('assetMgrGroupLabel');
+  _groupLabel = 'Class';
   const instEl = document.getElementById('institutionName');
   if (instEl) instEl.textContent = '';
   document.getElementById('superAdminScreen').style.display = 'none';
@@ -1398,6 +1609,11 @@ function applyRoleRestrictions(role) {
   // Admin tab: Admin only
   const tabAdmin = document.getElementById('tab-admin');
   if (tabAdmin) tabAdmin.style.display = isAdmin ? '' : 'none';
+
+  // Fixed Assets tab: Admin only
+  const tabFar = document.getElementById('tab-far');
+  if (tabFar) tabFar.style.display = isAdmin ? '' : 'none';
+  if (isAdmin && typeof farRefreshOps === 'function') farRefreshOps();
 
   // Barcodes tab: Admin only
   const tabBarcode = document.getElementById('tab-barcode');
@@ -1664,7 +1880,7 @@ function silentLoadLog() {
 //  TABS
 // ══════════════════════════════════════════════════════════
 function switchTab(name) {
-  ['add','view','log','barcode','stickering','admin'].forEach(t => {
+  ['add','view','log','barcode','stickering','far','admin'].forEach(t => {
     const panel = document.getElementById('panel-'+t);
     const tab   = document.getElementById('tab-'+t);
     if (panel) panel.classList.toggle('active', t===name);
@@ -1678,6 +1894,7 @@ function switchTab(name) {
   if (name==='log')        loadLog();
   if (name==='barcode')    initBarcodeTab();
   if (name==='stickering') initStickeringTab();
+  if (name==='far')        farInit();
   if (name==='admin')      adminLoad();
 }
 
@@ -1735,8 +1952,8 @@ function populateDDs() {
     const sel=document.getElementById(id); if(!sel) return;
     const cur=sel.value;
     sel.innerHTML = id==='eClass'
-      ? '<option value="">— Select Class —</option>'
-      : '<option value="">All Classes</option>';
+      ? '<option value="">— Select ' + gl() + ' —</option>'
+      : '<option value="">All ' + gls() + '</option>';
     sheetData.classHeaders.forEach(h => sel.appendChild(new Option(h,h)));
     if(cur) sel.value=cur;
   });
@@ -1846,7 +2063,7 @@ function renderData() {
             style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--amber-bg);border:none;cursor:pointer;font-family:inherit">
             <span style="display:flex;align-items:center;gap:8px">
               <span style="font-size:13px">&#9888;</span>
-              <span style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em">Pending Classes — No entries recorded yet</span>
+              <span style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em">Pending ${gls()} — No entries recorded yet</span>
               <span style="background:var(--amber);color:#fff;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:700">${pendingClasses.length}</span>
             </span>
             <span class="pc-chevron" style="color:var(--amber);font-size:12px;transition:transform .2s;transform:rotate(0deg)">&#9660;</span>
@@ -1855,7 +2072,7 @@ function renderData() {
             <table style="width:100%;border-collapse:collapse;font-size:13px">
               <thead><tr>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg);white-space:nowrap;width:48px">#</th>
-                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">${gl()} Name</th>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Assigned To</th>
               </tr></thead>
               <tbody>
@@ -1896,7 +2113,7 @@ function renderData() {
             <table style="width:100%;border-collapse:collapse;font-size:13px">
               <thead><tr>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg);white-space:nowrap;width:48px">#</th>
-                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">${gl()} Name</th>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--amber-b);background:var(--amber-bg)">Assigned To</th>
               </tr></thead>
               <tbody>
@@ -1935,7 +2152,7 @@ function renderData() {
             <table style="width:100%;border-collapse:collapse;font-size:13px">
               <thead><tr>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg);white-space:nowrap;width:48px">#</th>
-                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg)">Class Name</th>
+                <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg)">${gl()} Name</th>
                 <th style="padding:7px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--red-b);background:var(--red-bg)">Assigned To</th>
               </tr></thead>
               <tbody>
@@ -1993,16 +2210,16 @@ function doLockClass() {
   const cls = document.getElementById('eClass').value;
   if (!cls) return;
   const timestamp = new Date().toLocaleString();
-  setBusy('lockClassBtn', true, '&#128274; Submit Class');
+  setBusy('lockClassBtn', true, '&#128274; Submit ' + gl());
   call('lockClass', [{ className: cls, lockedBy: currentUser, timestamp }],
     () => {
       lockedClasses.set(cls, { lockedBy: currentUser, timestamp });
-      setBusy('lockClassBtn', false, '&#128274; Submit Class');
+      setBusy('lockClassBtn', false, '&#128274; Submit ' + gl());
       updateLockUI(cls);
       document.getElementById('submitBtn').disabled = true;
       showMsg('sm', `"${cls}" locked by ${currentUser} at ${timestamp}. Only Kush or Darsh can unlock.`, 'info');
     },
-    err => { setBusy('lockClassBtn', false, '&#128274; Submit Class'); showMsg('sm', 'Lock failed: ' + err, 'err'); }
+    err => { setBusy('lockClassBtn', false, '&#128274; Submit ' + gl()); showMsg('sm', 'Lock failed: ' + err, 'err'); }
   );
 }
 
@@ -2012,16 +2229,16 @@ function doUnlockClass() {
     return;
   }
   const cls = document.getElementById('eClass').value;
-  setBusy('unlockClassBtn', true, '&#128275; Unlock Class');
+  setBusy('unlockClassBtn', true, '&#128275; Unlock ' + gl());
   call('unlockClass', [{ className: cls }],
     () => {
       lockedClasses.delete(cls);
-      setBusy('unlockClassBtn', false, '&#128275; Unlock Class');
+      setBusy('unlockClassBtn', false, '&#128275; Unlock ' + gl());
       updateLockUI(cls);
       document.getElementById('submitBtn').disabled = false;
       clearMsg('sm');
     },
-    err => { setBusy('unlockClassBtn', false, '&#128275; Unlock Class'); showMsg('sm', 'Unlock failed: ' + err, 'err'); }
+    err => { setBusy('unlockClassBtn', false, '&#128275; Unlock ' + gl()); showMsg('sm', 'Unlock failed: ' + err, 'err'); }
   );
 }
 
@@ -2367,7 +2584,7 @@ function submitEntry() {
   if (lockedClasses.has(className)) { showMsg('sm', `"${className}" is locked. Only Kush or Darsh can unlock it.`, 'err'); return; }
   if (!itemName || !itemMap[itemName]) { showMsg('sm','Please select a valid item from the list.','err'); return; }
   if (!assetCode)                      { showMsg('sm','Asset code is missing.','err'); return; }
-  if (!className)                      { showMsg('sm','Please select a class.','err'); return; }
+  if (!className)                      { showMsg('sm','Please select a ' + gl().toLowerCase() + '.','err'); return; }
   if (isNaN(qty) || qty === 0)         { showMsg('sm','Enter a valid quantity (cannot be 0).','err'); return; }
 
   // Prevent going negative (req 6)
@@ -2462,7 +2679,7 @@ function initBarcodeTab() {
   if (sheetData.classHeaders.length) {
     const sel = document.getElementById('bcClass');
     const cur = sel.value;
-    sel.innerHTML = '<option value="">All Classes</option>';
+    sel.innerHTML = '<option value="">All ' + gls() + '</option>';
     sheetData.classHeaders.forEach(h => sel.appendChild(new Option(h, h)));
     if (cur) sel.value = cur;
   }
@@ -2629,13 +2846,1066 @@ function renderBarcodeGrid() {
           <div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:2px">CANCELLED</div>
         </div>`;
       } else {
-        html += `<div class="bc-card"><div class="bc-code-text">${b.codeText}</div></div>`;
+        html += `<div class="bc-card" style="position:relative"><div class="bc-code-text">${b.codeText}</div>
+          <button onclick="printLabels([bcData[${bcData.indexOf(b)}]])" title="Print this label" style="position:absolute;top:2px;right:2px;border:none;background:none;cursor:pointer;font-size:13px;opacity:.55;padding:2px">🖨</button></div>`;
       }
     });
     html += `</div></div>`;
   });
 
   document.getElementById('bcContainer').innerHTML = html;
+  document.getElementById('bcPrintBar').style.display = bcData.some(b => !b.cancelled) ? '' : 'none';
+}
+
+// ──────────────────────────────────────────────────────
+//  LABEL PRINTING — real Code128 / QR labels at true physical size
+// ──────────────────────────────────────────────────────
+const _escHtml = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function _labelSvg(code, fmt) {
+  if (fmt === 'qr') {
+    const qr = qrcode(0, 'M');
+    qr.addData(code);
+    qr.make();
+    return qr.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
+  }
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  JsBarcode(svg, code, { format: 'CODE128', displayValue: false, margin: 0, height: 40, width: 2 });
+  svg.removeAttribute('width'); svg.removeAttribute('height');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  return svg.outerHTML;
+}
+
+function buildLabelsHtml(list, size, fmt) {
+  const [w, h] = size.split('x').map(Number);
+  const org   = (document.getElementById('institutionName') || {}).textContent || '';
+  const small = h <= 25;
+  const font  = small ? 6.5 : 9;
+  const labels = list.map(b => {
+    const svg  = _labelSvg(b.codeText, fmt);
+    const text = `<div class="code">${_escHtml(b.codeText)}</div>
+      <div class="meta">${_escHtml(b.itemName)}</div>
+      <div class="meta cls">${_escHtml(b.className)}</div>`;
+    const body = fmt === 'qr'
+      ? `<div class="row"><div class="qr">${svg}</div><div class="txt">${text}</div></div>`
+      : `<div class="bar">${svg}</div>${text}`;
+    return `<div class="l"><div class="org">${_escHtml(org)}</div>${body}</div>`;
+  }).join('');
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Labels</title><style>
+    @page{size:${w}mm ${h}mm;margin:0}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    .l{width:${w}mm;height:${h}mm;padding:1.2mm 1.5mm;overflow:hidden;page-break-after:always;break-after:page;font-family:Arial,Helvetica,sans-serif;color:#000;display:flex;flex-direction:column}
+    .l:last-child{page-break-after:auto;break-after:auto}
+    .org{font-size:${font - 1}pt;font-weight:700;text-transform:uppercase;letter-spacing:.2mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+    .row{display:flex;gap:1.5mm;flex:1;min-height:0;align-items:center}
+    .qr{height:${h - (small ? 5 : 7)}mm;width:${h - (small ? 5 : 7)}mm;flex:none}
+    .qr svg{width:100%;height:100%;display:block}
+    .txt{min-width:0;flex:1}
+    .bar{flex:1;min-height:0;padding:.6mm 0}
+    .bar svg{width:100%;height:100%;display:block}
+    .code{font-size:${font}pt;font-weight:700;word-break:break-all;line-height:1.15}
+    .meta{font-size:${font - 0.5}pt;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cls{font-weight:700}
+  </style></head><body>${labels}</body></html>`;
+}
+
+function printLabels(list) {
+  list = (list || []).filter(Boolean);
+  if (!list.length) { showMsg('bcMsg', 'No labels to print.', 'err'); return; }
+  if (list.length > 300 && !confirm(`Print ${list.length} labels? That is ${list.length} separate stickers.`)) return;
+  const size = document.getElementById('bcLabelSize').value;
+  const fmt  = document.getElementById('bcLabelFmt').value;
+  if (_pr.mode !== 'browser') { printViaDevice(list, size, fmt); return; }
+  let html;
+  try { html = buildLabelsHtml(list, size, fmt); }
+  catch (e) { showMsg('bcMsg', 'Could not build labels: ' + e.message, 'err'); return; }
+
+  const old = document.getElementById('_labelFrame');
+  if (old) old.remove();
+  const f = document.createElement('iframe');
+  f.id = '_labelFrame';
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(f);
+  f.srcdoc = html;
+  f.onload = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { showMsg('bcMsg', 'Print failed: ' + e.message, 'err'); } };
+}
+
+// ──────────────────────────────────────────────────────
+//  DIRECT PRINTING — Bluetooth / serial / Wi-Fi (LAN) thermal printers
+//  Label is drawn as a 1-bit image, wrapped in ZPL / TSPL / ESC-POS, then sent.
+// ──────────────────────────────────────────────────────
+function prLoad() {
+  try { Object.assign(_pr, JSON.parse(store.getItem('assetMgrPrinter') || '{}')); } catch (e) {}
+  document.getElementById('prMode').value  = _pr.mode;
+  document.getElementById('prLang').value  = _pr.lang;
+  document.getElementById('prDpi').value   = String(_pr.dpi);
+  document.getElementById('prHost').value  = _pr.host;
+  document.getElementById('prInvert').checked = !!_pr.invert;
+  prRefreshUi();
+}
+
+function prSettingsChanged() {
+  _pr.mode   = document.getElementById('prMode').value;
+  _pr.lang   = document.getElementById('prLang').value;
+  _pr.dpi    = parseInt(document.getElementById('prDpi').value, 10) || 203;
+  _pr.host   = document.getElementById('prHost').value.trim();
+  _pr.invert = document.getElementById('prInvert').checked;
+  store.setItem('assetMgrPrinter', JSON.stringify({ mode: _pr.mode, lang: _pr.lang, dpi: _pr.dpi, invert: _pr.invert, host: _pr.host }));
+  prRefreshUi();
+}
+
+function prRefreshUi() {
+  const m = _pr.mode, direct = m !== 'browser';
+  document.getElementById('prLangWrap').style.display   = direct ? '' : 'none';
+  document.getElementById('prDpiWrap').style.display    = direct ? '' : 'none';
+  document.getElementById('prInvertWrap').style.display = direct ? 'flex' : 'none';
+  document.getElementById('prHostWrap').style.display   = m === 'network' ? '' : 'none';
+  document.getElementById('prConnectBtn').style.display = (m === 'bluetooth' || m === 'serial') ? '' : 'none';
+  let t = 'Browser print dialog';
+  if (m === 'bluetooth') t = _pr.ble ? 'Bluetooth — connected to ' + _pr.bleName : 'Bluetooth — not connected';
+  if (m === 'serial')    t = _pr.port ? 'Serial port — connected' : 'Serial port — not connected';
+  if (m === 'network')   t = 'Wi-Fi / LAN — ' + (_pr.host || 'enter printer IP');
+  document.getElementById('prStatus').textContent = t;
+}
+
+async function prConnect() {
+  clearMsg('prMsg');
+  try {
+    if (_pr.mode === 'bluetooth') {
+      if (!navigator.bluetooth) throw new Error('This browser has no Bluetooth printing support. Use Chrome or Edge (Android or desktop).');
+      const dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: _BLE_SERVICES });
+      const server = await dev.gatt.connect();
+      let ch = null;
+      for (const svc of await server.getPrimaryServices()) {
+        for (const c of await svc.getCharacteristics()) {
+          if (c.properties.writeWithoutResponse || c.properties.write) { ch = c; break; }
+        }
+        if (ch) break;
+      }
+      if (!ch) throw new Error('Connected to "' + (dev.name || 'device') + '" but found no writable printer channel. It may need Bluetooth Classic — try the serial-port option.');
+      _pr.ble = ch; _pr.bleName = dev.name || 'printer';
+      dev.addEventListener('gattserverdisconnected', () => { _pr.ble = null; prRefreshUi(); });
+      showMsg('prMsg', 'Connected to ' + _pr.bleName + '.', 'ok');
+    } else if (_pr.mode === 'serial') {
+      if (!navigator.serial) throw new Error('This browser has no serial-port support. Use desktop Chrome or Edge, with the printer paired/plugged in first.');
+      _pr.port = await navigator.serial.requestPort();
+      showMsg('prMsg', 'Serial port selected.', 'ok');
+    }
+  } catch (e) {
+    if (e && e.name === 'NotFoundError') showMsg('prMsg', 'No device selected.', 'info');
+    else showMsg('prMsg', 'Connect failed: ' + ((e && e.message) || e), 'err');
+  }
+  prRefreshUi();
+}
+
+async function _svgImg(svgStr, w, h) {
+  const el = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
+  el.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); el.setAttribute('width', w); el.setAttribute('height', h);
+  const img = new Image();
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('label image failed')); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(el)); });
+  return img;
+}
+
+async function renderLabelCanvas(b, wmm, hmm, fmt, dpi) {
+  const dpmm = dpi / 25.4, W = Math.round(wmm * dpmm), H = Math.round(hmm * dpmm);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.fillStyle = '#000'; x.textBaseline = 'top'; x.imageSmoothingEnabled = false;
+  const pad = Math.round(1.5 * dpmm), small = hmm <= 25;
+  const px = pt => Math.max(8, Math.round(pt * dpi / 72));
+  const line = (txt, left, y, maxW, size, bold, shrink) => {
+    let t = String(txt == null ? '' : txt), s = size;
+    x.font = (bold ? 'bold ' : '') + s + 'px Arial';
+    if (shrink) { while (x.measureText(t).width > maxW && s > 8) { s--; x.font = (bold ? 'bold ' : '') + s + 'px Arial'; } }
+    else if (x.measureText(t).width > maxW) { while (x.measureText(t + '…').width > maxW && t.length > 1) t = t.slice(0, -1); t += '…'; }
+    x.fillText(t, left, y); return y + Math.round(x.measureText('M').width * 1.35);
+  };
+  const org = ((document.getElementById('institutionName') || {}).textContent || '').toUpperCase();
+  const fs = small ? 6.5 : 9;
+  let y = pad;
+  y = line(org, pad, y, W - 2 * pad, px(fs - 1), true, false) + Math.round(dpmm * 0.4);
+  if (fmt === 'qr') {
+    const qr = qrcode(0, 'M'); qr.addData(b.codeText); qr.make();
+    const n = qr.getModuleCount(), avail = H - y - pad, m = Math.max(1, Math.floor(avail / n)), qs = m * n;
+    for (let r = 0; r < n; r++) for (let q = 0; q < n; q++) if (qr.isDark(r, q)) x.fillRect(pad + q * m, y + r * m, m, m);
+    const tx = pad + qs + Math.round(1.5 * dpmm), tw = W - tx - pad;
+    let ty = y + Math.round(dpmm * 1);
+    ty = line(b.codeText, tx, ty, tw, px(fs), true, true);
+    ty = line(b.itemName, tx, ty, tw, px(fs - .5), false, false);
+    line(b.className, tx, ty, tw, px(fs - .5), true, false);
+  } else {
+    const tmp = document.createElement('canvas');
+    JsBarcode(tmp, b.codeText, { format: 'CODE128', displayValue: false, margin: 0, width: 1, height: 50 });
+    const k = Math.max(1, Math.floor((W - 2 * pad) / tmp.width));
+    const bh = Math.round((H - y - pad) * (small ? 0.42 : 0.5)), bw = tmp.width * k;
+    x.drawImage(tmp, pad + Math.floor((W - 2 * pad - bw) / 2), y, bw, bh);
+    let ty = y + bh + Math.round(dpmm * 0.6);
+    ty = line(b.codeText, pad, ty, W - 2 * pad, px(fs), true, true);
+    ty = line(b.itemName, pad, ty, W - 2 * pad, px(fs - .5), false, false);
+    line(b.className, pad, ty, W - 2 * pad, px(fs - .5), true, false);
+  }
+  return c;
+}
+
+function canvasToBits(c) {
+  const W = c.width, H = c.height, rowBytes = Math.ceil(W / 8), d = c.getContext('2d').getImageData(0, 0, W, H).data;
+  const out = new Uint8Array(rowBytes * H);
+  for (let r = 0; r < H; r++) for (let q = 0; q < W; q++) {
+    const i = (r * W + q) * 4;
+    if (d[i + 3] > 127 && (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11) < 150) out[r * rowBytes + (q >> 3)] |= 0x80 >> (q & 7);
+  }
+  return { W, H, rowBytes, data: out };
+}
+
+function labelCommands(bm, wmm, hmm, lang, invert) {
+  const enc = s => new TextEncoder().encode(s);
+  const cat = parts => { const n = parts.reduce((a, p) => a + p.length, 0), o = new Uint8Array(n); let k = 0; parts.forEach(p => { o.set(p, k); k += p.length; }); return o; };
+  const bits = (flip) => { if (!flip) return bm.data; const o = new Uint8Array(bm.data.length); for (let i = 0; i < o.length; i++) o[i] = ~bm.data[i] & 0xff; return o; };
+  if (lang === 'tspl') {
+    // TSPL bitmaps print a 0 bit as black
+    return cat([enc(`SIZE ${wmm} mm,${hmm} mm\r\nGAP 2 mm,0 mm\r\nDIRECTION 0\r\nCLS\r\nBITMAP 0,0,${bm.rowBytes},${bm.H},0,`), bits(!invert), enc('\r\nPRINT 1,1\r\n')]);
+  }
+  if (lang === 'escpos') {
+    return cat([new Uint8Array([0x1b, 0x40, 0x1d, 0x76, 0x30, 0, bm.rowBytes & 255, bm.rowBytes >> 8, bm.H & 255, bm.H >> 8]), bits(invert), new Uint8Array([0x1b, 0x64, 0x03])]);
+  }
+  const hex = Array.from(bits(invert), v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const total = bm.rowBytes * bm.H;
+  return enc(`^XA^PW${bm.W}^LL${bm.H}^LH0,0^FO0,0^GFA,${total},${total},${bm.rowBytes},${hex}^FS^XZ`);
+}
+
+function _b64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+
+async function prSend(bytes) {
+  if (_pr.mode === 'network') {
+    if (!_pr.host) throw new Error('Enter the printer IP address in Printer settings.');
+    await apiPost('/api/print/raw', { host: _pr.host, port: 9100, data: _b64(bytes) });
+  } else if (_pr.mode === 'bluetooth') {
+    if (!_pr.ble) throw new Error('Not connected — press Connect in Printer settings first.');
+    let size = 100;
+    for (let i = 0; i < bytes.length;) {
+      const part = bytes.subarray(i, i + size);
+      try {
+        if (_pr.ble.properties.writeWithoutResponse) await _pr.ble.writeValueWithoutResponse(part); else await _pr.ble.writeValue(part);
+        i += part.length; await new Promise(r => setTimeout(r, 12));
+      } catch (e) { if (size > 20) size = 20; else throw e; }
+    }
+  } else if (_pr.mode === 'serial') {
+    if (!_pr.port) throw new Error('No port selected — press Connect in Printer settings first.');
+    if (!_pr.port.readable) await _pr.port.open({ baudRate: 115200 });
+    const w = _pr.port.writable.getWriter();
+    try { await w.write(bytes); } finally { w.releaseLock(); }
+  }
+}
+
+async function printViaDevice(list, size, fmt) {
+  const [w, h] = size.split('x').map(Number);
+  try {
+    showMsg('bcMsg', `Sending ${list.length} label${list.length !== 1 ? 's' : ''} to the printer…`, 'info');
+    const parts = [];
+    for (const b of list) parts.push(labelCommands(canvasToBits(await renderLabelCanvas(b, w, h, fmt, _pr.dpi)), w, h, _pr.lang, _pr.invert));
+    const total = parts.reduce((a, p) => a + p.length, 0), all = new Uint8Array(total); let k = 0;
+    parts.forEach(p => { all.set(p, k); k += p.length; });
+    await prSend(all);
+    showMsg('bcMsg', `✓ ${list.length} label${list.length !== 1 ? 's' : ''} sent to the printer.`, 'ok');
+  } catch (e) {
+    showMsg('bcMsg', 'Printing failed: ' + ((e && e.message) || e), 'err');
+  }
+}
+
+function prTest() {
+  clearMsg('prMsg');
+  printLabels([{ codeText: 'TEST/0001', itemName: 'Printer test label', className: 'AssetTrack' }]);
+}
+
+// ──────────────────────────────────────────────────────
+//  FIXED ASSET REGISTER — Companies Act 2013 (Sch. II/III) and CARO 2020 clause 3(i)
+// ──────────────────────────────────────────────────────
+const _far = { view: 'register', fy: null, lookups: null, assets: [], byId: {}, editId: null, parentId: null, filter: { q: '', cat: '', status: '' }, catEdit: null, asOn: '' };
+const _farViews = [['register', 'Register'], ['movement', 'Schedule III movement'], ['verification', 'Physical verification'], ['title', 'Title & revaluation'], ['maintenance', 'Maintenance'], ['custody', 'Custody'], ['audit', 'Audit trail'], ['categories', 'Categories']];
+const _inr = v => (Number(v) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const _dmy = iso => iso ? iso.slice(8, 10) + '-' + iso.slice(5, 7) + '-' + iso.slice(0, 4) : '';
+const _farNum = id => { const v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+const _farTri = id => { const v = document.getElementById(id).value; return v === 'yes' ? true : v === 'no' ? false : null; };
+const _farTh = 'padding:8px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap';
+const _farTd = 'padding:7px 10px;text-align:right;font-size:12.5px;white-space:nowrap';
+
+function _fyNow() { const d = new Date(); return d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1; }
+function _fyLabel(y) { return y + '-' + String(y + 1).slice(-2); }
+
+async function farInit() {
+  const sel = document.getElementById('farFy');
+  if (!sel.options.length) {
+    const now = _fyNow();
+    for (let y = now + 1; y >= now - 9; y--) sel.add(new Option('FY ' + _fyLabel(y), y));
+    sel.value = now; _far.fy = now;
+  }
+  document.getElementById('fa_loc_lbl').textContent = gl();
+  try { _far.lookups = await apiGet('/api/far/lookups'); } catch (e) { showMsg('farMsg', String(e.message || e), 'err'); return; }
+  await farRefreshOps();
+  farShow(_far.view);
+}
+
+function farFyChanged() { _far.fy = Number(document.getElementById('farFy').value); farShow(_far.view); }
+
+function farRenderNav() {
+  const o = _far.ops || {};
+  const badge = { maintenance: [(o.tasks_overdue || 0) + (o.tasks_due_soon || 0) + (o.warranties_expiring || 0), (o.tasks_overdue || 0) > 0],
+                  custody: [o.custody_out || 0, (o.custody_overdue || 0) > 0] };
+  document.getElementById('farNav').innerHTML = _farViews.map(([k, l]) => {
+    const b = badge[k], n = b && b[0] ? ` <span style="background:${b[1] ? '#dc2626' : '#d97706'};color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:3px">${b[0]}</span>` : '';
+    return `<button class="btn ${k === _far.view ? 'btn-p' : 'btn-s'}" type="button" onclick="farShow('${k}')" style="padding:8px 14px;font-size:13px">${l}${n}</button>`;
+  }).join('');
+}
+
+async function farRefreshOps() {
+  try { _far.ops = await apiGet('/api/ops/summary'); } catch (e) { _far.ops = null; }
+  farRenderNav(); farTabBadge();
+}
+
+function farTabBadge() {
+  const o = _far.ops, el = document.getElementById('farTabBadge');
+  if (!el) return;
+  const hot = o ? (o.tasks_overdue || 0) + (o.custody_overdue || 0) : 0;
+  el.style.display = hot ? 'inline-block' : 'none'; el.textContent = hot;
+}
+
+async function farShow(view) {
+  _far.view = view; farRenderNav(); clearMsg('farMsg');
+  document.getElementById('farBody').innerHTML = '<div class="tbl-loading"><span class="spin dk"></span> Loading…</div>';
+  try {
+    await ({ register: farRegister, movement: farMovement, verification: farVerification, title: farTitle, maintenance: farMaintenance, custody: farCustody, audit: farAudit, categories: farCategories })[view]();
+  } catch (e) { document.getElementById('farBody').innerHTML = ''; showMsg('farMsg', String(e.message || e), 'err'); }
+}
+
+function farExport(name, headers, rows) {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers].concat(rows)), name.slice(0, 31));
+  XLSX.writeFile(wb, name.replace(/[^\w-]+/g, '_') + '.xlsx');
+}
+
+// ── Register ───────────────────────────────────────────────
+async function farRegister() {
+  const r = await apiGet('/api/far/assets?fy=' + _far.fy);
+  _far.assets = r.assets; r.assets.forEach(a => { _far.byId[a.id] = a; });
+  const cats = _far.lookups.categories;
+  document.getElementById('farBody').innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+      <div class="fg" style="min-width:200px;flex:1"><label>Search</label><input type="text" id="farQ" placeholder="Description, register no., vendor, invoice…" value="${_esc(_far.filter.q)}" oninput="_far.filter.q=this.value;farRenderTable()"></div>
+      <div class="fg" style="min-width:170px"><label>Category</label><select id="farCatF" onchange="_far.filter.cat=this.value;farRenderTable()"><option value="">All</option>${cats.map(c => `<option value="${c.id}" ${String(c.id) === _far.filter.cat ? 'selected' : ''}>${_esc(c.name)}</option>`).join('')}</select></div>
+      <div class="fg" style="min-width:120px"><label>Status</label><select id="farStF" onchange="_far.filter.status=this.value;farRenderTable()"><option value="">All</option><option ${_far.filter.status === 'Active' ? 'selected' : ''}>Active</option><option ${_far.filter.status === 'Disposed' ? 'selected' : ''}>Disposed</option></select></div>
+      <button class="btn btn-p" type="button" onclick="farOpenModal(null,null)" style="height:42px">+ Add asset</button>
+      <button class="btn btn-s" type="button" onclick="document.getElementById('farImportFile').click()" style="height:42px">📂 Import Excel</button>
+      <button class="btn btn-s" type="button" onclick="farTemplate()" style="height:42px">⬇ Template</button>
+      <button class="btn btn-s" type="button" onclick="farExportRegister()" style="height:42px">📥 Export</button>
+      <input type="file" id="farImportFile" accept=".xlsx,.xls" style="display:none" onchange="farImport(this)">
+    </div>
+    <div id="farImportOut"></div>
+    <div id="farTbl"></div>
+    <p style="font-size:12px;color:var(--s400);margin-top:10px">Depreciation is pro rata by days from the put-to-use date (financial year April–March). Figures shown are for FY ${r.fy_label}. ⚠ marks assets whose life or residual value differs from Schedule II and carries a policy note.</p>`;
+  farRenderTable();
+}
+
+function farFilteredAssets() {
+  const f = _far.filter, q = f.q.toLowerCase();
+  const rows = _far.assets.filter(a => (!f.cat || String(a.category_id) === f.cat) && (!f.status || a.status === f.status) &&
+    (!q || (a.description + ' ' + a.far_no + ' ' + a.vendor + ' ' + a.invoice_no + ' ' + a.serial_no).toLowerCase().indexOf(q) >= 0));
+  const kids = {};
+  rows.forEach(a => { if (a.parent_id) (kids[a.parent_id] = kids[a.parent_id] || []).push(a); });
+  const out = [];
+  rows.filter(a => !a.parent_id || !rows.some(p => p.id === a.parent_id)).forEach(m => { out.push(m); (kids[m.id] || []).forEach(k => out.push(k)); });
+  return out;
+}
+
+function farRenderTable() {
+  const rows = farFilteredAssets();
+  const wrap = document.getElementById('farTbl');
+  if (!wrap) return;
+  if (!rows.length) { wrap.innerHTML = '<div class="tbl-empty">No assets yet. Use “+ Add asset” or import an Excel file.</div>'; return; }
+  const tot = { cost: 0, charge: 0, acc: 0, net: 0 };
+  let h = `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:1100px"><thead><tr>
+    <th>Reg. no.</th><th>Description</th><th>Category</th><th>${_esc(gl())}</th><th style="text-align:right">Qty</th><th>Put to use</th>
+    <th style="text-align:right">Cost (₹)</th><th>Method / life</th><th style="text-align:right">Depn. for year</th><th style="text-align:right">Accum. depn.</th><th style="text-align:right">Net block</th><th>Status</th><th></th></tr></thead><tbody>`;
+  rows.forEach(a => {
+    const inUse = a.closing_gross > 0 || a.disposed_in_year;
+    tot.cost += a.closing_gross; tot.charge += a.charge; tot.acc += a.closing_acc; tot.net += a.closing_net;
+    const cap = a.put_to_use_date || a.purchase_date;
+    const note = a.policy_note ? ` <span title="${_esc(a.policy_note)}" style="cursor:help">⚠</span>` : '';
+    const life = a.useful_life_years ? `${a.method} · ${a.useful_life_years} yrs` : 'Not depreciated';
+    h += `<tr style="${a.status === 'Disposed' ? 'opacity:.6' : ''}">
+      <td>${_esc(a.far_no)}</td>
+      <td style="${a.parent_id ? 'padding-left:26px' : ''}">${a.parent_id ? '↳ ' : ''}${_esc(a.description)}${note}</td>
+      <td>${_esc(a.category)}</td><td>${_esc(a.location)}</td><td style="text-align:right">${a.quantity}</td><td>${_dmy(cap)}</td>
+      <td style="text-align:right">${_inr(a.cost)}</td><td>${life}</td>
+      <td style="text-align:right">${inUse ? _inr(a.charge) : '—'}</td><td style="text-align:right">${inUse ? _inr(a.closing_acc) : '—'}</td>
+      <td style="text-align:right;font-weight:600">${inUse ? _inr(a.closing_net) : 'Not yet in use'}</td>
+      <td>${a.status}${a.disposal_date ? '<br><span style="font-size:11px;color:var(--s400)">' + _dmy(a.disposal_date) + '</span>' : ''}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farOpenModal(${a.id},null)">Edit</button>
+        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Photos and documents" onclick="farFiles(${a.id})">📎</button>
+        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Change history" onclick="farHistory(${a.id})">🕘</button>
+        ${a.parent_id ? '' : `<button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Add a component with its own life (Ind AS 16)" onclick="farOpenModal(null,${a.id})">+ Part</button>`}
+        <button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDelete(${a.id})">✕</button>
+      </td></tr>`;
+  });
+  h += `<tr style="font-weight:700;background:var(--s50)"><td colspan="6">Total (${rows.length} line${rows.length !== 1 ? 's' : ''})</td><td style="text-align:right">${_inr(tot.cost)}</td><td></td>
+    <td style="text-align:right">${_inr(tot.charge)}</td><td style="text-align:right">${_inr(tot.acc)}</td><td style="text-align:right">${_inr(tot.net)}</td><td colspan="2"></td></tr></tbody></table></div>`;
+  wrap.innerHTML = h;
+}
+
+function farExportRegister() {
+  const rows = farFilteredAssets().map(a => [a.far_no, a.description, a.parent_id ? 'Component' : 'Main', a.category, a.schedule_iii_class, a.location, a.item, a.quantity,
+    a.purchase_date, a.put_to_use_date || '', a.vendor, a.invoice_no, a.serial_no, a.cost, a.method, a.useful_life_years, a.residual_pct, a.policy_note,
+    a.opening_gross, a.additions, a.disposals, a.closing_gross, a.opening_acc, a.charge, a.acc_on_disposal, a.closing_acc, a.closing_net, a.status, a.disposal_date || '', a.disposal_proceeds, a.profit_loss_on_disposal]);
+  farExport('FAR_FY' + _fyLabel(_far.fy), ['Reg no', 'Description', 'Type', 'Category', 'Schedule III class', gl(), 'Linked item', 'Quantity', 'Purchase date', 'Put to use', 'Vendor', 'Invoice no', 'Serial no',
+    'Cost', 'Method', 'Useful life (yrs)', 'Residual %', 'Policy note', 'Gross block - opening', 'Additions', 'Disposals', 'Gross block - closing', 'Accum. depn - opening', 'Depn for the year',
+    'Depn on disposals', 'Accum. depn - closing', 'Net block - closing', 'Status', 'Disposal date', 'Disposal proceeds', 'Profit/(loss) on disposal'], rows);
+}
+
+function farTemplate() {
+  farExport('FAR_import_template', ['Description', 'Category', 'Cost', 'Purchase Date', 'Put To Use Date', 'Quantity', 'Location', 'Item Code', 'Vendor', 'Invoice No', 'Serial No', 'Method', 'Useful Life (Years)', 'Residual %', 'Policy Note'],
+    [['Dell laptops', 'Computers - desktops/laptops', 250000, '2025-04-15', '2025-04-20', 5, '', '', 'ABC Traders', 'INV-101', '', '', '', '', '']]);
+}
+
+function _farDate(v) {
+  if (v === '' || v == null) return null;
+  if (typeof v === 'number') return new Date(Math.round((v - 25569) * 86400000)).toISOString().slice(0, 10);
+  const s = String(v).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
+  m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+  return s;
+}
+
+async function farImport(input) {
+  const file = input.files && input.files[0]; input.value = '';
+  if (!file) return;
+  try {
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+    const pick = (row, ...names) => { for (const k of Object.keys(row)) if (names.indexOf(k.toLowerCase().replace(/[^a-z0-9]/g, '')) >= 0) return row[k]; return ''; };
+    const str = v => (v === '' || v == null) ? null : String(v).trim();
+    const num = v => (v === '' || v == null) ? null : Number(v);
+    const rows = raw.map(r => ({
+      description: String(pick(r, 'description') || '').trim(), category: String(pick(r, 'category') || '').trim(), cost: Number(pick(r, 'cost')) || 0,
+      purchase_date: _farDate(pick(r, 'purchasedate')), put_to_use_date: _farDate(pick(r, 'puttousedate')), quantity: num(pick(r, 'quantity')) || 1,
+      location: str(pick(r, 'location')), asset_code: str(pick(r, 'itemcode', 'assetcode')), vendor: str(pick(r, 'vendor')), invoice_no: str(pick(r, 'invoiceno')), serial_no: str(pick(r, 'serialno')),
+      method: str(pick(r, 'method')), useful_life_years: num(pick(r, 'usefullifeyears', 'usefullife')), residual_pct: num(pick(r, 'residual', 'residualpct')), policy_note: str(pick(r, 'policynote')),
+    })).filter(r => r.description || r.category);
+    if (!rows.length) { showMsg('farMsg', 'No rows found in the file.', 'err'); return; }
+    if (rows.some(r => !r.purchase_date)) { showMsg('farMsg', 'Every row needs a Purchase Date.', 'err'); return; }
+    const res = await apiPost('/api/far/assets/bulk', rows);
+    showMsg('farMsg', `${res.created} asset${res.created !== 1 ? 's' : ''} imported${res.errors.length ? ', ' + res.errors.length + ' row(s) rejected' : ''}.`, res.errors.length ? 'info' : 'ok');
+    document.getElementById('farImportOut').innerHTML = res.errors.length ? '<div style="font-size:12.5px;color:var(--err);margin-bottom:10px">' + res.errors.map(e => `Row ${e.row}: ${_esc(e.message)}`).join('<br>') + '</div>' : '';
+    const r2 = await apiGet('/api/far/assets?fy=' + _far.fy); _far.assets = r2.assets; r2.assets.forEach(a => { _far.byId[a.id] = a; }); farRenderTable();
+  } catch (e) { showMsg('farMsg', 'Import failed: ' + ((e && e.message) || e), 'err'); }
+}
+
+function farOpenModal(id, parentId) {
+  const L = _far.lookups, a = id ? _far.byId[id] : null;
+  _far.editId = id; _far.parentId = a ? a.parent_id : parentId;
+  const fill = (el, html) => { document.getElementById(el).innerHTML = html; };
+  fill('fa_category', L.categories.map(c => `<option value="${c.id}">${_esc(c.name)}</option>`).join(''));
+  fill('fa_item', '<option value="">— None —</option>' + L.items.map(i => `<option value="${i.id}">${_esc(i.name)} (${_esc(i.code)})</option>`).join(''));
+  fill('fa_location', '<option value="">— None —</option>' + L.locations.map(l => `<option value="${l.id}">${_esc(l.name)}</option>`).join(''));
+  document.getElementById('fa_loc_lbl').textContent = gl();
+  const set = (k, v) => { document.getElementById(k).value = v == null ? '' : v; };
+  const parent = _far.parentId ? _far.byId[_far.parentId] : null;
+  const sub = document.getElementById('farModalSub');
+  sub.style.display = parent ? 'block' : 'none';
+  if (parent) sub.textContent = 'Component of ' + parent.far_no + ' — ' + parent.description + '. A component is depreciated on its own life (Ind AS 16), so enter only its own cost.';
+  document.getElementById('farModalTitle').textContent = a ? 'Edit ' + a.far_no : (parent ? 'Add component' : 'Add asset');
+  set('fa_description', a && a.description); set('fa_far_no', a && a.far_no); set('fa_quantity', a ? a.quantity : 1); set('fa_cost', a && a.cost);
+  set('fa_purchase', a && a.purchase_date); set('fa_putuse', a && a.put_to_use_date); set('fa_vendor', a && a.vendor); set('fa_invoice', a && a.invoice_no);
+  set('fa_serial', a && a.serial_no); set('fa_warranty', a && a.warranty_expiry); set('fa_note', a && a.policy_note); set('fa_disp_date', a && a.disposal_date); set('fa_disp_amt', a ? a.disposal_proceeds : 0);
+  set('fa_item', a && a.asset_id); set('fa_location', a && a.class_id);
+  set('fa_t_in', a && (a.title_in_company_name === true ? 'yes' : a.title_in_company_name === false ? 'no' : '')); set('fa_t_holder', a && a.title_holder);
+  set('fa_t_rel', a && (a.title_holder_related === true ? 'yes' : a.title_holder_related === false ? 'no' : '')); set('fa_t_since', a && a.title_held_since); set('fa_t_reason', a && a.title_reason);
+  if (a) { set('fa_category', a.category_id); set('fa_method', a.method); set('fa_life', a.useful_life_years); set('fa_resid', a.residual_pct); }
+  else { farCategoryChanged(); }
+  farShowTitleBox(); farCheckDeparture();
+  clearMsg('farModalMsg');
+  document.getElementById('farModal').style.display = 'flex';
+}
+
+function farCloseModal() { document.getElementById('farModal').style.display = 'none'; }
+function _farCat() { const id = Number(document.getElementById('fa_category').value); return _far.lookups.categories.find(c => c.id === id); }
+function farShowTitleBox() { const c = _farCat(); document.getElementById('fa_title_box').style.display = c && c.is_immovable ? 'block' : 'none'; }
+
+function farCategoryChanged() {
+  const c = _farCat(); if (!c) return;
+  document.getElementById('fa_method').value = c.default_method;
+  document.getElementById('fa_life').value = c.schedule_ii_life == null ? '' : c.schedule_ii_life;
+  document.getElementById('fa_resid').value = c.residual_pct;
+  farShowTitleBox(); farCheckDeparture();
+}
+
+function farCheckDeparture() {
+  const c = _farCat(); if (!c) return;
+  const life = _farNum('fa_life'), res = _farNum('fa_resid') || 0;
+  const departs = (c.schedule_ii_life != null && life != null && Math.abs(life - c.schedule_ii_life) > 1e-9) || res > 5;
+  const lbl = document.getElementById('fa_note_lbl');
+  lbl.textContent = departs ? 'Policy note — REQUIRED: life or residual value differs from Schedule II' : 'Policy note';
+  lbl.style.color = departs ? 'var(--err)' : '';
+}
+
+async function farSaveAsset() {
+  clearMsg('farModalMsg');
+  const body = {
+    description: document.getElementById('fa_description').value.trim(), category_id: Number(document.getElementById('fa_category').value),
+    far_no: document.getElementById('fa_far_no').value.trim() || null, asset_id: _farNum('fa_item'), class_id: _farNum('fa_location'), parent_id: _far.parentId || null,
+    quantity: _farNum('fa_quantity'), cost: _farNum('fa_cost'), purchase_date: document.getElementById('fa_purchase').value || null,
+    put_to_use_date: document.getElementById('fa_putuse').value || null, vendor: document.getElementById('fa_vendor').value.trim() || null,
+    invoice_no: document.getElementById('fa_invoice').value.trim() || null, serial_no: document.getElementById('fa_serial').value.trim() || null,
+    method: document.getElementById('fa_method').value, useful_life_years: _farNum('fa_life'), residual_pct: _farNum('fa_resid'),
+    policy_note: document.getElementById('fa_note').value.trim() || null, disposal_date: document.getElementById('fa_disp_date').value || null,
+    warranty_expiry: document.getElementById('fa_warranty').value || null, disposal_proceeds: _farNum('fa_disp_amt') || 0, title_in_company_name: _farTri('fa_t_in'), title_holder: document.getElementById('fa_t_holder').value.trim() || null,
+    title_holder_related: _farTri('fa_t_rel'), title_held_since: document.getElementById('fa_t_since').value || null, title_reason: document.getElementById('fa_t_reason').value.trim() || null,
+  };
+  if (!body.description) { showMsg('farModalMsg', 'Description is required.', 'err'); return; }
+  if (body.cost == null || !body.purchase_date) { showMsg('farModalMsg', 'Cost and purchase date are required.', 'err'); return; }
+  try {
+    setBusy('farSaveBtn', true, 'Saving');
+    if (_far.editId) await apiPut('/api/far/assets/' + _far.editId, body); else await apiPost('/api/far/assets', body);
+    setBusy('farSaveBtn', false, 'Save asset');
+    farCloseModal();
+    showMsg('farMsg', 'Asset saved.', 'ok');
+    if (_far.view === 'title') farTitle(); else farRegister();
+  } catch (e) { setBusy('farSaveBtn', false, 'Save asset'); showMsg('farModalMsg', String((e && e.message) || e), 'err'); }
+}
+
+async function farDelete(id) {
+  const a = _far.byId[id];
+  if (!confirm(`Delete ${a.far_no} — ${a.description}?` + (a.parent_id ? '' : '\nIts components (if any) will be deleted too.') + '\n\nIf the asset was sold, edit it and record a disposal date instead, so the history stays in the register.')) return;
+  try { await apiDelete('/api/far/assets/' + id); showMsg('farMsg', 'Deleted.', 'ok'); farRegister(); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Schedule III movement ───────────────────────────────────
+async function farMovement() {
+  const m = await apiGet('/api/far/reports/movement?fy=' + _far.fy);
+  const cols = ['opening_gross', 'additions', 'disposals', 'closing_gross', 'opening_acc', 'charge', 'acc_on_disposal', 'closing_acc', 'opening_net', 'closing_net'];
+  const block = (title, rows, total) => !rows.length ? '' : `<div style="font-weight:700;margin:16px 0 6px;color:var(--s700)">${title}</div><div style="overflow-x:auto"><table class="data-tbl" style="min-width:1000px"><thead>
+    <tr><th rowspan="2">Class of asset</th><th colspan="4" style="text-align:center">Gross block (₹)</th><th colspan="4" style="text-align:center">Accumulated depreciation (₹)</th><th colspan="2" style="text-align:center">Net block (₹)</th></tr>
+    <tr>${['Opening', 'Additions', 'Disposals', 'Closing', 'Opening', 'For the year', 'On disposals', 'Closing', 'Opening', 'Closing'].map(h => `<th style="${_farTh}">${h}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${_esc(r.schedule_iii_class)}</td>${cols.map(k => `<td style="${_farTd}">${_inr(r[k])}</td>`).join('')}</tr>`).join('')}
+    <tr style="font-weight:700;background:var(--s50)"><td>Total</td>${cols.map(k => `<td style="${_farTd}">${_inr(total[k])}</td>`).join('')}</tr></tbody></table></div>`;
+  const pl = m.profit_loss_on_disposal;
+  document.getElementById('farBody').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="font-size:13px;color:var(--s500)">Reconciliation of carrying amounts for FY ${m.fy_label} — the movement statement required by Schedule III.</div>
+      <button class="btn btn-s" type="button" onclick="farExportMovement()">📥 Export Excel</button>
+    </div>
+    ${block('Property, plant and equipment', m.ppe, m.ppe_total)}
+    ${block('Intangible assets', m.intangible, m.intangible_total)}
+    ${(m.ppe.length + m.intangible.length) ? `<p style="margin-top:12px;font-size:13px">Profit / (loss) on disposal of assets during the year: <b style="color:${pl < 0 ? 'var(--err)' : 'var(--g700)'}">₹ ${_inr(pl)}</b></p>` : '<div class="tbl-empty">No assets in the register yet.</div>'}`;
+  _far.movement = m;
+}
+
+function farExportMovement() {
+  const m = _far.movement, cols = ['opening_gross', 'additions', 'disposals', 'closing_gross', 'opening_acc', 'charge', 'acc_on_disposal', 'closing_acc', 'opening_net', 'closing_net'];
+  const rows = [];
+  m.ppe.forEach(r => rows.push([r.schedule_iii_class].concat(cols.map(k => r[k])))); rows.push(['Total PPE'].concat(cols.map(k => m.ppe_total[k])));
+  m.intangible.forEach(r => rows.push([r.schedule_iii_class].concat(cols.map(k => r[k])))); if (m.intangible.length) rows.push(['Total intangible'].concat(cols.map(k => m.intangible_total[k])));
+  rows.push([]); rows.push(['Profit/(loss) on disposal', m.profit_loss_on_disposal]);
+  farExport('Movement_FY' + m.fy_label, ['Class', 'Gross opening', 'Additions', 'Disposals', 'Gross closing', 'Accum. depn opening', 'Depn for the year', 'Depn on disposals', 'Accum. depn closing', 'Net opening', 'Net closing'], rows);
+}
+
+// ── Physical verification (CARO 3(i)(b)) ───────────────────
+const _statusColor = s => s === 'Match' ? '#16a34a' : s === 'Shortage' ? '#dc2626' : '#d97706';
+
+async function farVerification() {
+  const asOn = _far.asOn || new Date().toISOString().slice(0, 10);
+  const [rep, runs] = await Promise.all([apiGet('/api/far/reports/verification?as_on=' + asOn), apiGet('/api/far/verification')]);
+  _far.verif = rep; _far.asOn = rep.as_on;
+  const s = rep.summary;
+  const stat = (l, v, c) => `<div class="stat"><div class="stat-lbl">${l}</div><div class="stat-val" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`;
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-size:13px;color:var(--s500);margin-bottom:12px">Compares what the register says you own with what was physically counted. Counts come from the Add Entry tab; register quantity is the sum of linked register lines in force on the date.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+      <div class="fg" style="max-width:170px"><label>As on</label><input type="date" id="farAsOn" value="${rep.as_on}"></div>
+      <button class="btn btn-p" type="button" onclick="_far.asOn=document.getElementById('farAsOn').value;farShow('verification')" style="height:42px">Refresh</button>
+      <button class="btn btn-s" type="button" onclick="farExportVerification()" style="height:42px">📥 Export Excel</button>
+    </div>
+    <div class="stats-row" style="margin-bottom:12px">${stat('Lines checked', rep.lines.length)}${stat('Matched', s.matched, '#16a34a')}${stat('Shortages', s.shortages, s.shortages ? '#dc2626' : '')}${stat('Excesses', s.excesses, s.excesses ? '#d97706' : '')}${stat('Shortage at cost (₹)', _inr(s.short_value), s.short_value ? '#dc2626' : '')}${stat('Write-off exposure, NBV (₹)', _inr(s.short_nbv), s.short_nbv ? '#dc2626' : '')}</div>
+    ${rep.locations_not_submitted.length ? `<div class="msg info" style="display:block">Counts not yet submitted for: ${rep.locations_not_submitted.map(_esc).join(', ')}. Differences there may be incomplete counting.</div>` : ''}
+    ${rep.unlinked.length ? `<div class="msg info" style="display:block">${rep.unlinked.length} register line(s) have no linked item or ${_esc(gl().toLowerCase())}, so they cannot be matched to a count: ${rep.unlinked.slice(0, 8).map(u => _esc(u.far_no)).join(', ')}${rep.unlinked.length > 8 ? '…' : ''}.</div>` : ''}
+    ${rep.lines.length ? `<div style="overflow-x:auto;margin-top:10px"><table class="data-tbl" style="min-width:760px"><thead><tr><th>Item</th><th>${_esc(gl())}</th><th style="text-align:right">As per books</th><th style="text-align:right">Physically found</th><th style="text-align:right">Difference</th><th>Status</th><th style="text-align:right">Shortage at cost (₹)</th><th style="text-align:right">Shortage NBV (₹)</th></tr></thead><tbody>
+      ${rep.lines.map(l => `<tr><td>${_esc(l.item)} <span style="color:var(--s400);font-size:11px">${_esc(l.item_code)}</span></td><td>${_esc(l.location)}${l.count_submitted ? '' : ' <span title="Count not submitted" style="color:var(--amber)">●</span>'}</td>
+        <td style="text-align:right">${l.book_qty}</td><td style="text-align:right">${l.physical_qty}</td><td style="text-align:right;font-weight:600">${l.difference > 0 ? '+' : ''}${l.difference}</td>
+        <td style="color:${_statusColor(l.status)};font-weight:600">${_esc(l.status)}</td><td style="text-align:right">${l.shortage_value ? _inr(l.shortage_value) : '—'}</td><td style="text-align:right">${l.shortage_nbv ? _inr(l.shortage_nbv) : '—'}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">Nothing to compare yet — link register lines to items and locations, and record counts.</div>'}
+    <div style="margin-top:18px;padding:14px;border:1.5px solid var(--s200);border-radius:12px">
+      <div style="font-weight:700;margin-bottom:8px">Record this verification</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="min-width:180px"><label>Verified by *</label><input type="text" id="farVBy" placeholder="Name and designation"></div>
+        <div class="fg" style="min-width:170px"><label>Treatment of differences</label><select id="farVStatus"><option>Open</option><option>Under investigation</option><option>Adjusted in books</option></select></div>
+        <div class="fg" style="min-width:220px;flex:1"><label>Remarks</label><input type="text" id="farVRemarks" placeholder="e.g. shortages written off with approval dated…"></div>
+        <button class="btn btn-p" type="button" onclick="farSaveVerification()" style="height:42px">Save record</button>
+      </div>
+    </div>
+    <div style="font-weight:700;margin:18px 0 6px">Verification history</div>
+    ${runs.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:700px"><thead><tr><th>As on</th><th>Verified by</th><th style="text-align:right">Shortages</th><th style="text-align:right">Excesses</th><th style="text-align:right">Shortage NBV (₹)</th><th>Treatment</th><th>Remarks</th><th></th></tr></thead><tbody>
+      ${runs.map(r => `<tr><td>${_dmy(r.as_on)}</td><td>${_esc(r.verified_by)}</td><td style="text-align:right">${r.summary.shortages}</td><td style="text-align:right">${r.summary.excesses}</td><td style="text-align:right">${_inr(r.summary.short_nbv)}</td>
+        <td><select onchange="farRunStatus(${r.id},this.value)">${['Open', 'Under investigation', 'Adjusted in books'].map(o => `<option ${o === r.status ? 'selected' : ''}>${o}</option>`).join('')}</select></td>
+        <td>${_esc(r.remarks)}</td><td><button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farExportRun(${r.id})" title="Download Excel">📥</button>
+        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farCertificate(${r.id})" title="Printable certificate (save as PDF)">🖨 Certificate</button></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No verification records saved yet.</div>'}`;
+}
+
+function _farVerifRows(lines) {
+  return lines.map(l => [l.item, l.item_code, l.location, l.book_qty, l.physical_qty, l.difference, l.status, l.book_cost, l.book_nbv, l.shortage_value, l.shortage_nbv]);
+}
+const _farVerifHead = () => ['Item', 'Item code', gl(), 'As per books', 'Physically found', 'Difference', 'Status', 'Book cost', 'Book NBV', 'Shortage at cost', 'Shortage NBV'];
+function farExportVerification() { farExport('Verification_' + _far.verif.as_on, _farVerifHead(), _farVerifRows(_far.verif.lines)); }
+async function farExportRun(id) { const r = await apiGet('/api/far/verification/' + id); farExport('Verification_' + r.as_on + '_' + r.status, _farVerifHead(), _farVerifRows(r.snapshot.lines)); }
+
+async function farSaveVerification() {
+  const by = document.getElementById('farVBy').value.trim();
+  if (!by) { showMsg('farMsg', 'Enter the name of the person who verified.', 'err'); return; }
+  try {
+    await apiPost('/api/far/verification', { verified_by: by, status: document.getElementById('farVStatus').value, remarks: document.getElementById('farVRemarks').value.trim() || null, as_on: _far.asOn });
+    await farShow('verification'); showMsg('farMsg', 'Verification record saved.', 'ok');
+  } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+async function farRunStatus(id, status) {
+  try { await apiPut('/api/far/verification/' + id, { status }); showMsg('farMsg', 'Updated.', 'ok'); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Title deeds & revaluation (CARO 3(i)(c), (d)) ──────────
+async function farTitle() {
+  const [td, rv, all] = await Promise.all([apiGet('/api/far/reports/titledeeds?fy=' + _far.fy), apiGet('/api/far/reports/revaluations?fy=' + _far.fy), apiGet('/api/far/assets?fy=' + _far.fy)]);
+  all.assets.forEach(a => { _far.byId[a.id] = a; }); td.rows.forEach(a => { _far.byId[a.id] = a; });
+  _far.titleAssets = all.assets.filter(a => a.status === 'Active' && !a.parent_id);
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-weight:700;margin-bottom:4px">Title deeds of immovable property <span style="font-weight:400;color:var(--s500)">— CARO 2020 clause 3(i)(c)</span></div>
+    <div style="font-size:12.5px;color:var(--s500);margin-bottom:8px">Land and buildings, with whose name the title deed stands in. Rows needing attention are those where the deed is not recorded as being in the company's name.${td.attention ? ` <b style="color:var(--err)">${td.attention} need attention.</b>` : ''}</div>
+    ${td.rows.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:820px"><thead><tr><th>Reg. no.</th><th>Description</th><th style="text-align:right">Gross carrying value (₹)</th><th>In company's name?</th><th>Held in the name of</th><th>Promoter/director/relative?</th><th>Held since</th><th>Reason</th><th></th></tr></thead><tbody>
+      ${td.rows.map(r => `<tr style="${r.needs_attention ? 'background:#fef2f2' : ''}"><td>${_esc(r.far_no)}</td><td>${_esc(r.description)}</td><td style="text-align:right">${_inr(r.closing_gross)}</td>
+        <td>${r.title_in_company_name === true ? 'Yes' : r.title_in_company_name === false ? '<b style="color:var(--err)">No</b>' : '<i>Not recorded</i>'}</td><td>${_esc(r.title_holder)}</td>
+        <td>${r.title_holder_related === true ? 'Yes' : r.title_holder_related === false ? 'No' : ''}</td><td>${_dmy(r.title_held_since)}</td><td>${_esc(r.title_reason)}</td>
+        <td><button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farOpenModal(${r.id},null)">Edit</button></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No land or buildings in the register.</div>'}
+    <div style="font-weight:700;margin:22px 0 4px">Revaluations <span style="font-weight:400;color:var(--s500)">— CARO 2020 clause 3(i)(d), FY ${rv.fy_label}</span></div>
+    <div style="font-size:12.5px;color:var(--s500);margin-bottom:8px">Record each revaluation with the registered valuer's details. The test compares the net change with the class's net carrying value (opening plus additions) and flags 10% or more — indicative only; confirm the basis with your auditor. Recording a revaluation here does not change depreciation; revise the asset's cost if the books are revalued.</div>
+    ${rv.valuer_missing ? `<div class="msg info" style="display:block">${rv.valuer_missing} revaluation(s) have no valuer registration number. CARO asks whether the valuation was by a registered valuer.</div>` : ''}
+    ${rv.rows.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:760px"><thead><tr><th>Date</th><th>Asset</th><th>Valuer (reg. no.)</th><th style="text-align:right">Before (₹)</th><th style="text-align:right">After (₹)</th><th style="text-align:right">Change (₹)</th><th></th></tr></thead><tbody>
+      ${rv.rows.map(r => `<tr><td>${_dmy(r.reval_date)}</td><td>${_esc(r.far_no)} — ${_esc(r.description)}</td><td>${_esc(r.valuer_name)}${r.valuer_reg_no ? ' (' + _esc(r.valuer_reg_no) + ')' : ' <span style="color:var(--err)">(no reg. no.)</span>'}</td>
+        <td style="text-align:right">${_inr(r.prior_net_carrying)}</td><td style="text-align:right">${_inr(r.revalued_net_carrying)}</td><td style="text-align:right">${_inr(r.change)}</td>
+        <td><button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDelReval(${r.id})">✕</button></td></tr>`).join('')}</tbody></table></div>
+      <div style="font-weight:600;margin:12px 0 4px">10% test by class</div>
+      <div style="overflow-x:auto"><table class="data-tbl" style="min-width:520px"><thead><tr><th>Class</th><th style="text-align:right">Net change (₹)</th><th style="text-align:right">Class net carrying value (₹)</th><th style="text-align:right">Change %</th><th>Report under CARO?</th></tr></thead><tbody>
+      ${rv.tests.map(t => `<tr><td>${_esc(t.schedule_iii_class)}</td><td style="text-align:right">${_inr(t.net_change)}</td><td style="text-align:right">${_inr(t.class_net_carrying_value)}</td><td style="text-align:right">${t.change_pct == null ? 'n/a' : t.change_pct + '%'}</td><td style="font-weight:600;color:${t.report_in_caro ? 'var(--err)' : 'var(--g700)'}">${t.report_in_caro ? 'Yes — 10% or more' : 'No'}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No revaluations recorded in this year.</div>'}
+    <div style="margin-top:14px;padding:14px;border:1.5px solid var(--s200);border-radius:12px">
+      <div style="font-weight:700;margin-bottom:8px">Record a revaluation</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="min-width:230px;flex:1"><label>Asset</label><select id="rvAsset" onchange="farRvPrefill()"><option value="">— Select —</option>${_far.titleAssets.map(a => `<option value="${a.id}">${_esc(a.far_no)} — ${_esc(a.description)}</option>`).join('')}</select></div>
+        <div class="fg" style="max-width:160px"><label>Date</label><input type="date" id="rvDate"></div>
+        <div class="fg" style="min-width:160px"><label>Valuer name</label><input type="text" id="rvName"></div>
+        <div class="fg" style="min-width:170px"><label>Valuer registration no.</label><input type="text" id="rvReg" placeholder="IBBI/RV/…"></div>
+        <div class="fg" style="max-width:150px"><label>Net value before (₹)</label><input type="number" id="rvPrior" step="0.01" min="0"></div>
+        <div class="fg" style="max-width:150px"><label>Net value after (₹)</label><input type="number" id="rvNew" step="0.01" min="0"></div>
+        <button class="btn btn-p" type="button" onclick="farSaveReval()" style="height:42px">Record</button>
+      </div>
+    </div>`;
+}
+
+function farRvPrefill() {
+  const a = _far.byId[document.getElementById('rvAsset').value];
+  if (a) document.getElementById('rvPrior').value = a.closing_net;
+}
+async function farSaveReval() {
+  const id = Number(document.getElementById('rvAsset').value), body = {
+    fixed_asset_id: id, reval_date: document.getElementById('rvDate').value, valuer_name: document.getElementById('rvName').value.trim(), valuer_reg_no: document.getElementById('rvReg').value.trim() || null,
+    prior_net_carrying: _farNum('rvPrior'), revalued_net_carrying: _farNum('rvNew'),
+  };
+  if (!id || !body.reval_date || !body.valuer_name || body.prior_net_carrying == null || body.revalued_net_carrying == null) { showMsg('farMsg', 'Asset, date, valuer name and both values are required.', 'err'); return; }
+  try { await apiPost('/api/far/revaluations', body); await farTitle(); showMsg('farMsg', 'Revaluation recorded.', 'ok'); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+async function farDelReval(id) {
+  if (!confirm('Delete this revaluation record?')) return;
+  try { await apiDelete('/api/far/revaluations/' + id); await farTitle(); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Small popup used by Mark done / Check in / Edit task ────
+let _opsSubmit = null;
+function opsClose() { document.getElementById('opsModal').style.display = 'none'; _opsSubmit = null; }
+
+function opsAsk(title, sub, fields, goLabel, onSubmit) {
+  document.getElementById('opsModalTitle').textContent = title;
+  document.getElementById('opsModalSub').textContent = sub || '';
+  document.getElementById('opsModalFields').innerHTML = fields.map(f =>
+    `<div class="fg"><label>${_esc(f.label)}</label><input type="${f.type || 'text'}" id="ops_${f.id}" value="${_esc(f.value == null ? '' : f.value)}" placeholder="${_esc(f.placeholder || '')}" ${f.step ? `step="${f.step}"` : ''} ${f.min != null ? `min="${f.min}"` : ''}></div>`).join('');
+  clearMsg('opsModalMsg');
+  const go = document.getElementById('opsModalGo');
+  go.style.display = ''; go.textContent = goLabel || 'Save'; document.getElementById('opsModalCancel').textContent = 'Cancel';
+  _opsSubmit = async () => {
+    const vals = {}; fields.forEach(f => { vals[f.id] = document.getElementById('ops_' + f.id).value; });
+    try { go.disabled = true; await onSubmit(vals); opsClose(); } catch (e) { showMsg('opsModalMsg', String((e && e.message) || e), 'err'); } finally { go.disabled = false; }
+  };
+  go.onclick = () => _opsSubmit && _opsSubmit();
+  document.getElementById('opsModal').style.display = 'flex';
+}
+
+function opsInfo(title, html) {
+  document.getElementById('opsModalTitle').textContent = title;
+  document.getElementById('opsModalSub').textContent = '';
+  document.getElementById('opsModalFields').innerHTML = html;
+  clearMsg('opsModalMsg');
+  document.getElementById('opsModalGo').style.display = 'none'; document.getElementById('opsModalCancel').textContent = 'Close';
+  document.getElementById('opsModal').style.display = 'flex';
+}
+
+const _badgeColors = { 'Overdue': '#dc2626', 'Due soon': '#d97706', 'Scheduled': '#64748b', 'Completed': '#16a34a', 'Expired': '#dc2626', 'Expiring soon': '#d97706', 'Out': '#2563eb', 'Returned': '#16a34a' };
+const _badge = s => `<span style="background:${_badgeColors[s] || '#64748b'}1a;color:${_badgeColors[s] || '#64748b'};border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:700;white-space:nowrap">${_esc(s)}</span>`;
+const _todayIso = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const _tile = (l, v, c) => `<div class="stat"><div class="stat-lbl">${l}</div><div class="stat-val" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`;
+
+// ── Maintenance & warranty ─────────────────────────────────
+async function farMaintenance() {
+  const [tasks, warr, sum, assets] = await Promise.all([apiGet('/api/ops/maintenance'), apiGet('/api/ops/warranties'), apiGet('/api/ops/summary'), apiGet('/api/far/assets?fy=' + _far.fy)]);
+  _far.ops = sum; farRenderNav(); farTabBadge();
+  _far.tasks = tasks; assets.assets.forEach(a => { _far.byId[a.id] = a; });
+  const live = assets.assets.filter(a => a.status === 'Active');
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-size:13px;color:var(--s500);margin-bottom:12px">Schedule servicing, inspections and calibrations against register assets. Repeating tasks fall due again the set number of days after the work was actually done.</div>
+    <div class="stats-row" style="margin-bottom:12px">${_tile('Overdue', sum.tasks_overdue, sum.tasks_overdue ? '#dc2626' : '')}${_tile('Due in ' + sum.due_soon_days + ' days', sum.tasks_due_soon, sum.tasks_due_soon ? '#d97706' : '')}${_tile('Warranties ending (' + sum.warranty_soon_days + ' days)', sum.warranties_expiring, sum.warranties_expiring ? '#d97706' : '')}</div>
+    <div style="padding:14px;border:1.5px solid var(--s200);border-radius:12px;margin-bottom:16px">
+      <div style="font-weight:700;margin-bottom:8px">Add a maintenance task</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="min-width:220px;flex:1"><label>Asset</label><select id="mtAsset"><option value="">— Select —</option>${live.map(a => `<option value="${a.id}">${_esc(a.far_no)} — ${_esc(a.description)}</option>`).join('')}</select></div>
+        <div class="fg" style="min-width:180px;flex:1"><label>Task</label><input type="text" id="mtTitle" placeholder="e.g. Annual service"></div>
+        <div class="fg" style="max-width:130px"><label>Repeat every (days)</label><input type="number" id="mtFreq" min="1" placeholder="one-off"></div>
+        <div class="fg" style="max-width:160px"><label>First due date</label><input type="date" id="mtDue"></div>
+        <button class="btn btn-p" type="button" onclick="farAddTask()" style="height:42px">Add task</button>
+      </div>
+    </div>
+    ${tasks.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:820px"><thead><tr><th>Due</th><th>Asset</th><th>Task</th><th>Repeats</th><th>Last done</th><th>Status</th><th></th></tr></thead><tbody>
+      ${tasks.map(t => `<tr><td>${t.next_due ? _dmy(t.next_due) : '—'}${t.days_to_due != null && t.status !== 'Scheduled' ? `<div style="font-size:11px;color:var(--s400)">${t.days_to_due < 0 ? Math.abs(t.days_to_due) + ' days late' : t.days_to_due === 0 ? 'today' : 'in ' + t.days_to_due + ' days'}</div>` : ''}</td>
+        <td>${_esc(t.far_no)} — ${_esc(t.asset)}</td><td>${_esc(t.title)}</td><td>${t.frequency_days ? 'every ' + t.frequency_days + ' days' : 'one-off'}</td><td>${t.last_done ? _dmy(t.last_done) : '—'}</td><td>${_badge(t.status)}</td>
+        <td style="white-space:nowrap">${t.next_due ? `<button class="btn btn-p" type="button" style="padding:4px 9px;font-size:12px" onclick="farDoneTask(${t.id})">Mark done</button>` : ''}
+          <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farTaskLog(${t.id})">History</button>
+          <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farEditTask(${t.id})">Edit</button>
+          <button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDelTask(${t.id})">✕</button></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No maintenance tasks yet.</div>'}
+    <div style="font-weight:700;margin:20px 0 6px">Warranties expired or ending within ${sum.warranty_soon_days} days</div>
+    ${warr.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:560px"><thead><tr><th>Reg. no.</th><th>Asset</th><th>Vendor</th><th>Warranty ends</th><th>Status</th></tr></thead><tbody>
+      ${warr.map(w => `<tr><td>${_esc(w.far_no)}</td><td>${_esc(w.description)}</td><td>${_esc(w.vendor)}</td><td>${_dmy(w.warranty_expiry)}${w.days_left >= 0 ? `<div style="font-size:11px;color:var(--s400)">in ${w.days_left} days</div>` : ''}</td><td>${_badge(w.status)}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No warranties ending soon. Set a warranty date on an asset (Register → Edit).</div>'}`;
+}
+
+async function farAddTask() {
+  const freq = document.getElementById('mtFreq').value;
+  const body = { fixed_asset_id: Number(document.getElementById('mtAsset').value), title: document.getElementById('mtTitle').value.trim(),
+    frequency_days: freq === '' ? null : Number(freq), next_due: document.getElementById('mtDue').value };
+  if (!body.fixed_asset_id || !body.title || !body.next_due) { showMsg('farMsg', 'Choose an asset, a task name and the first due date.', 'err'); return; }
+  try { await apiPost('/api/ops/maintenance', body); await farMaintenance(); showMsg('farMsg', 'Task added.', 'ok'); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+function farDoneTask(id) {
+  const t = _far.tasks.find(x => x.id === id);
+  opsAsk('Mark done: ' + t.title, t.far_no + ' — ' + t.asset + (t.frequency_days ? '. The next one will fall due ' + t.frequency_days + ' days after the date below.' : '. This is a one-off task and will be closed.'),
+    [{ id: 'on', label: 'Date done', type: 'date', value: _todayIso() }, { id: 'by', label: 'Done by (person or vendor) *', placeholder: 'Name' }, { id: 'cost', label: 'Cost (₹)', type: 'number', step: '0.01', min: 0, value: 0 }, { id: 'notes', label: 'Notes' }],
+    'Mark done', async v => {
+      await apiPost('/api/ops/maintenance/' + id + '/complete', { done_on: v.on, done_by: v.by.trim(), cost: Number(v.cost) || 0, notes: v.notes.trim() || null });
+      await farMaintenance(); showMsg('farMsg', 'Recorded.', 'ok');
+    });
+}
+
+function farEditTask(id) {
+  const t = _far.tasks.find(x => x.id === id);
+  opsAsk('Edit task', t.far_no + ' — ' + t.asset, [{ id: 'title', label: 'Task', value: t.title }, { id: 'freq', label: 'Repeat every (days, blank = one-off)', type: 'number', min: 1, value: t.frequency_days }, { id: 'due', label: 'Next due', type: 'date', value: t.next_due }, { id: 'notes', label: 'Notes', value: t.notes }],
+    'Save', async v => {
+      await apiPut('/api/ops/maintenance/' + id, { fixed_asset_id: t.fixed_asset_id, title: v.title.trim(), frequency_days: v.freq === '' ? null : Number(v.freq), next_due: v.due, notes: v.notes.trim() || null });
+      await farMaintenance(); showMsg('farMsg', 'Task updated.', 'ok');
+    });
+}
+
+async function farTaskLog(id) {
+  const t = _far.tasks.find(x => x.id === id);
+  const log = await apiGet('/api/ops/maintenance/' + id + '/log');
+  opsInfo('History: ' + t.title, log.length ? `<table class="data-tbl" style="width:100%"><thead><tr><th>Done on</th><th>By</th><th style="text-align:right">Cost (₹)</th><th>Notes</th></tr></thead><tbody>${log.map(l => `<tr><td>${_dmy(l.done_on)}</td><td>${_esc(l.done_by)}</td><td style="text-align:right">${_inr(l.cost)}</td><td>${_esc(l.notes)}</td></tr>`).join('')}</tbody></table><div style="font-size:12px;color:var(--s400);margin-top:8px">Total spend: ₹ ${_inr(log.reduce((a, l) => a + l.cost, 0))}</div>` : '<div class="tbl-empty">Nothing has been done on this task yet.</div>');
+}
+
+async function farDelTask(id) {
+  if (!confirm('Delete this task and its history?')) return;
+  try { await apiDelete('/api/ops/maintenance/' + id); await farMaintenance(); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Custody: check-out / check-in ──────────────────────────
+async function farCustody() {
+  const [openL, hist, sum, assets] = await Promise.all([apiGet('/api/ops/custody'), apiGet('/api/ops/custody?history=true'), apiGet('/api/ops/summary'), apiGet('/api/far/assets?fy=' + _far.fy)]);
+  _far.ops = sum; farRenderNav(); farTabBadge(); _far.custody = openL;
+  assets.assets.forEach(a => { _far.byId[a.id] = a; });
+  const outQty = {}; openL.forEach(c => { outQty[c.fixed_asset_id] = (outQty[c.fixed_asset_id] || 0) + c.quantity; });
+  const issuable = assets.assets.filter(a => a.status === 'Active' && !a.is_immovable);
+  const units = openL.reduce((a, c) => a + c.quantity, 0);
+  const returned = hist.filter(h => h.status === 'Returned').slice(0, 50);
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-size:13px;color:var(--s500);margin-bottom:12px">Record who has an asset, when it is due back and its condition on the way out and in. Land, buildings and disposed assets cannot be checked out.</div>
+    <div class="stats-row" style="margin-bottom:12px">${_tile('Records out', openL.length)}${_tile('Units out', units)}${_tile('Overdue returns', sum.custody_overdue, sum.custody_overdue ? '#dc2626' : '')}</div>
+    <div style="padding:14px;border:1.5px solid var(--s200);border-radius:12px;margin-bottom:16px">
+      <div style="font-weight:700;margin-bottom:8px">Check out</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="min-width:240px;flex:1"><label>Asset</label><select id="cuAsset"><option value="">— Select —</option>${issuable.map(a => { const free = Math.round((a.quantity - (outQty[a.id] || 0)) * 100) / 100; return `<option value="${a.id}" ${free <= 0 ? 'disabled' : ''}>${_esc(a.far_no)} — ${_esc(a.description)} (${free} available)</option>`; }).join('')}</select></div>
+        <div class="fg" style="max-width:100px"><label>Quantity</label><input type="number" id="cuQty" min="0" step="any" value="1"></div>
+        <div class="fg" style="min-width:160px"><label>Issued to *</label><input type="text" id="cuTo" placeholder="Person / department"></div>
+        <div class="fg" style="max-width:160px"><label>Due back</label><input type="date" id="cuDue"></div>
+        <div class="fg" style="min-width:150px"><label>Condition out</label><input type="text" id="cuCond" placeholder="e.g. Good"></div>
+        <button class="btn btn-p" type="button" onclick="farCheckout()" style="height:42px">Check out</button>
+      </div>
+    </div>
+    <div style="font-weight:700;margin-bottom:6px">Currently out</div>
+    ${openL.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:780px"><thead><tr><th>Asset</th><th style="text-align:right">Qty</th><th>Issued to</th><th>Issued on</th><th>Due back</th><th>Status</th><th>Condition out</th><th></th></tr></thead><tbody>
+      ${openL.map(c => `<tr><td>${_esc(c.far_no)} — ${_esc(c.asset)}</td><td style="text-align:right">${c.quantity}</td><td>${_esc(c.issued_to)}<div style="font-size:11px;color:var(--s400)">by ${_esc(c.issued_by)}</div></td><td>${_dmy(c.issued_at.slice(0, 10))}</td><td>${c.due_back ? _dmy(c.due_back) : '—'}</td><td>${_badge(c.status)}</td><td>${_esc(c.condition_out)}</td>
+        <td><button class="btn btn-p" type="button" style="padding:4px 9px;font-size:12px" onclick="farCheckin(${c.id})">Check in</button></td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">Nothing is checked out.</div>'}
+    <div style="font-weight:700;margin:20px 0 6px">Recently returned</div>
+    ${returned.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:720px"><thead><tr><th>Asset</th><th style="text-align:right">Qty</th><th>Issued to</th><th>Issued on</th><th>Returned on</th><th>Condition out → in</th><th>Notes</th></tr></thead><tbody>
+      ${returned.map(c => `<tr><td>${_esc(c.far_no)} — ${_esc(c.asset)}</td><td style="text-align:right">${c.quantity}</td><td>${_esc(c.issued_to)}</td><td>${_dmy(c.issued_at.slice(0, 10))}</td><td>${_dmy(c.returned_at.slice(0, 10))}</td><td>${_esc(c.condition_out || '—')} → ${_esc(c.condition_in || '—')}</td><td>${_esc(c.notes)}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No returns recorded yet.</div>'}`;
+}
+
+async function farCheckout() {
+  const body = { fixed_asset_id: Number(document.getElementById('cuAsset').value), quantity: Number(document.getElementById('cuQty').value), issued_to: document.getElementById('cuTo').value.trim(),
+    due_back: document.getElementById('cuDue').value || null, condition_out: document.getElementById('cuCond').value.trim() || null };
+  if (!body.fixed_asset_id || !body.issued_to) { showMsg('farMsg', 'Choose an asset and enter who it is issued to.', 'err'); return; }
+  try { await apiPost('/api/ops/custody/checkout', body); await farCustody(); showMsg('farMsg', 'Checked out.', 'ok'); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+function farCheckin(id) {
+  const c = _far.custody.find(x => x.id === id);
+  opsAsk('Check in', c.far_no + ' — ' + c.asset + ' (' + c.quantity + ') from ' + c.issued_to, [{ id: 'cond', label: 'Condition on return', placeholder: 'e.g. Good, scratched, damaged' }, { id: 'notes', label: 'Notes' }], 'Check in', async v => {
+    await apiPost('/api/ops/custody/' + id + '/checkin', { condition_in: v.cond.trim() || null, notes: v.notes.trim() || null });
+    await farCustody(); showMsg('farMsg', 'Checked in.', 'ok');
+  });
+}
+
+// ── Photos and documents ───────────────────────────────────
+async function farBlobUrl(path) {
+  const res = await fetch(API_URL + path, { headers: _authHeader() });
+  if (!res.ok) throw new Error('Could not load the file.');
+  return URL.createObjectURL(await res.blob());
+}
+
+async function farFiles(id) {
+  const a = _far.byId[id];
+  const files = await apiGet('/api/far/assets/' + id + '/files');
+  const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  opsInfo('Photos & documents: ' + a.far_no, `
+    <div style="font-size:12.5px;color:var(--s500);margin-bottom:8px">${_esc(a.description)}. JPG, PNG, WEBP or PDF, up to 5 MB each, 10 per asset. Good for invoices, warranty cards and photos.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">${files.length ? files.map(f => `
+      <div style="display:flex;gap:10px;align-items:center;border:1px solid var(--s200);border-radius:10px;padding:8px">
+        ${f.is_image ? `<img data-fid="${f.id}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:6px;background:var(--s100)">` : '<div style="width:56px;height:56px;border-radius:6px;background:var(--s100);display:flex;align-items:center;justify-content:center;font-size:22px">📄</div>'}
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_esc(f.filename)}</div><div style="font-size:11.5px;color:var(--s400)">${kb(f.size)} · ${_esc(f.uploaded_by)} · ${_dmy(f.created_at.slice(0, 10))}</div></div>
+        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farOpenFile(${f.id})">Open</button>
+        <button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDeleteFile(${id},${f.id})">✕</button>
+      </div>`).join('') : '<div class="tbl-empty">No files yet.</div>'}</div>
+    <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" onchange="farUploadFile(${id},this)">`);
+  document.querySelectorAll('#opsModalFields img[data-fid]').forEach(img => farBlobUrl('/api/far/files/' + img.dataset.fid).then(u => { img.src = u; }).catch(() => {}));
+}
+
+async function farOpenFile(fid) {
+  const w = window.open('', '_blank');
+  try { const u = await farBlobUrl('/api/far/files/' + fid); if (w) w.location = u; else window.location = u; } catch (e) { if (w) w.close(); showMsg('opsModalMsg', String((e && e.message) || e), 'err'); }
+}
+
+async function farUploadFile(id, input) {
+  const file = input.files && input.files[0]; input.value = '';
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showMsg('opsModalMsg', 'That file is larger than 5 MB.', 'err'); return; }
+  try {
+    const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+    await apiPost('/api/far/assets/' + id + '/files', { filename: file.name, data });
+    await farFiles(id);
+  } catch (e) { showMsg('opsModalMsg', String((e && e.message) || e), 'err'); }
+}
+
+async function farDeleteFile(id, fid) {
+  if (!confirm('Remove this file? The removal is recorded in the asset history.')) return;
+  try { await apiDelete('/api/far/files/' + fid); await farFiles(id); } catch (e) { showMsg('opsModalMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Change history and audit trail ─────────────────────────
+const _fieldNames = { description: 'Description', category: 'Category', cost: 'Cost', quantity: 'Quantity', purchase_date: 'Purchase date', put_to_use_date: 'Put-to-use date', vendor: 'Vendor', invoice_no: 'Invoice no.',
+  serial_no: 'Serial no.', method: 'Method', useful_life_years: 'Useful life', residual_pct: 'Residual %', policy_note: 'Policy note', disposal_date: 'Disposal date', disposal_proceeds: 'Disposal proceeds',
+  warranty_expiry: 'Warranty expiry', asset_id: 'Linked item', class_id: 'Location', parent_id: 'Parent', far_no: 'Register no.', title_in_company_name: 'Title in company name', title_holder: 'Title holder',
+  title_holder_related: 'Holder related', title_held_since: 'Title held since', title_reason: 'Title reason' };
+
+function farDetailsText(d) {
+  if (!d) return '';
+  const val = v => v === null || v === undefined || v === '' ? '(blank)' : String(v);
+  return Object.keys(d).map(k => {
+    const v = d[k], name = _fieldNames[k] || k.replace(/_/g, ' ');
+    return Array.isArray(v) ? `${name}: ${val(v[0])} → ${val(v[1])}` : `${name}: ${val(v)}`;
+  }).join('; ');
+}
+
+const _auditTime = iso => iso ? _dmy(iso.slice(0, 10)) + ' ' + new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '';
+
+async function farHistory(id) {
+  const a = _far.byId[id];
+  const rows = await apiGet('/api/far/audit?asset_id=' + id);
+  opsInfo('History: ' + a.far_no, `<div style="font-size:12.5px;color:var(--s500);margin-bottom:8px">${_esc(a.description)}. Entries are permanent and cannot be edited or removed.</div>` + (rows.length ? `<div style="display:flex;flex-direction:column;gap:6px">${rows.map(r => `
+    <div style="border-left:3px solid var(--g400);padding:4px 10px"><div style="font-size:12px;color:var(--s400)">${_auditTime(r.at)} · ${_esc(r.username)}</div><div style="font-weight:600;font-size:13px">${_esc(r.action)}</div><div style="font-size:12.5px;color:var(--s600)">${_esc(farDetailsText(r.details))}</div></div>`).join('')}</div>`
+    : '<div class="tbl-empty">No history recorded for this asset (it may pre-date the audit trail).</div>'));
+}
+
+async function farAudit() {
+  const rows = await apiGet('/api/far/audit?limit=500');
+  _far.auditRows = rows;
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-size:13px;color:var(--s500);margin-bottom:10px">A permanent record of every change to the register: who did what and when, with old and new values. Entries cannot be edited or deleted in the application, and they stay even if an asset is later deleted.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+      <div class="fg" style="min-width:240px;flex:1"><label>Search</label><input type="text" id="farAuditQ" placeholder="Person, action, register no., description…" oninput="farRenderAudit()"></div>
+      <button class="btn btn-s" type="button" onclick="farExportAudit()" style="height:42px">📥 Export Excel</button>
+    </div>
+    <div id="farAuditTbl"></div>`;
+  farRenderAudit();
+}
+
+function farAuditFiltered() {
+  const q = (document.getElementById('farAuditQ') || { value: '' }).value.toLowerCase();
+  return _far.auditRows.filter(r => !q || (r.username + ' ' + r.action + ' ' + r.far_no + ' ' + r.description + ' ' + farDetailsText(r.details)).toLowerCase().indexOf(q) >= 0);
+}
+
+function farRenderAudit() {
+  const rows = farAuditFiltered(), el = document.getElementById('farAuditTbl');
+  if (!el) return;
+  el.innerHTML = rows.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:760px"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Asset</th><th>Details</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td style="white-space:nowrap">${_auditTime(r.at)}</td><td>${_esc(r.username)}</td><td style="font-weight:600">${_esc(r.action)}</td><td>${_esc(r.far_no)}${r.description ? ' — ' + _esc(r.description) : ''}</td><td style="font-size:12.5px;color:var(--s600)">${_esc(farDetailsText(r.details))}</td></tr>`).join('')}</tbody></table></div>
+    <div style="font-size:12px;color:var(--s400);margin-top:6px">Showing ${rows.length} of the latest ${_far.auditRows.length} entries.</div>` : '<div class="tbl-empty">No entries.</div>';
+}
+
+function farExportAudit() {
+  farExport('Audit_trail', ['When', 'Who', 'Action', 'Reg no', 'Description', 'Details'], farAuditFiltered().map(r => [r.at, r.username, r.action, r.far_no, r.description, farDetailsText(r.details)]));
+}
+
+// ── Printable verification certificate ─────────────────────
+async function farCertificate(runId) {
+  try {
+    const run = await apiGet('/api/far/verification/' + runId);
+    const snap = run.snapshot, s = snap.summary, org = (document.getElementById('institutionName') || {}).textContent || '';
+    const bad = snap.lines.filter(l => l.status !== 'Match');
+    const e = _escHtml, n = v => _inr(v);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Verification certificate</title><style>
+      @page{size:A4;margin:16mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111;font-size:11pt;line-height:1.45}
+      h1{font-size:15pt;text-align:center;margin:0 0 2px;text-transform:uppercase;letter-spacing:.04em}.sub{text-align:center;color:#444;margin-bottom:16px;font-size:10.5pt}
+      .org{text-align:center;font-weight:700;font-size:13pt;margin-bottom:6px}table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+      td,th{border:1px solid #888;padding:5px 7px;text-align:left;font-size:10pt;vertical-align:top}th{background:#eee}.r{text-align:right}
+      .kv td:first-child{width:34%;background:#f6f6f6;font-weight:700}h2{font-size:11.5pt;margin:16px 0 4px}.note{font-size:9.5pt;color:#333}
+      .sign{display:flex;gap:30px;margin-top:46px}.sign div{flex:1;border-top:1px solid #111;padding-top:4px;font-size:10pt}.foot{margin-top:24px;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:6px}
+    </style></head><body>
+      <div class="org">${e(org)}</div><h1>Certificate of Physical Verification of Fixed Assets</h1>
+      <div class="sub">Comparison of the fixed asset register with physical counts, as on ${e(_dmy(snap.as_on))}<br>(Companies (Auditor's Report) Order, 2020 — clause 3(i)(b))</div>
+      <table class="kv"><tr><td>Record number</td><td>${run.id}</td></tr><tr><td>As on</td><td>${e(_dmy(snap.as_on))}</td></tr><tr><td>Verified by</td><td>${e(run.verified_by)}</td></tr>
+        <tr><td>Treatment of differences</td><td>${e(run.status)}</td></tr><tr><td>Remarks</td><td>${e(run.remarks || '—')}</td></tr></table>
+      <h2>Result</h2>
+      <table><tr><th>Lines checked</th><th>Matched</th><th>Shortages</th><th>Excesses</th><th class="r">Shortage at cost (₹)</th><th class="r">Shortage — net book value (₹)</th></tr>
+        <tr><td>${snap.lines.length}</td><td>${s.matched}</td><td>${s.shortages} (${s.short_qty} unit${s.short_qty === 1 ? '' : 's'})</td><td>${s.excesses} (${s.excess_qty} unit${s.excess_qty === 1 ? '' : 's'})</td><td class="r">${n(s.short_value)}</td><td class="r">${n(s.short_nbv)}</td></tr></table>
+      <h2>Differences</h2>
+      ${bad.length ? `<table><tr><th>Item</th><th>${e(gl())}</th><th class="r">Books</th><th class="r">Found</th><th class="r">Diff.</th><th>Status</th><th class="r">At cost (₹)</th><th class="r">NBV (₹)</th></tr>
+        ${bad.map(l => `<tr><td>${e(l.item)} (${e(l.item_code)})</td><td>${e(l.location)}</td><td class="r">${l.book_qty}</td><td class="r">${l.physical_qty}</td><td class="r">${l.difference > 0 ? '+' : ''}${l.difference}</td><td>${e(l.status)}</td><td class="r">${l.shortage_value ? n(l.shortage_value) : '—'}</td><td class="r">${l.shortage_nbv ? n(l.shortage_nbv) : '—'}</td></tr>`).join('')}</table>` : '<p>No differences were found.</p>'}
+      ${snap.locations_not_submitted.length ? `<p class="note"><b>Counts not submitted at the time of this record:</b> ${e(snap.locations_not_submitted.join(', '))}.</p>` : ''}
+      ${snap.unlinked.length ? `<p class="note"><b>${snap.unlinked.length} register line(s)</b> had no linked item or ${e(gl().toLowerCase())} and could not be matched to a count.</p>` : ''}
+      <p class="note">This certificate records the result of comparing the register with physical counts on the date above, using a frozen copy of the data saved in AssetTrack. It is a management record and is not an audit opinion. Differences should be investigated and dealt with in the books as appropriate.</p>
+      <div class="sign"><div>Verified by<br>${e(run.verified_by)}</div><div>Reviewed by (management)</div><div>Date and place</div></div>
+      <div class="foot">Generated from AssetTrack on ${e(new Date().toLocaleString('en-IN'))}. Record #${run.id}, saved ${e(_auditTime(run.created_at))}.</div>
+    </body></html>`;
+    const old = document.getElementById('_certFrame'); if (old) old.remove();
+    const f = document.createElement('iframe'); f.id = '_certFrame'; f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    document.body.appendChild(f); f.srcdoc = html;
+    f.onload = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (err) { showMsg('farMsg', 'Could not open the print dialog: ' + err.message, 'err'); } };
+  } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ── Categories ──────────────────────────────────────────────
+async function farCategories() {
+  const cats = await apiGet('/api/far/categories');
+  _far.lookups.categories = cats;
+  const c = _far.catEdit ? cats.find(x => x.id === _far.catEdit) : null;
+  document.getElementById('farBody').innerHTML = `
+    <div style="font-size:12.5px;color:var(--s500);margin-bottom:10px">Defaults follow the useful lives in Schedule II (Part C) of the Companies Act 2013 with a 5% residual value, and are editable. Please confirm them with your accountant. A life or residual value that differs on an individual asset needs a policy note.</div>
+    <div style="overflow-x:auto"><table class="data-tbl" style="min-width:680px"><thead><tr><th>Category</th><th>Schedule III class</th><th style="text-align:right">Life (yrs)</th><th>Method</th><th style="text-align:right">Residual %</th><th>Type</th><th></th></tr></thead><tbody>
+      ${cats.map(k => `<tr><td>${_esc(k.name)}</td><td>${_esc(k.schedule_iii_class)}</td><td style="text-align:right">${k.schedule_ii_life == null ? '—' : k.schedule_ii_life}</td><td>${k.default_method}</td><td style="text-align:right">${k.residual_pct}</td>
+        <td>${k.is_intangible ? 'Intangible' : k.is_immovable ? 'Immovable' : 'Movable'}</td>
+        <td style="white-space:nowrap"><button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="_far.catEdit=${k.id};farCategories()">Edit</button>
+        <button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDelCat(${k.id})">✕</button></td></tr>`).join('')}</tbody></table></div>
+    <div style="margin-top:14px;padding:14px;border:1.5px solid var(--s200);border-radius:12px">
+      <div style="font-weight:700;margin-bottom:8px">${c ? 'Edit category' : 'Add category'}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="min-width:200px"><label>Name</label><input type="text" id="ctName" value="${c ? _esc(c.name) : ''}"></div>
+        <div class="fg" style="min-width:200px"><label>Schedule III class</label><input type="text" id="ctClass" list="ctClassList" value="${c ? _esc(c.schedule_iii_class) : ''}"><datalist id="ctClassList">${[...new Set(cats.map(k => k.schedule_iii_class))].map(x => `<option value="${_esc(x)}">`).join('')}</datalist></div>
+        <div class="fg" style="max-width:110px"><label>Life (yrs)</label><input type="number" id="ctLife" step="any" min="0" value="${c && c.schedule_ii_life != null ? c.schedule_ii_life : ''}"></div>
+        <div class="fg" style="max-width:130px"><label>Method</label><select id="ctMethod"><option ${c && c.default_method === 'SLM' ? 'selected' : ''}>SLM</option><option ${c && c.default_method === 'WDV' ? 'selected' : ''}>WDV</option></select></div>
+        <div class="fg" style="max-width:110px"><label>Residual %</label><input type="number" id="ctRes" step="any" min="0" value="${c ? c.residual_pct : 5}"></div>
+        <div class="fg" style="min-width:140px"><label>Type</label><select id="ctType"><option value="m">Movable</option><option value="i" ${c && c.is_immovable ? 'selected' : ''}>Immovable (land / building)</option><option value="t" ${c && c.is_intangible ? 'selected' : ''}>Intangible</option></select></div>
+        <button class="btn btn-p" type="button" onclick="farSaveCat()" style="height:42px">${c ? 'Update' : 'Add'}</button>
+        ${c ? '<button class="btn btn-s" type="button" onclick="_far.catEdit=null;farCategories()" style="height:42px">Cancel</button>' : ''}
+      </div>
+      <div style="font-size:12px;color:var(--s400);margin-top:6px">Leave life blank for categories where you set the life on each asset (for example software). Use 0 for assets that are not depreciated (freehold land).</div>
+    </div>`;
+}
+
+async function farSaveCat() {
+  const t = document.getElementById('ctType').value, life = document.getElementById('ctLife').value;
+  const body = { name: document.getElementById('ctName').value.trim(), schedule_iii_class: document.getElementById('ctClass').value.trim(), schedule_ii_life: life === '' ? null : Number(life),
+    default_method: document.getElementById('ctMethod').value, residual_pct: Number(document.getElementById('ctRes').value) || 0, is_immovable: t === 'i', is_intangible: t === 't' };
+  try {
+    if (_far.catEdit) await apiPut('/api/far/categories/' + _far.catEdit, body); else await apiPost('/api/far/categories', body);
+    _far.catEdit = null; await farCategories(); showMsg('farMsg', 'Category saved.', 'ok');
+  } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+async function farDelCat(id) {
+  if (!confirm('Delete this category?')) return;
+  try { await apiDelete('/api/far/categories/' + id); await farCategories(); } catch (e) { showMsg('farMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ──────────────────────────────────────────────────────
+//  CAMERA SCANNER — reads QR and Code128 labels
+// ──────────────────────────────────────────────────────
+let _scanner = null, _scanCb = null;
+
+async function openScanner(cb) {
+  _scanCb = cb;
+  clearMsg('scanMsg');
+  document.getElementById('scanModal').style.display = 'flex';
+  if (!window.isSecureContext) { showMsg('scanMsg', 'The camera needs a secure address (https, or localhost on this computer).', 'err'); return; }
+  if (typeof Html5Qrcode === 'undefined') { showMsg('scanMsg', 'Scanner could not load — check your internet connection.', 'err'); return; }
+  try {
+    _scanner = new Html5Qrcode('scanReader');
+    await _scanner.start(
+      { facingMode: 'environment' },
+      {
+        fps: 10,
+        qrbox: (w, h) => ({ width: Math.min(w - 20, 320), height: Math.min(h - 20, 160) }),
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.CODE_128],
+      },
+      text => scanDone(text),
+      () => {}
+    );
+  } catch (e) {
+    showMsg('scanMsg', 'Could not start the camera: ' + ((e && e.message) || e), 'err');
+  }
+}
+
+async function closeScanner() {
+  document.getElementById('scanModal').style.display = 'none';
+  const s = _scanner; _scanner = null;
+  if (s) { try { await s.stop(); } catch (e) {} try { s.clear(); } catch (e) {} }
+}
+
+function scanDone(text) {
+  const cb = _scanCb;
+  if (navigator.vibrate) navigator.vibrate(60);
+  closeScanner();
+  if (cb) cb(String(text).trim());
+}
+
+function stScanned(code) {
+  document.getElementById('stNewCode').value = code.toUpperCase();
+  showMsg('stAddMsg', 'Scanned: ' + code.toUpperCase(), 'ok');
 }
 
 // ──────────────────────────────────────────────────────
@@ -2976,8 +4246,8 @@ function initStickeringTab(_retried) {
     const sel = document.getElementById(id);
     if (!sel) return;
     const prev = sel.value;
-    if (id === 'stFilterClass') sel.innerHTML = '<option value="">All Classes</option>';
-    else sel.innerHTML = '<option value="">— Select Class —</option>';
+    if (id === 'stFilterClass') sel.innerHTML = '<option value="">All ' + gls() + '</option>';
+    else sel.innerHTML = '<option value="">— Select ' + gl() + ' —</option>';
     classes.forEach(c => {
       const o = document.createElement('option');
       o.value = o.textContent = c;
@@ -3270,7 +4540,7 @@ function stickeringRender() {
 
   let html = `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:580px">
     <thead><tr>
-      <th>Sl No.</th><th>Bar Code</th><th>Item Name</th><th>Class Name</th><th>Remarks</th>
+      <th>Sl No.</th><th>Bar Code</th><th>Item Name</th><th>${gl()} Name</th><th>Remarks</th>
     </tr></thead><tbody>`;
 
   rows.forEach(r => {
@@ -3400,7 +4670,7 @@ function stickeringAddNew() {
   const code = document.getElementById('stNewCode').value.trim().toUpperCase();
   const item = document.getElementById('stNewItem').value.trim();
   const cls  = document.getElementById('stNewClass').value;
-  if (!cls)  { showMsg('stAddMsg', 'Please select a Class Name.', 'err'); return; }
+  if (!cls)  { showMsg('stAddMsg', 'Please select a ' + gl() + ' Name.', 'err'); return; }
   if (stickerLockedClasses.has(cls)) {
     showMsg('stAddMsg', `Stickering for "${cls}" is already submitted. Only Admin can unlock.`, 'err'); return;
   }
@@ -3517,11 +4787,11 @@ function _admPopulateBranchSelects() {
   const opts = _admBranches.map(b => `<option value="${b.id}">${_esc(b.name)} (${_esc(b.code)})</option>`).join('');
   // Class branch selector
   const cb = document.getElementById('admClassBranch');
-  if (cb) cb.innerHTML = '<option value="">— Select Branch —</option>' + opts;
+  if (cb) cb.innerHTML = '<option value="">— Select Site —</option>' + opts;
   // Admin view selector
   const vb = document.getElementById('adminViewBranch');
   if (vb) {
-    vb.innerHTML = '<option value="">All Branches</option>' + opts;
+    vb.innerHTML = '<option value="">All Sites</option>' + opts;
     if (adminViewBranchId) vb.value = adminViewBranchId;
   }
   // Export multi-select
@@ -3585,18 +4855,18 @@ async function admClassesLoad() {
   try {
     _admClasses = await apiGet('/api/classes');
     admClassesRender();
-  } catch(e) { showMsg('admClassMsg', 'Failed to load classes: ' + e, 'err'); }
+  } catch(e) { showMsg('admClassMsg', 'Failed to load ' + gls().toLowerCase() + ': ' + e, 'err'); }
 }
 
 
 async function admClassCreate() {
   const name     = document.getElementById('admClassName').value.trim();
   const branchId = document.getElementById('admClassBranch').value;
-  if (!name) { showMsg('admClassMsg', 'Class name is required.', 'err'); return; }
+  if (!name) { showMsg('admClassMsg', gl() + ' name is required.', 'err'); return; }
   try {
     await apiPost('/api/classes/create', { className: name, branchId: branchId ? parseInt(branchId) : null });
     document.getElementById('admClassName').value = '';
-    showMsg('admClassMsg', 'Class created.', 'ok');
+    showMsg('admClassMsg', gl() + ' created.', 'ok');
     await admClassesLoad();
     // Refresh data so new class appears in dropdowns
     loadData();
@@ -3607,7 +4877,7 @@ async function admClassDelete(className) {
   if (!confirm(`Delete class "${className}"? All count data for this class will also be deleted.`)) return;
   try {
     await apiDel('/api/classes/delete?className=' + encodeURIComponent(className));
-    showMsg('admClassMsg', 'Class deleted.', 'ok');
+    showMsg('admClassMsg', gl() + ' deleted.', 'ok');
     await admClassesLoad();
     loadData();
   } catch(e) { showMsg('admClassMsg', String(e), 'err'); }
@@ -3785,11 +5055,11 @@ async function admAssetDelete(id) {
 // ── Class assignment helper ───────────────────────────────
 function admClassesRender() {
   const wrap = document.getElementById('admClassTable');
-  if (!_admClasses.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No classes yet.</p>'; return; }
+  if (!_admClasses.length) { wrap.innerHTML = '<p style="color:var(--s500);font-size:13px">No ' + gls().toLowerCase() + ' yet.</p>'; return; }
   // Build user list for assignment dropdown
   const userOpts = '<option value="">— Unassigned —</option>' +
     _admUsers.filter(u => u.role !== 'Demo').map(u => `<option value="${_esc(u.username)}">${_esc(u.username)}</option>`).join('');
-  let html = '<table><thead><tr><th>Class Name</th><th>Branch</th><th>Assigned To</th><th>Actions</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>' + gl() + ' Name</th><th>Site</th><th>Assigned To</th><th>Actions</th></tr></thead><tbody>';
   _admClasses.forEach(c => {
     const userSel = userOpts.replace(`value="${_esc(c.assignedTo)}"`, `value="${_esc(c.assignedTo)}" selected`);
     html += `<tr>
@@ -3828,18 +5098,18 @@ function admDownloadTemplate(type) {
     ws = XLSX.utils.aoa_to_sheet([
       ['Name', 'Code', 'Active (yes/no)'],
       ['Main Campus', 'MC01', 'yes'],
-      ['North Branch', 'NB02', 'yes'],
+      ['Warehouse 2', 'WH02', 'yes'],
     ]);
-    sheetName = 'Branches';
+    sheetName = 'Sites';
   } else if (type === 'class') {
     const branchCodes = _admBranches.map(b => b.code).join(', ') || 'MC01';
     ws = XLSX.utils.aoa_to_sheet([
-      ['Class Name', 'Branch Code'],
+      [gl() + ' Name', 'Site Code'],
       ['Room 101', _admBranches[0]?.code || 'MC01'],
       ['Room 102', _admBranches[0]?.code || 'MC01'],
     ]);
     ws['C1'] = { t: 's', v: `Branch codes available: ${branchCodes}` };
-    sheetName = 'Classes';
+    sheetName = gls();
   } else if (type === 'asset') {
     ws = XLSX.utils.aoa_to_sheet([
       ['Item Name', 'Asset Code', 'Sl No (optional)'],
@@ -3851,7 +5121,7 @@ function admDownloadTemplate(type) {
   } else {
     const branchCodes = _admBranches.map(b => b.code).join(', ') || 'MC01';
     ws = XLSX.utils.aoa_to_sheet([
-      ['Username', 'Password', 'Role (Admin/Editor/Demo)', 'Branch Code'],
+      ['Username', 'Password', 'Role (Admin/Editor/Demo)', 'Site Code'],
       ['john.doe', 'password123', 'Editor', _admBranches[0]?.code || 'MC01'],
       ['jane.admin', 'securepass', 'Admin', ''],
     ]);
@@ -3893,8 +5163,8 @@ async function admUploadExcel(type, input) {
         endpoint = '/api/branches/bulk';
       } else if (type === 'class') {
         payload  = rows.map(r => ({
-          class_name:  String(r['Class Name'] || r['class_name'] || '').trim(),
-          branch_code: String(r['Branch Code'] || r['branch_code'] || '').trim() || null,
+          class_name:  String(r[gl() + ' Name'] || r['Class Name'] || r['class_name'] || '').trim(),
+          branch_code: String(r['Site Code'] || r['branch_code'] || '').trim() || null,
         })).filter(r => r.class_name);
         endpoint = '/api/classes/bulk';
       } else if (type === 'asset') {
@@ -3909,7 +5179,7 @@ async function admUploadExcel(type, input) {
           username:     String(r['Username'] || r['username'] || '').trim(),
           password:     String(r['Password'] || r['password'] || '').trim(),
           role:         String(r['Role (Admin/Editor/Demo)'] || r['role'] || 'Editor').trim(),
-          branch_codes: String(r['Branch Code'] || r['branch_code'] || r['Branch Codes'] || '').trim() || null,
+          branch_codes: String(r['Site Code'] || r['branch_code'] || r['Branch Codes'] || '').trim() || null,
         })).filter(r => r.username && r.password);
         endpoint = '/api/users/bulk';
       }

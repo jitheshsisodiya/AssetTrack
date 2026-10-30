@@ -4,11 +4,12 @@ import bcrypt as _bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models.models import User
+from app.models.models import Institution, User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -19,6 +20,10 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def hash_password(plain: str) -> str:
     return _bcrypt.hashpw(plain.encode(), _bcrypt.gensalt()).decode()
+
+
+def username_taken(db: Session, username: str) -> bool:
+    return db.query(User).filter(func.lower(User.username) == username.strip().lower()).first() is not None
 
 
 def create_access_token(data: dict) -> str:
@@ -48,4 +53,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     ).first()
     if not user:
         raise exc
+    if user.role != "SuperAdmin":
+        inst = db.get(Institution, user.institution_id)
+        if not inst or not inst.is_active:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This institution has been disabled.")
     return user
