@@ -1,0 +1,17 @@
+# Render Blueprint: builds the Dockerfile as a free web service.
+# Set DATABASE_URL to a Postgres connection string (for example a free Neon database).
+services:
+  - type: web
+    name: assettrack
+    runtime: docker
+    plan: free
+    healthCheckPath: /docs
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SUPERADMIN_USERNAME
+        sync: false
+      - key: SUPERADMIN_PASSWORD
+        sync: false

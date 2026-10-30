@@ -92,6 +92,14 @@ With the backend running on port 8001, open `http://127.0.0.1:8001/` in your bro
 4. Open **Settings → Networking → Generate Domain**. Railway gives you an `https://…up.railway.app` address; open it.
 5. Optional: **Settings → Volumes**, add a volume mounted at `/data`. Without one, uploaded photos and documents are lost each time the service is redeployed.
 
+### Free alternative: Render + Neon
+
+1. Create a free Postgres database at [neon.com](https://neon.com) and copy its connection string (the direct one, not the pooled one).
+2. At [render.com](https://render.com) choose **New → Blueprint**, pick this repository, and fill in `DATABASE_URL` (the Neon string), `SUPERADMIN_USERNAME` and `SUPERADMIN_PASSWORD`. `SECRET_KEY` is generated for you.
+3. Open the `https://….onrender.com` address when the deploy finishes.
+
+Limits of the free plans: the service sleeps after 15 minutes without traffic and takes about a minute to wake, and its disk is wiped on every restart, so uploaded photos and documents do not survive. The Neon database is kept permanently (0.5 GB) but pauses when idle.
+
 On every start the app applies pending database migrations and, if `SUPERADMIN_PASSWORD` is set and no such Super Admin exists, creates it. After the first successful start you can delete `SUPERADMIN_PASSWORD` from the variables.
 
 ---
