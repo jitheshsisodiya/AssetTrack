@@ -17,8 +17,8 @@ A school asset physical-verification tool. Staff log in, record asset counts per
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/jitheshsisodiya/AssetManagment_V1.git
-cd AssetManagment_V1
+git clone https://github.com/jitheshsisodiya/AssetTrack.git
+cd AssetTrack
 ```
 
 ### 2. Configure environment
@@ -53,7 +53,7 @@ python -m alembic upgrade head
 python create_superadmin.py
 ```
 
-This creates username `Jithesh` with password `1234`.
+You are asked for a username and a password of at least 8 characters. Run it again with `--reset` to change the password later.
 
 ### 6. (Optional) Import existing asset data
 
@@ -78,13 +78,9 @@ Open `index.html` directly in your browser (double-click the file).
 
 ---
 
-## Default Logins
+## Logins
 
-| Username | Password | Role |
-|----------|----------|------|
-| Jithesh  | 1234     | Super Admin |
-
-Institution admins are created via the **New Institution** tab on the login screen.
+There are no default logins. The Super Admin is created in step 5, and company admins register themselves on the **New Institution** tab of the login screen.
 
 ---
 
