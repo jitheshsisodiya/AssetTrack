@@ -66,15 +66,33 @@ python migrate.py
 ### 7. Start the backend server
 
 ```bash
-python -m uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8001
 ```
 
-### 8. Open the frontend
+### 8. Open the app
 
-Open `index.html` directly in your browser (double-click the file).
+With the backend running on port 8001, open `http://127.0.0.1:8001/` in your browser. The backend serves the page itself, so nothing else needs configuring. (Opening `index.html` as a file also works locally.)
 
-> **Note:** The `API_URL` in `index.html` (line ~589) is set to `http://localhost:8000`.  
-> Change this to your server's IP/domain if deploying on a remote machine.
+---
+
+## Deploy on Railway
+
+1. Sign in at [railway.com](https://railway.com) with GitHub, then **New Project → Deploy from GitHub repo** and pick this repository. Railway builds it from the `Dockerfile`.
+2. In the same project click **+ New → Database → PostgreSQL**.
+3. Open the app service → **Variables** and add:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (reference to the database service) |
+   | `SECRET_KEY` | a long random string, made with `python -c "import secrets;print(secrets.token_urlsafe(48))"` |
+   | `SUPERADMIN_USERNAME` | the Super Admin username you want |
+   | `SUPERADMIN_PASSWORD` | a strong password (at least 8 characters); used once to create the account |
+   | `UPLOAD_DIR` | `/data/uploads` (only if you add a volume, see below) |
+
+4. Open **Settings → Networking → Generate Domain**. Railway gives you an `https://…up.railway.app` address; open it.
+5. Optional: **Settings → Volumes**, add a volume mounted at `/data`. Without one, uploaded photos and documents are lost each time the service is redeployed.
+
+On every start the app applies pending database migrations and, if `SUPERADMIN_PASSWORD` is set and no such Super Admin exists, creates it. After the first successful start you can delete `SUPERADMIN_PASSWORD` from the variables.
 
 ---
 

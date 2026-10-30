@@ -16,7 +16,7 @@ from app.database import SessionLocal
 from app.models.models import Institution, User
 from app.auth.jwt import hash_password, username_taken
 
-username = os.environ.get("SUPERADMIN_USERNAME") or input("Super Admin username [Jithesh]: ").strip() or "Jithesh"
+username = os.environ.get("SUPERADMIN_USERNAME") or ((input("Super Admin username [Jithesh]: ").strip() if sys.stdin.isatty() else "") or "Jithesh")
 password = os.environ.get("SUPERADMIN_PASSWORD") or getpass.getpass("Super Admin password (at least 8 characters): ")
 if len(password) < 8:
     sys.exit("The password must be at least 8 characters.")

@@ -1,0 +1,13 @@
+.git
+.gitignore
+**/.env
+**/__pycache__
+backend/uploads
+backend/tests
+backend/create_demo.py
+*.xlsx
+*.xls
+*.csv
+*.md
+Dockerfile
+.dockerignore
