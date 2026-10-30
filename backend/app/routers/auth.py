@@ -1,4 +1,6 @@
 import shutil
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -28,8 +30,20 @@ def _require_superadmin(user: User):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SuperAdmin only.")
 
 
+LOGIN_MAX_FAILURES = 8
+LOGIN_WINDOW_SECONDS = 600
+_failed_logins: dict = defaultdict(deque)
+
+
 @router.post("/login", response_model=TokenResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    key, now = data.username.strip().lower(), time.monotonic()
+    fails = _failed_logins[key]
+    while fails and now - fails[0] > LOGIN_WINDOW_SECONDS:
+        fails.popleft()
+    if len(fails) >= LOGIN_MAX_FAILURES:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, headers={"Retry-After": str(LOGIN_WINDOW_SECONDS)},
+                            detail="Too many failed sign-in attempts. Please wait a few minutes and try again.")
     user = (
         db.query(User)
         .filter(User.username == data.username)
@@ -37,7 +51,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         .first()
     )
     if not user or not verify_password(data.password, user.password_hash):
+        if len(_failed_logins) > 10000:
+            _failed_logins.clear()
+        fails.append(now)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password.")
+    _failed_logins.pop(key, None)
     institution = db.get(Institution, user.institution_id)
     if institution and not institution.is_active and user.role != "SuperAdmin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This institution has been disabled. Contact support.")

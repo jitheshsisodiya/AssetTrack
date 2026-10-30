@@ -5,7 +5,7 @@ import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
 from app.config import settings
 from app.routers import assets, auth, barcodes, branches, classes, export, far, ops, print as print_router, public_api, stickering, users
@@ -46,7 +46,7 @@ def serve_app():
     path = os.path.abspath(_HTML_PATH)
     if not os.path.exists(path):
         return JSONResponse(status_code=404, content={"detail": "index.html not found"})
-    return FileResponse(path, media_type="text/html")
+    return FileResponse(path, media_type="text/html", headers={"Cache-Control": "no-cache"})
 
 
 # ── Server fingerprint (lightweight anti-copy check) ─────────────────────────
@@ -61,6 +61,6 @@ def server_check(request: Request):
     return {"ok": True, "sig": sig, "ts": ts}
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-    return {"message": "Asset Management API is running. Open /app to use the application."}
+    return RedirectResponse("/app")
