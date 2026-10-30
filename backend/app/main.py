@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.config import settings
-from app.routers import assets, auth, barcodes, branches, classes, export, far, ops, print as print_router, stickering, users
+from app.routers import assets, auth, barcodes, branches, classes, export, far, ops, print as print_router, public_api, stickering, users
 
 app = FastAPI(title="Asset Management API", version="2.0.0")
 
@@ -34,6 +34,8 @@ app.include_router(export.router)
 app.include_router(print_router.router)
 app.include_router(far.router)
 app.include_router(ops.router)
+app.include_router(public_api.router)
+app.include_router(public_api.keys_router)
 
 # ── Serve HTML ────────────────────────────────────────────────────────────────
 _HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "index.html")

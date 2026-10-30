@@ -222,8 +222,32 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
 .bc-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
 .bc-toolbar .fg{flex:1;min-width:130px}
 
+/* ── register layout, phone menu, scroll hints ── */
+.far-act{position:sticky;right:0;background:#fff;box-shadow:-8px 0 8px -8px rgba(0,0,0,.22)}
+thead th.far-act{background:var(--g800)}
+tbody tr:hover td.far-act{background:var(--g50)}
+.far-cards{display:none}
+.far-tbl thead th,.far-tbl tbody td{padding-left:8px;padding-right:8px}
+.far-hint{font-size:11.5px;color:var(--s400);margin:4px 0}
+.tab-more{display:none}
+#moreMenu{display:none;position:fixed;right:8px;bottom:72px;z-index:150;background:#fff;border:1.5px solid var(--s200);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.2);padding:6px;min-width:176px}
+#moreMenu button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--s700);padding:11px 12px;border-radius:10px;cursor:pointer;text-align:left}
+#moreMenu button.active{background:var(--g50);color:var(--g700)}
+@media(max-width:639px){
+  .far-tbl-wrap{display:none}
+  .far-cards{display:block}
+  #farNav{flex-wrap:nowrap !important;overflow-x:auto;width:100%;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  #farNav .btn{flex:none;white-space:nowrap}
+}
+
 /* ── MOBILE ── */
 @media(max-width:479px){
+  .tab-collapsed{display:none !important}
+  .tab-more.tab-more-empty{display:none !important}
+  .topbar-brand{gap:6px}
+  #institutionName{flex:0 1 auto !important;min-width:0;max-width:130px !important}
+  #uname{display:none}
+  .user-chip{padding:5px}
   .tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1.5px solid var(--s200);border-bottom:none;padding:0;box-shadow:0 -2px 12px rgba(0,0,0,.08);justify-content:stretch}
   .tab-btn{flex:1;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px 10px;gap:3px;font-size:10px;border-bottom:none;border-top:2.5px solid transparent;display:flex}
   .tab-btn.active{border-bottom:none;border-top-color:var(--g400);color:var(--g600)}
@@ -459,7 +483,11 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
     <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display:none">
       <span class="tab-icon">⚙️</span>Admin
     </button>
+    <button class="tab-btn tab-more tab-more-empty" id="tab-more" onclick="toggleMoreMenu(event)">
+      <span class="tab-icon">⋯</span>More
+    </button>
   </div>
+  <div id="moreMenu"></div>
 
   <div class="main">
 
@@ -906,6 +934,19 @@ tbody td{padding:10px 14px;color:var(--s800);vertical-align:middle}
         </div>
       </div>
 
+
+      <!-- API access -->
+      <div class="card" id="apiKeysCard">
+        <div class="card-title">API access — read-only keys for other software</div>
+        <p style="font-size:12.5px;color:var(--s500);margin:0 0 12px">Give a key to Power BI, Excel, Tally or your ERP so it can read your data. Keys are read-only, can be revoked at any time, and the full key is shown only once. Add <b>?format=csv</b> to any list for spreadsheet-friendly output. <a id="akDocs" href="#" target="_blank" rel="noopener">API documentation</a></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+          <div class="fg" style="flex:1;min-width:220px"><label>Key name</label><input type="text" id="akName" placeholder="e.g. Power BI dashboard" maxlength="100"></div>
+          <button class="btn btn-p" type="button" onclick="apiKeyCreate()" style="height:42px">+ Create key</button>
+        </div>
+        <div id="akNew" style="display:none"></div>
+        <div id="akMsg" class="msg"></div>
+        <div id="akTable"><div class="tbl-loading"><span class="spin dk"></span> Loading…</div></div>
+      </div>
     </div><!-- /panel-admin -->
 
     <!-- FIXED ASSET REGISTER -->
@@ -1277,6 +1318,7 @@ function loginAs(username, role, branchIds, branchNames, institutionName) {
   document.getElementById('uname').textContent = currentUser;
   document.getElementById('uav').textContent   = currentUser.charAt(0).toUpperCase();
   applyRoleRestrictions(currentRole);
+  layoutMobileTabs();
   // Show pending badge + drain any queue left from a previous offline session
   oqUpdateUI();
   if (navigator.onLine) oqDrain();
@@ -1879,6 +1921,31 @@ function silentLoadLog() {
 // ══════════════════════════════════════════════════════════
 //  TABS
 // ══════════════════════════════════════════════════════════
+const _secondaryTabs = ['log', 'barcode', 'admin'];
+const _moreLabels = { log: ['📝', 'Edit Log'], barcode: ['🏷️', 'Barcodes'], admin: ['⚙️', 'Admin'] };
+
+function _visibleSecondary() {
+  return _secondaryTabs.filter(t => { const b = document.getElementById('tab-' + t); return b && b.style.display !== 'none'; });
+}
+
+function layoutMobileTabs() {
+  const collapse = _visibleSecondary().length >= 2;
+  _secondaryTabs.forEach(t => { const b = document.getElementById('tab-' + t); if (b) b.classList.toggle('tab-collapsed', collapse); });
+  document.getElementById('tab-more').classList.toggle('tab-more-empty', !collapse);
+}
+
+function toggleMoreMenu(ev) {
+  if (ev) ev.stopPropagation();
+  const m = document.getElementById('moreMenu');
+  if (m.style.display === 'block') { m.style.display = 'none'; return; }
+  const cur = (document.querySelector('.tab-btn.active') || {}).id;
+  m.innerHTML = _visibleSecondary().map(t => `<button type="button" class="${cur === 'tab-' + t ? 'active' : ''}" onclick="moreGo('${t}')"><span style="font-size:18px">${_moreLabels[t][0]}</span>${_moreLabels[t][1]}</button>`).join('');
+  m.style.display = 'block';
+}
+
+function moreGo(t) { document.getElementById('moreMenu').style.display = 'none'; switchTab(t); }
+document.addEventListener('click', e => { const m = document.getElementById('moreMenu'); if (m && m.style.display === 'block' && !m.contains(e.target)) m.style.display = 'none'; });
+
 function switchTab(name) {
   ['add','view','log','barcode','stickering','far','admin'].forEach(t => {
     const panel = document.getElementById('panel-'+t);
@@ -1896,6 +1963,9 @@ function switchTab(name) {
   if (name==='stickering') initStickeringTab();
   if (name==='far')        farInit();
   if (name==='admin')      adminLoad();
+  const more = document.getElementById('tab-more');
+  if (more) more.classList.toggle('active', _secondaryTabs.indexOf(name) >= 0 && document.getElementById('tab-' + name).classList.contains('tab-collapsed'));
+  document.getElementById('moreMenu').style.display = 'none';
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3119,6 +3189,52 @@ function prTest() {
 }
 
 // ──────────────────────────────────────────────────────
+//  API ACCESS KEYS (Admin)
+// ──────────────────────────────────────────────────────
+// ── API keys (Admin) ───────────────────────────────────────
+async function apiKeysLoad() {
+  const docs = document.getElementById('akDocs'); if (docs) docs.href = API_URL + '/docs';
+  const wrap = document.getElementById('akTable'); if (!wrap) return;
+  try {
+    const keys = await apiGet('/api/keys');
+    wrap.innerHTML = keys.length ? `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:560px"><thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th>Status</th><th></th></tr></thead><tbody>
+      ${keys.map(k => `<tr style="${k.active ? '' : 'opacity:.55'}"><td>${_esc(k.name)}<div style="font-size:11px;color:var(--s400)">by ${_esc(k.created_by)}</div></td><td><code>${_esc(k.prefix)}…</code></td><td>${_dmy(k.created_at.slice(0, 10))}</td>
+        <td>${k.last_used_at ? _dmy(k.last_used_at.slice(0, 10)) : 'never'}</td><td>${k.active ? 'Active' : 'Revoked'}</td>
+        <td>${k.active ? `<button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="apiKeyRevoke(${k.id})">Revoke</button>` : ''}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="tbl-empty">No keys yet.</div>';
+  } catch (e) { wrap.innerHTML = ''; showMsg('akMsg', String((e && e.message) || e), 'err'); }
+}
+
+async function apiKeyCreate() {
+  const name = document.getElementById('akName').value.trim();
+  if (!name) { showMsg('akMsg', 'Give the key a name, for example the system that will use it.', 'err'); return; }
+  try {
+    const k = await apiPost('/api/keys', { name });
+    document.getElementById('akName').value = ''; clearMsg('akMsg');
+    const box = document.getElementById('akNew');
+    box.style.display = 'block';
+    box.innerHTML = `<div style="border:1.5px solid var(--g400);background:var(--g50);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="font-weight:700;margin-bottom:4px">Key created for “${_esc(k.name)}” — copy it now</div>
+      <div style="font-size:12.5px;color:var(--err);margin-bottom:8px">This is the only time the full key is shown. If you lose it, revoke it and create a new one.</div>
+      <div style="display:flex;gap:8px"><input type="text" id="akNewKey" readonly value="${_esc(k.key)}" style="flex:1;min-width:0;font-family:monospace;font-size:12.5px" onclick="this.select()"><button class="btn btn-p" type="button" onclick="apiKeyCopy()" id="akCopyBtn">Copy</button></div>
+      <div style="font-size:12px;color:var(--s500);margin-top:8px">Try it: <code style="word-break:break-all">curl -H "X-API-Key: ${_esc(k.key.slice(0, 12))}…" ${_esc(API_URL)}/api/v1/assets</code></div></div>`;
+    await apiKeysLoad();
+  } catch (e) { showMsg('akMsg', String((e && e.message) || e), 'err'); }
+}
+
+function apiKeyCopy() {
+  const el = document.getElementById('akNewKey'); el.select();
+  const done = () => { const b = document.getElementById('akCopyBtn'); if (b) { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500); } };
+  if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(done, () => { document.execCommand('copy'); done(); }); else { document.execCommand('copy'); done(); }
+}
+
+async function apiKeyRevoke(id) {
+  if (!confirm('Revoke this key? Any system using it will stop working immediately.')) return;
+  try { await apiDelete('/api/keys/' + id); document.getElementById('akNew').style.display = 'none'; showMsg('akMsg', 'Key revoked.', 'ok'); await apiKeysLoad(); }
+  catch (e) { showMsg('akMsg', String((e && e.message) || e), 'err'); }
+}
+
+// ──────────────────────────────────────────────────────
 //  FIXED ASSET REGISTER — Companies Act 2013 (Sch. II/III) and CARO 2020 clause 3(i)
 // ──────────────────────────────────────────────────────
 const _far = { view: 'register', fy: null, lookups: null, assets: [], byId: {}, editId: null, parentId: null, filter: { q: '', cat: '', status: '' }, catEdit: null, asOn: '' };
@@ -3175,7 +3291,18 @@ async function farShow(view) {
   document.getElementById('farBody').innerHTML = '<div class="tbl-loading"><span class="spin dk"></span> Loading…</div>';
   try {
     await ({ register: farRegister, movement: farMovement, verification: farVerification, title: farTitle, maintenance: farMaintenance, custody: farCustody, audit: farAudit, categories: farCategories })[view]();
+    farScrollHints();
   } catch (e) { document.getElementById('farBody').innerHTML = ''; showMsg('farMsg', String(e.message || e), 'err'); }
+}
+
+function farScrollHints() {
+  document.querySelectorAll('#farBody div[style*="overflow-x"]').forEach(w => {
+    if (w.offsetParent === null) return;
+    const prev = w.previousElementSibling;
+    if (w.scrollWidth > w.clientWidth + 4 && !(prev && prev.classList.contains('far-hint'))) {
+      const h = document.createElement('div'); h.className = 'far-hint'; h.textContent = '↔ Scroll sideways to see all columns'; w.parentNode.insertBefore(h, w);
+    }
+  });
 }
 
 function farExport(name, headers, rows) {
@@ -3223,34 +3350,40 @@ function farRenderTable() {
   if (!wrap) return;
   if (!rows.length) { wrap.innerHTML = '<div class="tbl-empty">No assets yet. Use “+ Add asset” or import an Excel file.</div>'; return; }
   const tot = { cost: 0, charge: 0, acc: 0, net: 0 };
-  let h = `<div style="overflow-x:auto"><table class="data-tbl" style="min-width:1100px"><thead><tr>
-    <th>Reg. no.</th><th>Description</th><th>Category</th><th>${_esc(gl())}</th><th style="text-align:right">Qty</th><th>Put to use</th>
-    <th style="text-align:right">Cost (₹)</th><th>Method / life</th><th style="text-align:right">Depn. for year</th><th style="text-align:right">Accum. depn.</th><th style="text-align:right">Net block</th><th>Status</th><th></th></tr></thead><tbody>`;
+  const btn = (label, onclick, cls, title) => `<button class="btn ${cls || 'btn-s'}" type="button" style="padding:4px 9px;font-size:12px" ${title ? `title="${title}"` : ''} onclick="${onclick}">${label}</button>`;
+  const actions = a => btn('Edit', `farOpenModal(${a.id},null)`) + ' ' + btn('📎', `farFiles(${a.id})`, 'btn-s', 'Photos and documents') + ' ' + btn('🕘', `farHistory(${a.id})`, 'btn-s', 'Change history') + ' '
+    + (a.parent_id ? '' : btn('+ Part', `farOpenModal(null,${a.id})`, 'btn-s', 'Add a component with its own life (Ind AS 16)') + ' ') + btn('✕', `farDelete(${a.id})`, 'btn-danger', 'Delete');
+  let body = '', cards = '';
   rows.forEach(a => {
     const inUse = a.closing_gross > 0 || a.disposed_in_year;
     tot.cost += a.closing_gross; tot.charge += a.charge; tot.acc += a.closing_acc; tot.net += a.closing_net;
     const cap = a.put_to_use_date || a.purchase_date;
     const note = a.policy_note ? ` <span title="${_esc(a.policy_note)}" style="cursor:help">⚠</span>` : '';
     const life = a.useful_life_years ? `${a.method} · ${a.useful_life_years} yrs` : 'Not depreciated';
-    h += `<tr style="${a.status === 'Disposed' ? 'opacity:.6' : ''}">
-      <td>${_esc(a.far_no)}</td>
-      <td style="${a.parent_id ? 'padding-left:26px' : ''}">${a.parent_id ? '↳ ' : ''}${_esc(a.description)}${note}</td>
-      <td>${_esc(a.category)}</td><td>${_esc(a.location)}</td><td style="text-align:right">${a.quantity}</td><td>${_dmy(cap)}</td>
-      <td style="text-align:right">${_inr(a.cost)}</td><td>${life}</td>
-      <td style="text-align:right">${inUse ? _inr(a.charge) : '—'}</td><td style="text-align:right">${inUse ? _inr(a.closing_acc) : '—'}</td>
-      <td style="text-align:right;font-weight:600">${inUse ? _inr(a.closing_net) : 'Not yet in use'}</td>
-      <td>${a.status}${a.disposal_date ? '<br><span style="font-size:11px;color:var(--s400)">' + _dmy(a.disposal_date) + '</span>' : ''}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" onclick="farOpenModal(${a.id},null)">Edit</button>
-        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Photos and documents" onclick="farFiles(${a.id})">📎</button>
-        <button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Change history" onclick="farHistory(${a.id})">🕘</button>
-        ${a.parent_id ? '' : `<button class="btn btn-s" type="button" style="padding:4px 9px;font-size:12px" title="Add a component with its own life (Ind AS 16)" onclick="farOpenModal(null,${a.id})">+ Part</button>`}
-        <button class="btn btn-danger" type="button" style="padding:4px 9px;font-size:12px" onclick="farDelete(${a.id})">✕</button>
-      </td></tr>`;
+    const sub = [a.category, a.location, a.useful_life_years ? `${a.method} ${a.useful_life_years} yrs` : 'Not depreciated', a.status === 'Disposed' ? 'Disposed ' + _dmy(a.disposal_date) : ''].filter(Boolean).map(_esc).join(' · ');
+    const status = a.status + (a.disposal_date ? ' ' + _dmy(a.disposal_date) : '');
+    body += `<tr style="${a.status === 'Disposed' ? 'opacity:.6' : ''}">
+      <td style="white-space:nowrap">${_esc(a.far_no)}</td>
+      <td style="min-width:200px;${a.parent_id ? 'padding-left:26px' : ''}"><div style="font-weight:600">${a.parent_id ? '↳ ' : ''}${_esc(a.description)}${note}</div><div style="font-size:11.5px;color:var(--s400)">${sub}</div></td>
+      <td style="text-align:right">${a.quantity}</td><td style="white-space:nowrap">${_dmy(cap)}</td>
+      <td style="text-align:right;white-space:nowrap">${_inr(a.cost)}</td>
+      <td style="text-align:right;white-space:nowrap">${inUse ? _inr(a.charge) : '—'}</td><td style="text-align:right;white-space:nowrap">${inUse ? _inr(a.closing_acc) : '—'}</td>
+      <td style="text-align:right;white-space:nowrap;font-weight:600">${inUse ? _inr(a.closing_net) : 'Not yet in use'}</td>
+      <td class="far-act" style="white-space:nowrap">${actions(a)}</td></tr>`;
+    const kv = (l, v, strong) => `<div><div style="font-size:11px;color:var(--s400);text-transform:uppercase;letter-spacing:.05em">${l}</div><div style="font-size:13.5px;${strong ? 'font-weight:700' : ''}">${v}</div></div>`;
+    cards += `<div style="border:1.5px solid var(--s200);border-radius:12px;padding:12px;margin-bottom:10px;${a.status === 'Disposed' ? 'opacity:.6' : ''}${a.parent_id ? 'margin-left:14px' : ''}">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="font-weight:700">${a.parent_id ? '↳ ' : ''}${_esc(a.description)}${note}</div><div style="font-size:11.5px;color:var(--s500);white-space:nowrap">${_esc(status)}</div></div>
+      <div style="font-size:12px;color:var(--s500);margin-top:2px">${_esc(a.far_no)}${sub ? ' · ' + sub : ''}${a.quantity > 1 ? ' · qty ' + a.quantity : ''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:10px 0">${kv('Cost', '₹ ' + _inr(a.cost))}${kv('Net block', inUse ? '₹ ' + _inr(a.closing_net) : 'Not yet in use', true)}${kv('Depn. for year', inUse ? '₹ ' + _inr(a.charge) : '—')}${kv('Put to use', _dmy(cap) + ' · ' + life)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${actions(a)}</div></div>`;
   });
-  h += `<tr style="font-weight:700;background:var(--s50)"><td colspan="6">Total (${rows.length} line${rows.length !== 1 ? 's' : ''})</td><td style="text-align:right">${_inr(tot.cost)}</td><td></td>
-    <td style="text-align:right">${_inr(tot.charge)}</td><td style="text-align:right">${_inr(tot.acc)}</td><td style="text-align:right">${_inr(tot.net)}</td><td colspan="2"></td></tr></tbody></table></div>`;
-  wrap.innerHTML = h;
+  const totals = `<tr style="font-weight:700;background:var(--s50)"><td colspan="4">Total (${rows.length} line${rows.length !== 1 ? 's' : ''})</td><td style="text-align:right">${_inr(tot.cost)}</td>
+    <td style="text-align:right">${_inr(tot.charge)}</td><td style="text-align:right">${_inr(tot.acc)}</td><td style="text-align:right">${_inr(tot.net)}</td><td class="far-act" style="background:var(--s50)"></td></tr>`;
+  const totalCard = `<div style="border:1.5px solid var(--g400);background:var(--g50);border-radius:12px;padding:12px;font-size:13px"><b>Total (${rows.length} line${rows.length !== 1 ? 's' : ''})</b><br>Cost ₹ ${_inr(tot.cost)} · Depn. ₹ ${_inr(tot.charge)}<br>Accum. depn. ₹ ${_inr(tot.acc)} · Net block ₹ ${_inr(tot.net)}</div>`;
+  wrap.innerHTML = `<div class="far-tbl-wrap" style="overflow-x:auto"><table class="data-tbl far-tbl"><thead><tr>
+    <th>Reg. no.</th><th>Description</th><th style="text-align:right">Qty</th><th>Put to use</th><th style="text-align:right">Cost (₹)</th><th style="text-align:right">Depn. for year</th><th style="text-align:right">Accum. depn.</th><th style="text-align:right">Net block</th><th class="far-act"></th></tr></thead>
+    <tbody>${body}${totals}</tbody></table></div><div class="far-cards">${cards}${totalCard}</div>`;
+  farScrollHints();
 }
 
 function farExportRegister() {
@@ -4772,6 +4905,7 @@ let _admClasses  = [];
 async function adminLoad() {
   await Promise.all([admBranchesLoad(), admUsersLoad(), admClassesLoad(), admAssetsLoad()]);
   admClassesRender();
+  apiKeysLoad();
 }
 
 // ── Branch helpers ────────────────────────────────────────
